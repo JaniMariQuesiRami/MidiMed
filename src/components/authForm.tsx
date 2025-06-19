@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { signUp } from '@/db/db'
 import tw from 'tailwind-styled-components'
+import Link from 'next/link'
 
 type AuthFormProps = {
   mode: 'login' | 'signup'
@@ -36,7 +37,6 @@ export default function AuthForm({ mode }: AuthFormProps) {
         await signInWithEmailAndPassword(auth, email, password)
         toast.success('Inicio de sesión exitoso')
       }
-      router.push('/')
     } catch (err: any) {
       toast.error('Error al autenticar')
       console.error(err)
@@ -56,6 +56,9 @@ export default function AuthForm({ mode }: AuthFormProps) {
 
   return (
     <Wrapper>
+      <Title>
+        MidiMed
+      </Title>
       <StyledCard>
         <CardHeader>
           <CardTitle className="text-xl">{title}</CardTitle>
@@ -130,6 +133,23 @@ export default function AuthForm({ mode }: AuthFormProps) {
           <Button onClick={handleAuth} disabled={loading} className="w-full">
             {actionLabel}
           </Button>
+          <div className="text-sm text-center">
+            {mode === 'signup' ? (
+              <span>
+                ¿Ya tienes cuenta?{' '}
+                <Link href="/login" className="text-primary font-medium hover:underline">
+                  Ingresar
+                </Link>
+              </span>
+            ) : (
+              <span>
+                ¿Nuevo aquí?{' '}
+                <Link href="/signup" className="text-primary font-medium hover:underline">
+                  Crear cuenta
+                </Link>
+              </span>
+            )}
+          </div>
         </CardContent>
       </StyledCard>
     </Wrapper>
@@ -138,7 +158,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
 
 // Styled components
 const Wrapper = tw.div`
-  flex items-center justify-center min-h-screen bg-muted px-4 w-full
+  flex flex-col items-center justify-center min-h-screen px-4 w-full
 `
 
 const StyledCard = tw(Card)`
@@ -148,3 +168,8 @@ const StyledCard = tw(Card)`
 const FieldGroup = tw.div`
   space-y-1
 `
+
+const Title = tw.h1`
+  text-6xl font-bold mb-6 text-center
+  text-white
+`;

@@ -1,9 +1,10 @@
-import AuthForm from "@/components/AuthForm"
+import AuthForm from '@/components/AuthForm'
+import AuthScreenLayout from '@/components/AuthScreenLayout'
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-muted">
+    <AuthScreenLayout>
       <AuthForm mode="login" />
-    </div>
+    </AuthScreenLayout>
   )
 }
