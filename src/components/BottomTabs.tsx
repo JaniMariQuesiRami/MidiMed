@@ -32,5 +32,6 @@ const Wrapper = tw.div`
 
 const TabLink = tw(Link)<{ $active?: boolean }>`
   p-2 transition-colors
-  ${({ $active }) => ($active ? 'text-foreground' : 'text-muted-foreground')}
+  ${({ $active }) => ($active ? 'text-[color:var(--primary)]' : 'text-muted-foreground')}
 `
+
