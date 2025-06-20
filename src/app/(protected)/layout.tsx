@@ -3,6 +3,7 @@
 import { ReactNode } from 'react'
 import Sidebar from '@/components/Sidebar'
 import BottomTabs from '@/components/BottomTabs'
+import BrandLogo from '@/components/BrandLogo'
 import tw from 'tailwind-styled-components'
 
 export default function ProtectedLayout({ children }: { children: ReactNode }) {
@@ -12,6 +13,9 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
         <Sidebar />
       </SidebarWrapper>
       <ContentWrapper>
+        <MobileHeader>
+          <BrandLogo />
+        </MobileHeader>
         {children}
       </ContentWrapper>
       <BottomTabsWrapper>
@@ -31,7 +35,11 @@ const SidebarWrapper = tw.div`
 `
 
 const ContentWrapper = tw.main`
-  flex-1 p-4 md:p-6
+  flex-1 p-2 md:p-6
+`
+
+const MobileHeader = tw.div`
+  md:hidden py-2 px-3
 `
 
 const BottomTabsWrapper = tw.div`

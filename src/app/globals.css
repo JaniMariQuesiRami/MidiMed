@@ -135,3 +135,9 @@
   background-size: 200% 200%;
   animation: gradient 10s ease infinite;
 }
+
+.rbc-month-view .rbc-today,
+.rbc-time-view .rbc-today,
+.rbc-day-slot .rbc-today {
+  background-color: rgba(58, 189, 212, 0.15); /* versión dimmed del primary */
+}

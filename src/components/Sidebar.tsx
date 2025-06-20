@@ -11,6 +11,7 @@ import {
   ChevronsRight,
 } from 'lucide-react'
 import { useState } from 'react'
+import Image from 'next/image'
 import UserSettings from '@/components/UserSettings'
 import tw from 'tailwind-styled-components'
 
@@ -27,21 +28,34 @@ export default function Sidebar() {
 
   return (
     <Wrapper $collapsed={collapsed}>
-      <div>
-        <ToggleWrapper>
-          <ToggleButton onClick={() => setCollapsed(!collapsed)}>
-            {collapsed ? <ChevronsRight size={18} /> : <ChevronsLeft size={18} />}
-          </ToggleButton>
-        </ToggleWrapper>
+      <TopSection>
+        {collapsed ? (
+          <>
+            <CollapsedLogoWrapper>
+              <Logo src="/logoPrimary.svg" alt="Logo" width={28} height={28} />
+            </CollapsedLogoWrapper>
+            <ToggleFloating onClick={() => setCollapsed(false)}>
+              <ChevronsRight size={18} />
+            </ToggleFloating>
+          </>
+        ) : (
+          <BrandRow>
+            <div className="flex items-center gap-2">
+              <Logo src="/logoPrimary.svg" alt="Logo" width={28} height={28} />
+              <BrandText>MidiMed</BrandText>
+            </div>
+            <ToggleButton onClick={() => setCollapsed(true)}>
+              <ChevronsLeft size={18} />
+            </ToggleButton>
+          </BrandRow>
+        )}
 
         <NavList>
           {navItems.map(({ href, label, icon: Icon }) => (
             <NavItem key={href} $active={pathname === href} $collapsed={collapsed}>
               <Link
                 href={href}
-                className={`flex items-center gap-2 px-4 py-3 w-full ${
-                  collapsed ? 'justify-center' : ''
-                }`}
+                className={`flex items-center gap-2 w-full ${collapsed ? 'justify-center px-2 py-3' : 'px-4 py-3 '}`}
               >
                 <Icon size={20} />
                 {!collapsed && <span>{label}</span>}
@@ -49,7 +63,7 @@ export default function Sidebar() {
             </NavItem>
           ))}
         </NavList>
-      </div>
+      </TopSection>
 
       <UserSettings collapsed={collapsed} />
     </Wrapper>
@@ -58,24 +72,33 @@ export default function Sidebar() {
 
 // styled components
 const Wrapper = tw.div<{ $collapsed: boolean }>`
-  h-full flex flex-col justify-between p-2 transition-all
-  ${({ $collapsed }) => ($collapsed ? 'w-16' : 'w-64')}
-  border-r border-border
+  relative h-full flex flex-col justify-between  transition-all
+  ${({ $collapsed }) => ($collapsed ? 'w-16 p-2' : 'w-64 p-3')}
+  border-r border-sidebar-border bg-sidebar text-sidebar-foreground
 `
 
-const ToggleWrapper = tw.div`
-  flex justify-end mb-2
-`
+const TopSection = tw.div`flex flex-col gap-8`
+
+const BrandRow = tw.div`flex items-center justify-between pl-1 py-2`
+const BrandText = tw.span`text-primary text-lg font-semibold`
+const Logo = tw(Image)`shrink-0`
+
+const CollapsedLogoWrapper = tw.div`flex justify-center p-2`
 
 const ToggleButton = tw.button`
   p-1 rounded hover:bg-muted text-muted-foreground
 `
 
-const NavList = tw.div`
-  flex flex-col gap-1
+const ToggleFloating = tw.button`
+  absolute right-[-26.5px] top-8 -translate-y-1/2
+  bg-sidebar border-r border-b border-t border-border rounded-r-md
+  p-1 hover:bg-muted text-muted-foreground
+  transition-all
 `
 
+const NavList = tw.div`flex flex-col gap-1`
+
 const NavItem = tw.div<{ $active?: boolean; $collapsed?: boolean }>`
-  ${({ $active }) => ($active ? 'bg-primary text-white font-medium' : 'text-muted-foreground hover:bg-muted ')}
+  ${({ $active }) => ($active ? 'bg-primary text-white font-medium' : 'text-muted-foreground hover:bg-muted')}
   rounded-lg transition-colors hover:text-foreground
 `
