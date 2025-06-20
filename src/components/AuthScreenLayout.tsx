@@ -15,7 +15,7 @@ export default function AuthScreenLayout({ children }: Props) {
   useEffect(() => {
     const move = () => {
       setPosition((prev) => {
-        let { x, y } = prev
+        const { x, y } = prev
         let { vx, vy } = velocity
 
         if (x + 80 >= window.innerWidth || x <= 0) vx *= -1

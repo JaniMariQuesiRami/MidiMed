@@ -30,6 +30,7 @@ const views = [
 
 export default function DashboardCalendar() {
   const [view, setView] = useState<View | null>(null)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [events, setEvents] = useState([])
 
   useEffect(() => {

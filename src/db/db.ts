@@ -5,9 +5,7 @@ import {
 } from 'firebase/auth'
 import {
 	doc,
-	setDoc,
 	runTransaction,
-	serverTimestamp,
 } from 'firebase/firestore'
 import { Tenant, User } from '@/types/db'
 

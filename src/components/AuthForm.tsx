@@ -25,7 +25,6 @@ export default function AuthForm({ mode }: AuthFormProps) {
   const [phone, setPhone] = useState('')
   const [address, setAddress] = useState('')
   const [loading, setLoading] = useState(false)
-  const router = useRouter()
 
   const handleAuth = async () => {
     setLoading(true)
@@ -37,6 +36,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
         await signInWithEmailAndPassword(auth, email, password)
         toast.success('Inicio de sesión exitoso')
       }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       toast.error('Error al autenticar')
       console.error(err)

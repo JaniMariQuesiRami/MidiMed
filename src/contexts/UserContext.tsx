@@ -68,7 +68,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     if (!loading && user && tenant) {
       router.push('/dashboard')
     }
-  }, [loading, user, tenant])
+  }, [loading, user, tenant, router])
 
   const logout = async () => {
     await signOut(auth)
