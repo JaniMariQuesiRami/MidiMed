@@ -12,8 +12,10 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormControl,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
@@ -24,6 +26,8 @@ const schema = z.object({
   lastName: z.string().nonempty('Apellido'),
   email: z.string().email().optional(),
   phone: z.string().regex(/^\+\d{1,3}\s?\d{8}$/).optional(),
+  birth: z.string().nonempty('Fecha de nacimiento'),
+  sex: z.enum(['M', 'F', 'O'], { required_error: 'Sexo requerido' }),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -45,21 +49,29 @@ export default function CreatePatientModal({
       lastName: '',
       email: '',
       phone: '',
+      birth: '',
+      sex: 'O',
     },
   })
 
   useEffect(() => {
     if (open) {
-      form.reset({ firstName: '', lastName: '', email: '', phone: '' })
+      form.reset({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        birth: '',
+        sex: 'O',
+      })
     }
   }, [open, form])
+
   const submit = async (values: FormValues) => {
     try {
       if (!user || !tenant) throw new Error('No user')
       const patientId = await createPatient({
         ...values,
-        birth: '',
-        sex: 'O',
         tenantId: tenant.tenantId,
         createdBy: user.uid,
       })
@@ -67,10 +79,10 @@ export default function CreatePatientModal({
         patientId,
         firstName: values.firstName,
         lastName: values.lastName,
-        email: values.email || null,
-        phone: values.phone || null,
-        birth: '',
-        sex: 'O',
+        email: values.email,
+        phone: values.phone,
+        birth: values.birth,
+        sex: values.sex,
         tenantId: tenant.tenantId,
         createdBy: user.uid,
         createdAt: new Date().toISOString(),
@@ -81,6 +93,7 @@ export default function CreatePatientModal({
       toast.error('Error al crear paciente')
     }
   }
+
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent>
@@ -95,7 +108,7 @@ export default function CreatePatientModal({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Nombre</FormLabel>
-                    <Input {...field} />
+                  <Input {...field} />
                   <FormMessage />
                 </FormItem>
               )}
@@ -106,7 +119,7 @@ export default function CreatePatientModal({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Apellido</FormLabel>
-                    <Input {...field} />
+                  <Input {...field} />
                   <FormMessage />
                 </FormItem>
               )}
@@ -128,7 +141,40 @@ export default function CreatePatientModal({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Teléfono</FormLabel>
-                    <Input type="tel" pattern="^\\+\d{1,3}\s?\d{8}$" {...field} />
+                  <Input type="tel" pattern="^\\+\\d{1,3}\\s?\\d{8}$" {...field} />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="birth"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Fecha de nacimiento</FormLabel>
+                  <Input type="date" {...field} />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="sex"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Sexo</FormLabel>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="M">Masculino</SelectItem>
+                      <SelectItem value="F">Femenino</SelectItem>
+                      <SelectItem value="O">Otro</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}

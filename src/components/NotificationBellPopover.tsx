@@ -5,6 +5,7 @@ import { getNotifications, markNotificationAsRead } from '@/db/notifications'
 import { useUser } from '@/contexts/UserContext'
 import { toast } from 'sonner'
 import tw from 'tailwind-styled-components'
+import { Notification } from '@/types/db'
 
 export default function NotificationBellPopover() {
   const { user } = useUser()
