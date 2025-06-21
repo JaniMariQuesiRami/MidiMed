@@ -67,6 +67,7 @@ export default function MedicalRecordFormModal({
           details: { heightCm: 0, weightKg: 0, bloodPressure: '', notes: '' },
           tenantId: tenant.tenantId,
           createdBy: user.uid,
+          patientId: patientId,
         })
         const newRec: MedicalRecord = {
           tenantId: tenant.tenantId,
