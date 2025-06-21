@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner'
+import LoadingSpinner from './LoadingSpinner'
 import { signUp } from '@/db/db'
 import tw from 'tailwind-styled-components'
 import Link from 'next/link'
@@ -35,8 +36,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
         await signInWithEmailAndPassword(auth, email, password)
         toast.success('Inicio de sesión exitoso')
       }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Error al autenticar')
       console.error(err)
     } finally {
@@ -45,13 +45,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
   }
 
   const title = mode === 'signup' ? 'Crear cuenta' : 'Iniciar sesión'
-  const actionLabel = loading
-    ? mode === 'signup'
-      ? 'Creando...'
-      : 'Ingresando...'
-    : mode === 'signup'
-      ? 'Crear cuenta'
-      : 'Ingresar'
+  const actionLabel = mode === 'signup' ? 'Crear cuenta' : 'Ingresar'
 
   return (
     <Wrapper>
@@ -87,13 +81,15 @@ export default function AuthForm({ mode }: AuthFormProps) {
               </FieldGroup>
               <FieldGroup>
                 <Label htmlFor="phone">Teléfono</Label>
-                <Input
-                  id="phone"
-                  placeholder="+502 5555-1234"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  disabled={loading}
-                />
+                  <Input
+                    id="phone"
+                    type="tel"
+                    pattern="^\+\d{1,3}\s?\d{8}$"
+                    placeholder="+502 55551234"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    disabled={loading}
+                  />
               </FieldGroup>
               <FieldGroup>
                 <Label htmlFor="address">Dirección</Label>
@@ -129,8 +125,8 @@ export default function AuthForm({ mode }: AuthFormProps) {
               disabled={loading}
             />
           </FieldGroup>
-          <Button onClick={handleAuth} disabled={loading} className="w-full">
-            {actionLabel}
+          <Button onClick={handleAuth} disabled={loading} className="w-full flex items-center justify-center gap-1">
+            {loading ? <LoadingSpinner className="h-4 w-4" /> : actionLabel}
           </Button>
           <div className="text-sm text-center">
             {mode === 'signup' ? (

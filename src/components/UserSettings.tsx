@@ -3,12 +3,24 @@
 import { useContext, useEffect, useRef, useState } from 'react'
 import { UserContext } from '@/contexts/UserContext'
 import { User as UserIcon, X } from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { auth, db } from '@/lib/firebase'
+import { updateProfile } from 'firebase/auth'
+import { doc, updateDoc } from 'firebase/firestore'
 import tw from 'tailwind-styled-components'
 
 export default function UserSettings({ collapsed }: { collapsed: boolean }) {
   const { user, tenant, logout } = useContext(UserContext)
   const [open, setOpen] = useState(false)
   const modalRef = useRef<HTMLDivElement>(null)
+  const [displayName, setDisplayName] = useState('')
+
+  const save = async () => {
+    if (!user) return
+    await updateProfile(auth.currentUser!, { displayName })
+    await updateDoc(doc(db, 'users', user.uid), { displayName })
+  }
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -25,6 +37,10 @@ export default function UserSettings({ collapsed }: { collapsed: boolean }) {
       document.removeEventListener('mousedown', handleClickOutside)
     }
   }, [open])
+
+  useEffect(() => {
+    if (user) setDisplayName(user.displayName)
+  }, [user])
 
   if (!user || !tenant) return null
 
@@ -52,10 +68,18 @@ export default function UserSettings({ collapsed }: { collapsed: boolean }) {
         <ModalOverlay>
           <ModalContent ref={modalRef}>
             <ModalHeader>
-              <span>Settings</span>
+              <span>Configuración</span>
               <CloseButton onClick={() => setOpen(false)}><X size={18} /></CloseButton>
             </ModalHeader>
-            <DangerButton onClick={logout}>Logout</DangerButton>
+            <div className="space-y-3">
+              <Input
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                placeholder="Nombre"
+              />
+              <Button className="w-full" onClick={save}>Guardar</Button>
+              <DangerButton onClick={logout}>Logout</DangerButton>
+            </div>
           </ModalContent>
         </ModalOverlay>
       )}

@@ -14,7 +14,7 @@ import {
 } from 'firebase/firestore'
 import { auth, db } from '@/lib/firebase'
 import { User, Tenant } from '@/types/db'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 
 type UserContextType = {
   user: User | null
@@ -63,12 +63,15 @@ export function UserProvider({ children }: { children: ReactNode }) {
     return () => unsubscribe()
   }, [])
 
+  const pathname = usePathname()
+
   useEffect(() => {
-    if (!loading && (!user || !tenant)) return
-    if (!loading && user && tenant) {
+    if (loading) return
+    if (!user || !tenant) return
+    if (pathname === '/' || pathname === '/login' || pathname === '/signup') {
       router.push('/dashboard')
     }
-  }, [loading, user, tenant, router])
+  }, [loading, user, tenant, pathname, router])
 
   const logout = async () => {
     await signOut(auth)

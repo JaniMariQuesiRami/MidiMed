@@ -24,6 +24,7 @@ export type Tenant = {
   email: string
   phone: string
   address: string
+  logoUrl?: string
   settings: TenantSettings
   counters: TenantCounters
 }
@@ -100,11 +101,11 @@ export type NotificationType = "appointment_reminder"
 export type Notification = {
   tenantId: string
   userId: string
+  notificationId: string
   title: string
   body: string
   type?: NotificationType
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
   isRead: boolean
   createdAt: string
   expiresAt?: string
@@ -120,3 +121,24 @@ export type Billing = {
   paymentProviderSubscriptionId: string
   paymentProviderCustomerId: string
 }
+
+// Input types
+export type PatientInput = Omit<
+  Patient,
+  "tenantId" | "patientId" | "createdAt" | "createdBy" | "latestAppointmentId"
+>
+
+export type AppointmentInput = Omit<
+  Appointment,
+  "tenantId" | "appointmentId" | "createdAt" | "createdBy"
+>
+
+export type MedicalRecordInput = Omit<
+  MedicalRecord,
+  "tenantId" | "recordId" | "createdAt" | "createdBy" | "attachments"
+>
+
+export type OrganizationSettingsInput = Partial<
+  Pick<Tenant, "name" | "email" | "phone" | "address" | "logoUrl" | "settings">
+>
+

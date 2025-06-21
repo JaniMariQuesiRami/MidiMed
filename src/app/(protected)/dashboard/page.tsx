@@ -1,15 +1,30 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { Calendar, View, dateFnsLocalizer } from 'react-big-calendar'
 import {
   format,
   parse,
   startOfWeek,
   getDay,
+  startOfMonth,
+  startOfDay,
+  addMonths,
+  addWeeks,
+  addDays,
 } from 'date-fns'
 import { es } from 'date-fns/locale'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 import tw from 'tailwind-styled-components'
+import { getPatients } from '@/db/patients'
+import { getAppointmentsInRange } from '@/db/appointments'
+import { useUser } from '@/contexts/UserContext'
+import CreateAppointmentModal from '@/components/CreateAppointmentModal'
+import AppointmentDetailsPopup from '@/components/AppointmentDetailsPopup'
+import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
+import PatientAutocomplete from '@/components/PatientAutocomplete'
+import type { Patient, Appointment } from '@/types/db'
+import { toast } from 'sonner'
+import LoadingSpinner from '@/components/LoadingSpinner'
 
 const locales = { es }
 const localizer = dateFnsLocalizer({
@@ -29,24 +44,117 @@ const views = [
 ]
 
 export default function DashboardCalendar() {
+  const { tenant } = useUser()
   const [view, setView] = useState<View | null>(null)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [events, setEvents] = useState([])
+  const [date, setDate] = useState(new Date())
+  const [patients, setPatients] = useState<Patient[]>([])
+  const [patientFilter, setPatientFilter] = useState('all')
+  type CalendarEvent = {
+    start: Date
+    end: Date
+    title: string
+    resource: Appointment
+  }
+  const [events, setEvents] = useState<CalendarEvent[]>([])
+  const [open, setOpen] = useState(false)
+  const [selected, setSelected] = useState<{ appt: Appointment; name: string } | null>(null)
+
+  const navigate = (step: number) => {
+    if (view === 'month') setDate((d) => addMonths(d, step))
+    else if (view === 'week') setDate((d) => addWeeks(d, step))
+    else setDate((d) => addDays(d, step))
+  }
+
+  const loadEvents = useCallback(async () => {
+    if (!view || patients.length === 0 || !tenant) return
+    let start: Date
+    let end: Date
+    if (view === 'month') {
+      start = startOfMonth(date)
+      end = addMonths(start, 1)
+    } else if (view === 'week') {
+      start = startOfWeek(date, { locale: es })
+      end = addWeeks(start, 1)
+    } else {
+      start = startOfDay(date)
+      end = addDays(start, 1)
+    }
+    const nameMap = new Map(
+      patients.map((p) => [p.patientId, `${p.firstName} ${p.lastName}`]),
+    )
+    const filterId = patientFilter === "all" ? undefined : patientFilter
+    console.log("Tenant ID:", tenant.tenantId)
+    console.log("Date Range:", start, end)
+    const list = await getAppointmentsInRange(
+      start,
+      end,
+      filterId,
+      tenant.tenantId,
+    )
+    setEvents(
+      list.map((a) => ({
+        start: new Date(a.scheduledStart),
+        end: new Date(a.scheduledEnd),
+        title: nameMap.get(a.patientId) ?? a.patientId,
+        resource: a,
+      }))
+    )
+  }, [view, patients, tenant, date, patientFilter])
 
   useEffect(() => {
     const isMobile = window.innerWidth < 640
     setView(isMobile ? 'day' : 'month')
   }, [])
 
-  const todayStr = format(new Date(), "EEEE, d 'de' MMMM yyyy", { locale: es })
+  useEffect(() => {
+    if (!tenant) return
+    getPatients(tenant.tenantId).then(setPatients).catch(() => { })
+  }, [tenant])
+
+  useEffect(() => {
+    if (patients.length > 0) {
+      loadEvents().catch((err) => {
+        console.error('Error loading events in UI:', err)
+        toast.error('Error cargando citas')
+      })
+    }
+  }, [loadEvents, patients])
+
+  const todayStr = format(date, "EEEE, d 'de' MMMM yyyy", { locale: es })
   const title = todayStr.charAt(0).toUpperCase() + todayStr.slice(1)
 
-  if (!view) return null
+  if (!view)
+    return (
+      <div className="p-4 flex justify-center">
+        <LoadingSpinner className="h-6 w-6" />
+      </div>
+    )
 
   return (
     <Wrapper>
       <Header>
         <DateTitle>{title}</DateTitle>
+        <div className="flex gap-2 ml-auto sm:ml-0">
+          <IconButton onClick={() => navigate(-1)}>
+            <ChevronLeft size={20} />
+          </IconButton>
+          <IconButton onClick={() => navigate(1)}>
+            <ChevronRight size={20} />
+          </IconButton>
+        </div>
+        <div className="flex items-center gap-2 ml-auto">
+          <PatientAutocomplete
+            patients={patients}
+            value={patientFilter}
+            onChange={(v) => setPatientFilter(v || 'all')}
+          />
+          <button
+            className="bg-primary text-white px-3 py-1 rounded flex items-center gap-1"
+            onClick={() => setOpen(true)}
+          >
+            Nueva cita <Plus size={16} />
+          </button>
+        </div>
         <ViewSwitcher>
           {views.map(({ key, label }) => (
             <SwitchButton
@@ -67,13 +175,29 @@ export default function DashboardCalendar() {
             events={events}
             defaultView={view}
             view={view}
+            date={date}
+            onNavigate={setDate}
             onView={setView}
+            onSelectEvent={(e: CalendarEvent) =>
+              setSelected({ appt: e.resource, name: e.title })
+            }
             style={{ height: 'calc(100vh - 150px)' }}
             selectable
             components={{ toolbar: () => null }}
           />
         </div>
       </div>
+      <CreateAppointmentModal
+        open={open}
+        onClose={() => setOpen(false)}
+        onCreated={() => loadEvents()}
+      />
+      <AppointmentDetailsPopup
+        appointment={selected?.appt || null}
+        patientName={selected?.name}
+        onClose={() => setSelected(null)}
+        onUpdated={() => loadEvents()}
+      />
     </Wrapper>
   )
 }
@@ -91,3 +215,5 @@ const SwitchButton = tw.button<{ $active: boolean }>`
       : 'bg-secondary text-secondary-dark'}
   hover:opacity-80
 `
+
+const IconButton = tw.button`p-1 rounded hover:bg-muted text-muted-foreground`
