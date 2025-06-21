@@ -19,7 +19,7 @@ export default function NotificationBellPopover() {
       try {
         const list = await getNotifications(user.uid)
         setNotifications(list.filter((n) => !n.isRead).slice(0, 5))
-      } catch (err) {
+      } catch {
         toast.error('Error al cargar notificaciones')
       } finally {
         setLoading(false)

@@ -14,6 +14,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
+import { Plus } from 'lucide-react'
 
 const schema = z.object({
   firstName: z.string().nonempty('Nombre'),
@@ -57,7 +58,7 @@ export default function CreatePatientModal({ open, onClose }: { open: boolean; o
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Nombre</FormLabel>
-                  <Input {...field} />
+                  <Input type="tel" {...field} />
                   <FormMessage />
                 </FormItem>
               )}
@@ -95,8 +96,8 @@ export default function CreatePatientModal({ open, onClose }: { open: boolean; o
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full">
-              Crear
+            <Button type="submit" className="w-full flex items-center gap-1">
+              Crear <Plus size={16} />
             </Button>
           </form>
         </Form>

@@ -12,12 +12,12 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Select, SelectItem, SelectTrigger, SelectContent, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
+import { Plus } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 
 const schema = z.object({
@@ -89,7 +89,7 @@ export default function CreateAppointmentModal({
       toast.success('Cita creada')
       onCreated?.(newAppt)
       onClose()
-    } catch (err) {
+    } catch {
       toast.error('No se pudo crear cita')
     } finally {
       setLoading(false)
@@ -186,8 +186,8 @@ export default function CreateAppointmentModal({
                 </FormItem>
               )}
             />
-            <Button type="submit" disabled={loading} className="w-full">
-              {loading ? 'Guardando...' : 'Crear'}
+            <Button type="submit" disabled={loading} className="w-full flex items-center justify-center gap-1">
+              {loading ? 'Guardando...' : <>Crear <Plus size={16} /></>}
             </Button>
           </form>
         </Form>

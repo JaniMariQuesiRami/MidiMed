@@ -16,12 +16,14 @@ export async function getAppointmentsInRange(
   start: Date,
   end: Date,
   patientId?: string,
+  tenantId?: string,
 ): Promise<Appointment[]> {
   const conditions = [
     where('scheduledStart', '>=', start.toISOString()),
     where('scheduledStart', '<=', end.toISOString()),
   ]
   if (patientId) conditions.push(where('patientId', '==', patientId))
+  if (tenantId) conditions.push(where('tenantId', '==', tenantId))
   const q = query(collection(db, 'appointments'), ...conditions)
   const snap = await getDocs(q)
   return snap.docs.map((d) => ({ ...(d.data() as Omit<Appointment, 'appointmentId'>), appointmentId: d.id }))

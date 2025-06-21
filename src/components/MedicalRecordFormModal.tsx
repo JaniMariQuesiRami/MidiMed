@@ -9,12 +9,12 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
+import { Plus } from 'lucide-react'
 import type { MedicalRecord } from '@/types/db'
 
 const schema = z.object({
@@ -79,8 +79,8 @@ export default function MedicalRecordFormModal({
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full">
-              Crear
+            <Button type="submit" className="w-full flex items-center gap-1">
+              Crear <Plus size={16} />
             </Button>
           </form>
         </Form>

@@ -88,6 +88,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
                 <Label htmlFor="phone">Teléfono</Label>
                 <Input
                   id="phone"
+                  type="tel"
                   placeholder="+502 5555-1234"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}

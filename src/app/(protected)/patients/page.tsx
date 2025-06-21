@@ -6,12 +6,15 @@ import { Table, TableBody, TableHead, TableHeader, TableRow, TableCell } from '@
 import { Input } from '@/components/ui/input'
 import tw from 'tailwind-styled-components'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { Plus } from 'lucide-react'
 import CreatePatientModal from '@/components/CreatePatientModal'
 
 export default function PatientsPage() {
   const [patients, setPatients] = useState<Patient[]>([])
   const [search, setSearch] = useState('')
   const [open, setOpen] = useState(false)
+  const router = useRouter()
 
   useEffect(() => {
     getPatients().then(setPatients).catch(() => {})
@@ -30,8 +33,11 @@ export default function PatientsPage() {
           onChange={(e) => setSearch(e.target.value)}
           className="max-w-sm"
         />
-        <button className="bg-primary text-white px-3 py-1 rounded" onClick={() => setOpen(true)}>
-          Nuevo
+        <button
+          className="bg-primary text-white px-3 py-1 rounded flex items-center gap-1"
+          onClick={() => setOpen(true)}
+        >
+          Nuevo <Plus size={16} />
         </button>
       </Header>
       <Table>
@@ -45,7 +51,11 @@ export default function PatientsPage() {
         </TableHeader>
         <TableBody>
           {filtered.map((p) => (
-            <TableRow key={p.patientId}>
+            <TableRow
+              key={p.patientId}
+              className="cursor-pointer hover:bg-muted"
+              onClick={() => router.push(`/patients/${p.patientId}`)}
+            >
               <TableCell>
                 {p.firstName} {p.lastName}
               </TableCell>
@@ -63,5 +73,5 @@ export default function PatientsPage() {
   )
 }
 
-const Wrapper = tw.div`flex flex-col gap-4`
+const Wrapper = tw.div`flex flex-col gap-4 px-2 sm:px-4 pt-4`
 const Header = tw.div`flex justify-between items-center`
