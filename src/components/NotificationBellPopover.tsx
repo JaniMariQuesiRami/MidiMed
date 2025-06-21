@@ -6,6 +6,7 @@ import { useUser } from '@/contexts/UserContext'
 import { toast } from 'sonner'
 import tw from 'tailwind-styled-components'
 import { Notification } from '@/types/db'
+import LoadingSpinner from './LoadingSpinner'
 
 export default function NotificationBellPopover() {
   const { user } = useUser()
@@ -46,7 +47,9 @@ export default function NotificationBellPopover() {
       {open && (
         <Popover>
           {loading ? (
-            <div className="p-2 text-sm">Cargando...</div>
+            <div className="p-2 flex justify-center">
+              <LoadingSpinner className="h-4 w-4" />
+            </div>
           ) : notifications.length === 0 ? (
             <div className="p-2 text-sm">Sin notificaciones</div>
           ) : (
