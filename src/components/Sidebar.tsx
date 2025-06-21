@@ -72,9 +72,10 @@ export default function Sidebar() {
 
 // styled components
 const Wrapper = tw.div<{ $collapsed: boolean }>`
-  relative h-full flex flex-col justify-between  transition-all
+  relative h-full flex flex-col justify-between transition-all
   ${({ $collapsed }) => ($collapsed ? 'w-16 p-2' : 'w-64 p-3')}
-  border-r border-sidebar-border bg-sidebar text-sidebar-foreground
+  border-r border-sidebar-border/40 bg-sidebar/60 backdrop-blur-lg text-sidebar-foreground
+  rounded-xl
 `
 
 const TopSection = tw.div`flex flex-col gap-8`
@@ -86,19 +87,19 @@ const Logo = tw(Image)`shrink-0`
 const CollapsedLogoWrapper = tw.div`flex justify-center p-2`
 
 const ToggleButton = tw.button`
-  p-1 rounded hover:bg-muted text-muted-foreground
+  p-1 rounded hover:bg-muted/60 text-muted-foreground bg-sidebar/60 backdrop-blur-lg
 `
 
 const ToggleFloating = tw.button`
   absolute right-[-26.5px] top-8 -translate-y-1/2
-  bg-sidebar border-r border-b border-t border-border rounded-r-md
-  p-1 hover:bg-muted text-muted-foreground
+  bg-sidebar/60 backdrop-blur-lg border-r border-b border-t border-border/40 rounded-r-md
+  p-1 hover:bg-muted/60 text-muted-foreground
   transition-all
 `
 
 const NavList = tw.div`flex flex-col gap-1`
 
 const NavItem = tw.div<{ $active?: boolean; $collapsed?: boolean }>`
-  ${({ $active }) => ($active ? 'bg-primary text-white font-medium' : 'text-muted-foreground hover:bg-muted')}
-  rounded-lg transition-colors hover:text-foreground
+  ${({ $active }) => ($active ? 'bg-primary/80 text-white font-medium' : 'text-muted-foreground hover:bg-muted/60')}
+  rounded-lg transition-colors hover:text-foreground backdrop-blur-lg
 `
