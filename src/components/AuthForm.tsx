@@ -157,7 +157,7 @@ const Wrapper = tw.div`
 `
 
 const StyledCard = tw(Card)`
-  w-full max-w-lg
+  w-full max-w-lg glass shadow-lg backdrop-blur-xl
 `
 
 const FieldGroup = tw.div`
@@ -165,6 +165,6 @@ const FieldGroup = tw.div`
 `
 
 const Title = tw.h1`
-  text-6xl font-bold mb-6 text-center
-  text-white
+  text-6xl font-bold mb-6 text-center text-transparent bg-clip-text
+  bg-gradient-to-r from-primary to-purple-500 animate-gradient
 `;

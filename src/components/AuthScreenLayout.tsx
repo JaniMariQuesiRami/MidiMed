@@ -55,5 +55,5 @@ export const BouncingLogo = tw(Image)`
 `
 
 export const AuthFormWrapper = tw.div`
-  z-20 relative w-full
+  z-20 relative w-full glass shadow-lg p-6 rounded-2xl backdrop-blur-xl
 `
