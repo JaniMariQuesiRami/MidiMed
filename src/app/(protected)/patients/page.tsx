@@ -1,9 +1,17 @@
 'use client'
+
 import { useEffect, useState } from 'react'
 import { getPatients } from '@/db/patients'
 import { useUser } from '@/contexts/UserContext'
 import type { Patient } from '@/types/db'
-import { Table, TableBody, TableHead, TableHeader, TableRow, TableCell } from '@/components/ui/table'
+import {
+  Table,
+  TableBody,
+  TableHead,
+  TableHeader,
+  TableRow,
+  TableCell,
+} from '@/components/ui/table'
 import { Input } from '@/components/ui/input'
 import tw from 'tailwind-styled-components'
 import Link from 'next/link'
@@ -12,26 +20,32 @@ import { Plus } from 'lucide-react'
 import CreatePatientModal from '@/components/CreatePatientModal'
 import LoadingSpinner from '@/components/LoadingSpinner'
 
+const PAGE_SIZE = 10
+
 export default function PatientsPage() {
   const { tenant } = useUser()
-  const [patients, setPatients] = useState<Patient[]>([])
-  const [loading, setLoading] = useState(true)
+  const [allPatients, setAllPatients] = useState<Patient[]>([])
   const [search, setSearch] = useState('')
   const [open, setOpen] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [page, setPage] = useState(0)
   const router = useRouter()
 
   useEffect(() => {
     if (!tenant) return
     setLoading(true)
     getPatients(tenant.tenantId)
-      .then(setPatients)
+      .then(setAllPatients)
       .catch(() => {})
       .finally(() => setLoading(false))
   }, [tenant])
 
-  const filtered = patients.filter((p) =>
+  const filtered = allPatients.filter((p) =>
     `${p.firstName} ${p.lastName}`.toLowerCase().includes(search.toLowerCase())
   )
+
+  const paginated = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE)
 
   return (
     <Wrapper>
@@ -39,7 +53,10 @@ export default function PatientsPage() {
         <Input
           placeholder="Buscar"
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => {
+            setSearch(e.target.value)
+            setPage(0)
+          }}
           className="max-w-sm"
         />
         <button
@@ -49,52 +66,78 @@ export default function PatientsPage() {
           Nuevo <Plus size={16} />
         </button>
       </Header>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Nombre</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Teléfono</TableHead>
-            <TableHead></TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {loading ? (
+
+      <div className="border rounded-lg overflow-hidden shadow-sm">
+        <Table>
+          <TableHeader className="bg-muted">
             <TableRow>
-              <TableCell colSpan={4} className="py-6 text-center">
-                <LoadingSpinner className="h-6 w-6 mx-auto" />
-              </TableCell>
+              <TableHead>Nombre</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Teléfono</TableHead>
+              <TableHead></TableHead>
             </TableRow>
-          ) : filtered.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={4} className="py-6 text-center">
-                No se encontraron pacientes
-              </TableCell>
-            </TableRow>
-          ) : (
-            filtered.map((p) => (
-              <TableRow
-                key={p.patientId}
-                className="cursor-pointer hover:bg-muted"
-                onClick={() => router.push(`/patients/${p.patientId}`)}
-              >
-                <TableCell>
-                  {p.firstName} {p.lastName}
-                </TableCell>
-                <TableCell>{p.email}</TableCell>
-                <TableCell>{p.phone}</TableCell>
-                <TableCell>
-                  <Link className="text-primary" href={`/patients/${p.patientId}`}>Ver</Link>
+          </TableHeader>
+          <TableBody>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={4} className="py-6 text-center">
+                  <LoadingSpinner className="h-6 w-6 mx-auto" />
                 </TableCell>
               </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
+            ) : filtered.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={4} className="py-6 text-center">
+                  No se encontraron pacientes
+                </TableCell>
+              </TableRow>
+            ) : (
+              paginated.map((p) => (
+                <TableRow
+                  key={p.patientId}
+                  className="cursor-pointer hover:bg-[var(--primary-soft)]"
+                  onClick={() => router.push(`/patients/${p.patientId}`)}
+                >
+                  <TableCell>{p.firstName} {p.lastName}</TableCell>
+                  <TableCell>{p.email}</TableCell>
+                  <TableCell>{p.phone}</TableCell>
+                  <TableCell>
+                    <Link className="text-primary" href={`/patients/${p.patientId}`}>Ver</Link>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+
+        {!loading && filtered.length > 0 && (
+          <div className="flex justify-between items-center p-2 text-sm">
+            <span className="text-muted-foreground">
+              Mostrando {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, filtered.length)} de {filtered.length}
+            </span>
+            <div className="flex gap-2">
+              <button
+                disabled={page === 0}
+                onClick={() => setPage((p) => p - 1)}
+                className="text-primary hover:underline disabled:opacity-50"
+              >
+                Anterior
+              </button>
+              <button
+                disabled={page >= totalPages - 1}
+                onClick={() => setPage((p) => p + 1)}
+                className="text-primary hover:underline disabled:opacity-50"
+              >
+                Siguiente
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
       <CreatePatientModal
         open={open}
         onClose={() => setOpen(false)}
-        onCreated={(p) => setPatients((prev) => [...prev, p])}
+        onCreated={(p) => setAllPatients((prev) => [p, ...prev])}
       />
     </Wrapper>
   )
