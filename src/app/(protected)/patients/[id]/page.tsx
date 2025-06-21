@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import tw from 'tailwind-styled-components'
 import { format } from 'date-fns'
+import LoadingSpinner from '@/components/LoadingSpinner'
 
 export default function PatientDetailsPage() {
   const params = useParams<{ id: string }>()
@@ -59,7 +60,12 @@ export default function PatientDetailsPage() {
         .catch(() => {})
   }, [params.id, tenant])
 
-  if (!patient) return <div className="p-2">Cargando...</div>
+  if (!patient)
+    return (
+      <div className="p-2 flex justify-center">
+        <LoadingSpinner className="h-6 w-6" />
+      </div>
+    )
 
   const past = appointments.filter(
     (a) => new Date(a.scheduledStart) < new Date(),
@@ -100,8 +106,15 @@ export default function PatientDetailsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {future.map((a) => (
-                  <TableRow key={a.appointmentId}>
+                {future.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="py-4 text-center">
+                      No hay citas futuras
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  future.map((a) => (
+                    <TableRow key={a.appointmentId}>
                     <TableCell>
                       {format(new Date(a.scheduledStart), 'dd/MM/yyyy')}
                     </TableCell>
@@ -121,7 +134,8 @@ export default function PatientDetailsPage() {
                       </button>
                     </TableCell>
                   </TableRow>
-                ))}
+                  ))
+                )}
               </TableBody>
           </Table>
         </Section>
@@ -137,8 +151,15 @@ export default function PatientDetailsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {past.map((a) => (
-                <TableRow key={a.appointmentId}>
+              {past.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={4} className="py-4 text-center">
+                    No hay citas pasadas
+                  </TableCell>
+                </TableRow>
+              ) : (
+                past.map((a) => (
+                  <TableRow key={a.appointmentId}>
                   <TableCell>
                     {format(new Date(a.scheduledStart), 'dd/MM/yyyy')}
                   </TableCell>
@@ -158,7 +179,8 @@ export default function PatientDetailsPage() {
                     </button>
                   </TableCell>
                 </TableRow>
-              ))}
+                ))
+              )}
             </TableBody>
           </Table>
         </Section>
@@ -177,8 +199,15 @@ export default function PatientDetailsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {records.map((r) => (
-                <TableRow key={r.recordId}>
+              {records.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={2} className="py-4 text-center">
+                    No hay registros
+                  </TableCell>
+                </TableRow>
+              ) : (
+                records.map((r) => (
+                  <TableRow key={r.recordId}>
                     <TableCell>{r.summary}</TableCell>
                     <TableCell className="flex gap-2">
                       <button onClick={() => { setEditingRecord(r); setOpenRecord(true); }}>
@@ -193,9 +222,10 @@ export default function PatientDetailsPage() {
                         <Trash size={16} />
                       </button>
                     </TableCell>
-                </TableRow>
-              ))}
-              </TableBody>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
             </Table>
           </Section>
         </div>

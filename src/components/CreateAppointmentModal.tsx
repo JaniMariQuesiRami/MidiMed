@@ -20,6 +20,7 @@ import { Select, SelectItem, SelectTrigger, SelectContent, SelectValue } from '@
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import LoadingSpinner from './LoadingSpinner'
 
 const schema = z.object({
   patientId: z.string().nonempty('Seleccione paciente'),
@@ -253,11 +254,15 @@ export default function CreateAppointmentModal({
               )}
             />
             <Button type="submit" disabled={loading} className="w-full flex items-center justify-center gap-1">
-              {loading
-                ? 'Guardando...'
-                : appointment
-                ? 'Guardar'
-                : <>Crear <Plus size={16} /></>}
+              {loading ? (
+                <LoadingSpinner className="h-4 w-4" />
+              ) : appointment ? (
+                'Guardar'
+              ) : (
+                <>
+                  Crear <Plus size={16} />
+                </>
+              )}
             </Button>
           </form>
         </Form>

@@ -10,17 +10,23 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Plus } from 'lucide-react'
 import CreatePatientModal from '@/components/CreatePatientModal'
+import LoadingSpinner from '@/components/LoadingSpinner'
 
 export default function PatientsPage() {
   const { tenant } = useUser()
   const [patients, setPatients] = useState<Patient[]>([])
+  const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [open, setOpen] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
     if (!tenant) return
-    getPatients(tenant.tenantId).then(setPatients).catch(() => {})
+    setLoading(true)
+    getPatients(tenant.tenantId)
+      .then(setPatients)
+      .catch(() => {})
+      .finally(() => setLoading(false))
   }, [tenant])
 
   const filtered = patients.filter((p) =>
@@ -53,22 +59,36 @@ export default function PatientsPage() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {filtered.map((p) => (
-            <TableRow
-              key={p.patientId}
-              className="cursor-pointer hover:bg-muted"
-              onClick={() => router.push(`/patients/${p.patientId}`)}
-            >
-              <TableCell>
-                {p.firstName} {p.lastName}
-              </TableCell>
-              <TableCell>{p.email}</TableCell>
-              <TableCell>{p.phone}</TableCell>
-              <TableCell>
-                <Link className="text-primary" href={`/patients/${p.patientId}`}>Ver</Link>
+          {loading ? (
+            <TableRow>
+              <TableCell colSpan={4} className="py-6 text-center">
+                <LoadingSpinner className="h-6 w-6 mx-auto" />
               </TableCell>
             </TableRow>
-          ))}
+          ) : filtered.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={4} className="py-6 text-center">
+                No se encontraron pacientes
+              </TableCell>
+            </TableRow>
+          ) : (
+            filtered.map((p) => (
+              <TableRow
+                key={p.patientId}
+                className="cursor-pointer hover:bg-muted"
+                onClick={() => router.push(`/patients/${p.patientId}`)}
+              >
+                <TableCell>
+                  {p.firstName} {p.lastName}
+                </TableCell>
+                <TableCell>{p.email}</TableCell>
+                <TableCell>{p.phone}</TableCell>
+                <TableCell>
+                  <Link className="text-primary" href={`/patients/${p.patientId}`}>Ver</Link>
+                </TableCell>
+              </TableRow>
+            ))
+          )}
         </TableBody>
       </Table>
       <CreatePatientModal

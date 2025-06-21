@@ -21,9 +21,10 @@ import { useUser } from '@/contexts/UserContext'
 import CreateAppointmentModal from '@/components/CreateAppointmentModal'
 import AppointmentDetailsPopup from '@/components/AppointmentDetailsPopup'
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
+import PatientAutocomplete from '@/components/PatientAutocomplete'
 import type { Patient, Appointment } from '@/types/db'
 import { toast } from 'sonner'
+import LoadingSpinner from '@/components/LoadingSpinner'
 
 const locales = { es }
 const localizer = dateFnsLocalizer({
@@ -47,7 +48,7 @@ export default function DashboardCalendar() {
   const [view, setView] = useState<View | null>(null)
   const [date, setDate] = useState(new Date())
   const [patients, setPatients] = useState<Patient[]>([])
-  const [patientFilter, setPatientFilter] = useState('')
+  const [patientFilter, setPatientFilter] = useState('all')
   type CalendarEvent = {
     start: Date
     end: Date
@@ -122,7 +123,12 @@ export default function DashboardCalendar() {
   const todayStr = format(date, "EEEE, d 'de' MMMM yyyy", { locale: es })
   const title = todayStr.charAt(0).toUpperCase() + todayStr.slice(1)
 
-  if (!view) return null
+  if (!view)
+    return (
+      <div className="p-4 flex justify-center">
+        <LoadingSpinner className="h-6 w-6" />
+      </div>
+    )
 
   return (
     <Wrapper>
@@ -137,19 +143,11 @@ export default function DashboardCalendar() {
           </IconButton>
         </div>
         <div className="flex items-center gap-2 ml-auto">
-          <Select value={patientFilter} onValueChange={setPatientFilter}>
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="Todos" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos</SelectItem>
-              {patients.map((p) => (
-                <SelectItem key={p.patientId} value={p.patientId}>
-                  {p.firstName} {p.lastName}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <PatientAutocomplete
+            patients={patients}
+            value={patientFilter}
+            onChange={(v) => setPatientFilter(v || 'all')}
+          />
           <button
             className="bg-primary text-white px-3 py-1 rounded flex items-center gap-1"
             onClick={() => setOpen(true)}

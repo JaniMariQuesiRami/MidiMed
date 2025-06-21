@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner'
+import LoadingSpinner from './LoadingSpinner'
 import { signUp } from '@/db/db'
 import tw from 'tailwind-styled-components'
 import Link from 'next/link'
@@ -44,13 +45,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
   }
 
   const title = mode === 'signup' ? 'Crear cuenta' : 'Iniciar sesión'
-  const actionLabel = loading
-    ? mode === 'signup'
-      ? 'Creando...'
-      : 'Ingresando...'
-    : mode === 'signup'
-      ? 'Crear cuenta'
-      : 'Ingresar'
+  const actionLabel = mode === 'signup' ? 'Crear cuenta' : 'Ingresar'
 
   return (
     <Wrapper>
@@ -130,8 +125,8 @@ export default function AuthForm({ mode }: AuthFormProps) {
               disabled={loading}
             />
           </FieldGroup>
-          <Button onClick={handleAuth} disabled={loading} className="w-full">
-            {actionLabel}
+          <Button onClick={handleAuth} disabled={loading} className="w-full flex items-center justify-center gap-1">
+            {loading ? <LoadingSpinner className="h-4 w-4" /> : actionLabel}
           </Button>
           <div className="text-sm text-center">
             {mode === 'signup' ? (
