@@ -1,0 +1,122 @@
+
+
+export type TenantSettings = {
+  appointmentDurationMinutes: number
+  workingHours: {
+    mon: [string, string]
+    tue: [string, string]
+    wed: [string, string]
+    thu: [string, string]
+    fri: [string, string]
+  }
+}
+
+export type TenantCounters = {
+  patients: number
+  appointments: number
+  medicalRecords: number
+}
+
+export type Tenant = {
+  tenantId: string
+  name: string
+  createdAt: string
+  email: string
+  phone: string
+  address: string
+  settings: TenantSettings
+  counters: TenantCounters
+}
+
+export type UserRole = "admin" | "provider" | "staff"
+
+export type User = {
+  tenantId: string
+  uid: string
+  email: string
+  displayName: string
+  role: UserRole
+  createdAt: string
+  lastLoginAt: string
+  avatarUrl?: string
+}
+
+export type Patient = {
+  tenantId: string
+  patientId: string
+  firstName: string
+  lastName: string
+  birth: string
+  sex: "M" | "F" | "O"
+  email?: string
+  phone?: string
+  address?: string
+  createdBy: string
+  createdAt: string
+  latestAppointmentId?: string
+}
+
+export type MedicalRecordAttachment = {
+  fileName: string
+  storagePath: string
+}
+
+export type MedicalRecordDetails = {
+  heightCm: number
+  weightKg: number
+  bloodPressure: string
+  notes: string
+}
+
+export type MedicalRecord = {
+  tenantId: string
+  recordId: string
+  patientId: string
+  summary: string
+  details: MedicalRecordDetails
+  createdAt: string
+  createdBy: string
+  attachments?: MedicalRecordAttachment[]
+}
+
+export type AppointmentStatus = "scheduled" | "completed" | "cancelled"
+
+export type Appointment = {
+  tenantId: string
+  appointmentId: string
+  patientId: string
+  providerId: string
+  scheduledStart: string
+  scheduledEnd: string
+  status: AppointmentStatus
+  reason: string
+  createdAt: string
+  createdBy: string
+  medicalRecordId?: string | null
+}
+
+export type NotificationType = "appointment_reminder"
+
+export type Notification = {
+  tenantId: string
+  userId: string
+  title: string
+  body: string
+  type?: NotificationType
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  metadata?: Record<string, any>
+  isRead: boolean
+  createdAt: string
+  expiresAt?: string
+}
+
+export type Billing = {
+  tenantId: string
+  plan: "basic" | "pro"
+  subscriptionStart: string
+  subscriptionEnd: string
+  isActive: boolean
+  paymentProvider: string
+  paymentProviderSubscriptionId: string
+  paymentProviderCustomerId: string
+}
