@@ -4,6 +4,7 @@ import { ReactNode } from 'react'
 import Sidebar from '@/components/Sidebar'
 import BottomTabs from '@/components/BottomTabs'
 import BrandLogo from '@/components/BrandLogo'
+import NotificationBellPopover from '@/components/NotificationBellPopover'
 import tw from 'tailwind-styled-components'
 
 export default function ProtectedLayout({ children }: { children: ReactNode }) {
@@ -15,6 +16,9 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
       <ContentWrapper>
         <MobileHeader>
           <BrandLogo />
+          <BellWrapper>
+            <NotificationBellPopover />
+          </BellWrapper>
         </MobileHeader>
         {children}
       </ContentWrapper>
@@ -39,8 +43,10 @@ const ContentWrapper = tw.main`
 `
 
 const MobileHeader = tw.div`
-  md:hidden py-2 px-3
+  md:hidden py-2 px-3 flex items-center gap-4
 `
+
+const BellWrapper = tw.div`ml-auto`
 
 const BottomTabsWrapper = tw.div`
   md:hidden fixed bottom-0 left-0 w-full border-t border-border bg-background
