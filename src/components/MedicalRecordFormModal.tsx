@@ -106,7 +106,11 @@ export default function MedicalRecordFormModal({
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full flex items-center gap-1">
+            <Button
+              type="submit"
+              className="w-full flex items-center gap-1"
+              disabled={form.formState.isSubmitting}
+            >
               {record ? 'Guardar' : <>Crear <Plus size={16} /></>}
             </Button>
           </form>

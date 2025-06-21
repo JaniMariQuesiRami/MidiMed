@@ -24,8 +24,8 @@ import type { Patient } from '@/types/db'
 const schema = z.object({
   firstName: z.string().nonempty('Nombre'),
   lastName: z.string().nonempty('Apellido'),
-  email: z.string().email().optional(),
-  phone: z.string().regex(/^\+\d{1,3}\s?\d{8}$/).optional(),
+  email: z.string().email(),
+  phone: z.string(),
   birth: z.string().nonempty('Fecha de nacimiento'),
   sex: z.enum(['M', 'F', 'O'], { required_error: 'Sexo requerido' }),
 })
@@ -141,7 +141,7 @@ export default function CreatePatientModal({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Teléfono</FormLabel>
-                  <Input type="tel" pattern="^\\+\\d{1,3}\\s?\\d{8}$" {...field} />
+                  <Input type="tel" {...field} />
                   <FormMessage />
                 </FormItem>
               )}
@@ -179,9 +179,14 @@ export default function CreatePatientModal({
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full flex items-center gap-1">
+            <Button
+              type="submit"
+              disabled={form.formState.isSubmitting}
+              className="w-full flex items-center gap-1"
+            >
               Crear <Plus size={16} />
             </Button>
+
           </form>
         </Form>
       </DialogContent>
