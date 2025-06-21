@@ -9,6 +9,7 @@ import {
   getDoc,
   updateDoc,
   deleteDoc,
+  orderBy,
 } from 'firebase/firestore'
 import { Appointment, AppointmentInput } from '@/types/db'
 
@@ -16,18 +17,26 @@ export async function getAppointmentsInRange(
   start: Date,
   end: Date,
   patientId?: string,
+  tenantId?: string,
 ): Promise<Appointment[]> {
   const conditions = [
     where('scheduledStart', '>=', start.toISOString()),
     where('scheduledStart', '<=', end.toISOString()),
   ]
   if (patientId) conditions.push(where('patientId', '==', patientId))
-  const q = query(collection(db, 'appointments'), ...conditions)
+  if (tenantId) conditions.push(where('tenantId', '==', tenantId))
+  const q = query(
+    collection(db, 'appointments'),
+    ...conditions,
+    orderBy('scheduledStart'),
+  )
   const snap = await getDocs(q)
   return snap.docs.map((d) => ({ ...(d.data() as Omit<Appointment, 'appointmentId'>), appointmentId: d.id }))
 }
 
-export async function createAppointment(data: AppointmentInput): Promise<string> {
+export async function createAppointment(
+  data: AppointmentInput & { tenantId: string; createdBy: string },
+): Promise<string> {
   const ref = doc(collection(db, 'appointments'))
   const now = new Date().toISOString()
   await setDoc(ref, {

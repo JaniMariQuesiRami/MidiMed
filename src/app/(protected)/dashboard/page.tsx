@@ -1,19 +1,26 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { Calendar, View, dateFnsLocalizer } from 'react-big-calendar'
 import {
   format,
   parse,
   startOfWeek,
   getDay,
+  startOfMonth,
+  startOfDay,
+  addMonths,
+  addWeeks,
+  addDays,
 } from 'date-fns'
 import { es } from 'date-fns/locale'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 import tw from 'tailwind-styled-components'
 import { getPatients } from '@/db/patients'
 import { getAppointmentsInRange } from '@/db/appointments'
+import { useUser } from '@/contexts/UserContext'
 import CreateAppointmentModal from '@/components/CreateAppointmentModal'
 import AppointmentDetailsPopup from '@/components/AppointmentDetailsPopup'
+import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
 import type { Patient, Appointment } from '@/types/db'
 
@@ -35,7 +42,9 @@ const views = [
 ]
 
 export default function DashboardCalendar() {
+  const { tenant } = useUser()
   const [view, setView] = useState<View | null>(null)
+  const [date, setDate] = useState(new Date())
   const [patients, setPatients] = useState<Patient[]>([])
   const [patientFilter, setPatientFilter] = useState('')
   type CalendarEvent = {
@@ -46,21 +55,37 @@ export default function DashboardCalendar() {
   }
   const [events, setEvents] = useState<CalendarEvent[]>([])
   const [open, setOpen] = useState(false)
-  const [selected, setSelected] = useState<Appointment | null>(null)
+  const [selected, setSelected] = useState<{ appt: Appointment; name: string } | null>(null)
 
-  const loadEvents = async () => {
-    if (!view || patients.length === 0) return
-    const start = new Date()
-    start.setDate(1)
-    const end = new Date(start)
-    end.setMonth(start.getMonth() + 1)
+  const navigate = (step: number) => {
+    if (view === 'month') setDate((d) => addMonths(d, step))
+    else if (view === 'week') setDate((d) => addWeeks(d, step))
+    else setDate((d) => addDays(d, step))
+  }
+
+  const loadEvents = useCallback(async () => {
+    if (!view || patients.length === 0 || !tenant) return
+    let start: Date
+    let end: Date
+    if (view === 'month') {
+      start = startOfMonth(date)
+      end = addMonths(start, 1)
+    } else if (view === 'week') {
+      start = startOfWeek(date, { locale: es })
+      end = addWeeks(start, 1)
+    } else {
+      start = startOfDay(date)
+      end = addDays(start, 1)
+    }
     const nameMap = new Map(
       patients.map((p) => [p.patientId, `${p.firstName} ${p.lastName}`]),
     )
+    const filterId = patientFilter || undefined
     const list = await getAppointmentsInRange(
       start,
       end,
-      patientFilter || undefined,
+      filterId,
+      tenant.tenantId,
     )
     setEvents(
       list.map((a) => ({
@@ -68,21 +93,25 @@ export default function DashboardCalendar() {
         end: new Date(a.scheduledEnd),
         title: nameMap.get(a.patientId) ?? a.patientId,
         resource: a,
-      })),
+      }))
     )
-  }
+  }, [view, patients, tenant, date, patientFilter])
 
   useEffect(() => {
     const isMobile = window.innerWidth < 640
     setView(isMobile ? 'day' : 'month')
-    getPatients().then(setPatients).catch(() => {})
   }, [])
 
   useEffect(() => {
-    loadEvents().catch(() => {})
-  }, [view, patientFilter, patients])
+    if (!tenant) return
+    getPatients(tenant.tenantId).then(setPatients).catch(() => {})
+  }, [tenant])
 
-  const todayStr = format(new Date(), "EEEE, d 'de' MMMM yyyy", { locale: es })
+  useEffect(() => {
+    loadEvents().catch(() => {})
+  }, [loadEvents])
+
+  const todayStr = format(date, "EEEE, d 'de' MMMM yyyy", { locale: es })
   const title = todayStr.charAt(0).toUpperCase() + todayStr.slice(1)
 
   if (!view) return null
@@ -91,13 +120,21 @@ export default function DashboardCalendar() {
     <Wrapper>
       <Header>
         <DateTitle>{title}</DateTitle>
+        <div className="flex gap-2 ml-auto sm:ml-0">
+          <IconButton onClick={() => navigate(-1)}>
+            <ChevronLeft size={20} />
+          </IconButton>
+          <IconButton onClick={() => navigate(1)}>
+            <ChevronRight size={20} />
+          </IconButton>
+        </div>
         <div className="flex items-center gap-2 ml-auto">
           <Select value={patientFilter} onValueChange={setPatientFilter}>
             <SelectTrigger className="w-40">
               <SelectValue placeholder="Todos" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Todos</SelectItem>
+              <SelectItem value="">Todos</SelectItem>
               {patients.map((p) => (
                 <SelectItem key={p.patientId} value={p.patientId}>
                   {p.firstName} {p.lastName}
@@ -106,10 +143,10 @@ export default function DashboardCalendar() {
             </SelectContent>
           </Select>
           <button
-            className="bg-primary text-white px-3 py-1 rounded"
+            className="bg-primary text-white px-3 py-1 rounded flex items-center gap-1"
             onClick={() => setOpen(true)}
           >
-            Nueva cita
+            Nueva cita <Plus size={16} />
           </button>
         </div>
         <ViewSwitcher>
@@ -132,8 +169,12 @@ export default function DashboardCalendar() {
             events={events}
             defaultView={view}
             view={view}
+            date={date}
+            onNavigate={setDate}
             onView={setView}
-            onSelectEvent={(e) => setSelected(e.resource as Appointment)}
+            onSelectEvent={(e: CalendarEvent) =>
+              setSelected({ appt: e.resource, name: e.title })
+            }
             style={{ height: 'calc(100vh - 150px)' }}
             selectable
             components={{ toolbar: () => null }}
@@ -145,7 +186,11 @@ export default function DashboardCalendar() {
         onClose={() => setOpen(false)}
         onCreated={() => loadEvents()}
       />
-      <AppointmentDetailsPopup appointment={selected} onClose={() => setSelected(null)} />
+      <AppointmentDetailsPopup
+        appointment={selected?.appt || null}
+        patientName={selected?.name}
+        onClose={() => setSelected(null)}
+      />
     </Wrapper>
   )
 }
@@ -163,3 +208,5 @@ const SwitchButton = tw.button<{ $active: boolean }>`
       : 'bg-secondary text-secondary-dark'}
   hover:opacity-80
 `
+
+const IconButton = tw.button`p-1 rounded hover:bg-muted text-muted-foreground`

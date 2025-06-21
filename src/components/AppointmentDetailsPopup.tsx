@@ -5,9 +5,11 @@ import tw from 'tailwind-styled-components'
 
 export default function AppointmentDetailsPopup({
   appointment,
+  patientName,
   onClose,
 }: {
   appointment: Appointment | null
+  patientName?: string
   onClose: () => void
 }) {
   if (!appointment) return null
@@ -16,8 +18,23 @@ export default function AppointmentDetailsPopup({
       <Popup onClick={(e) => e.stopPropagation()}>
         <h3 className="font-medium mb-2">Detalle de cita</h3>
         <p>
-          <b>Paciente:</b> {appointment.patientId}
+          <b>Paciente:</b>{' '}
+          {patientName ? (
+            <a
+              href={`/patients/${appointment.patientId}`}
+              className="text-primary underline"
+            >
+              {patientName}
+            </a>
+          ) : (
+            appointment.patientId
+          )}
         </p>
+        {appointment.reason && (
+          <p>
+            <b>Notas:</b> {appointment.reason}
+          </p>
+        )}
         <p>
           <b>Inicio:</b>{' '}
           {format(new Date(appointment.scheduledStart), 'dd/MM/yyyy HH:mm')}

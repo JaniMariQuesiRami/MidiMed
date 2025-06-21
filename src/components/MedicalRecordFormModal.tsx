@@ -1,20 +1,22 @@
 'use client'
 import { useForm } from 'react-hook-form'
+import { useEffect } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { createMedicalRecord } from '@/db/patients'
+import { useUser } from '@/contexts/UserContext'
 import { toast } from 'sonner'
 import {
   Form,
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
+import { Plus } from 'lucide-react'
 import type { MedicalRecord } from '@/types/db'
 
 const schema = z.object({
@@ -34,23 +36,33 @@ export default function MedicalRecordFormModal({
   patientId: string
   onCreated?: (rec: MedicalRecord) => void
 }) {
-  const form = useForm<FormValues>({ resolver: zodResolver(schema) })
+  const { user, tenant } = useUser()
+  const form = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: { summary: '' },
+  })
+
+  useEffect(() => {
+    if (open) form.reset({ summary: '' })
+  }, [open, form])
 
   const submit = async (values: FormValues) => {
     try {
+      if (!user || !tenant) throw new Error('No user')
       const recordId = await createMedicalRecord(patientId, {
         summary: values.summary,
         details: { heightCm: 0, weightKg: 0, bloodPressure: '', notes: '' },
-        createdBy: 'system',
+        tenantId: tenant.tenantId,
+        createdBy: user.uid,
       })
       const newRec: MedicalRecord = {
-        tenantId: '',
+        tenantId: tenant.tenantId,
         patientId,
         recordId,
         summary: values.summary,
         details: { heightCm: 0, weightKg: 0, bloodPressure: '', notes: '' },
         createdAt: new Date().toISOString(),
-        createdBy: 'system',
+        createdBy: user.uid,
       }
       toast.success('Registro creado')
       onCreated?.(newRec)
@@ -79,8 +91,8 @@ export default function MedicalRecordFormModal({
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full">
-              Crear
+            <Button type="submit" className="w-full flex items-center gap-1">
+              Crear <Plus size={16} />
             </Button>
           </form>
         </Form>

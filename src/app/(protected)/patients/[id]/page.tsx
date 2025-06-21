@@ -1,11 +1,13 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
+import { useUser } from '@/contexts/UserContext'
 import { getPatientById, getMedicalRecords, updatePatient} from '@/db/patients'
 import { getAppointmentsInRange } from '@/db/appointments'
 import type { Patient, MedicalRecord, Appointment } from '@/types/db'
 import CreateAppointmentModal from '@/components/CreateAppointmentModal'
 import MedicalRecordFormModal from '@/components/MedicalRecordFormModal'
+import { Plus, Pencil } from 'lucide-react'
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -15,6 +17,7 @@ import { format } from 'date-fns'
 
 export default function PatientDetailsPage() {
   const params = useParams<{ id: string }>()
+  const { tenant } = useUser()
   const [patient, setPatient] = useState<Patient | null>(null)
   const [records, setRecords] = useState<MedicalRecord[]>([])
   const [appointments, setAppointments] = useState<Appointment[]>([])
@@ -35,13 +38,17 @@ export default function PatientDetailsPage() {
         })
       })
       .catch(() => {})
-    getMedicalRecords(params.id).then(setRecords).catch(() => {})
+    if (tenant)
+      getMedicalRecords(params.id, tenant.tenantId).then(setRecords).catch(() => {})
     const start = new Date()
     start.setMonth(start.getMonth() - 12)
     const end = new Date()
     end.setFullYear(end.getFullYear() + 1)
-    getAppointmentsInRange(start, end, params.id).then(setAppointments).catch(() => {})
-  }, [params.id])
+    if (tenant)
+      getAppointmentsInRange(start, end, params.id, tenant.tenantId)
+        .then(setAppointments)
+        .catch(() => {})
+  }, [params.id, tenant])
 
   if (!patient) return <div className="p-2">Cargando...</div>
 
@@ -70,8 +77,8 @@ export default function PatientDetailsPage() {
           <Section>
             <div className="flex justify-between items-center">
               <h2 className="font-medium">Citas futuras</h2>
-              <Button size="sm" onClick={() => setOpenAppt(true)}>
-                Nueva cita
+              <Button size="sm" onClick={() => setOpenAppt(true)} className="flex items-center gap-1">
+                Nueva cita <Plus size={14} />
               </Button>
             </div>
             <Table>
@@ -79,6 +86,7 @@ export default function PatientDetailsPage() {
                 <TableRow>
                   <TableHead>Fecha</TableHead>
                   <TableHead>Estado</TableHead>
+                  <TableHead>Notas</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -88,16 +96,40 @@ export default function PatientDetailsPage() {
                       {format(new Date(a.scheduledStart), 'dd/MM/yyyy')}
                     </TableCell>
                     <TableCell>{a.status}</TableCell>
+                    <TableCell>{a.reason}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
-            </Table>
-          </Section>
-          <Section>
+          </Table>
+        </Section>
+        <Section>
+          <h2 className="font-medium">Citas pasadas</h2>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Fecha</TableHead>
+                <TableHead>Estado</TableHead>
+                <TableHead>Notas</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {past.map((a) => (
+                <TableRow key={a.appointmentId}>
+                  <TableCell>
+                    {format(new Date(a.scheduledStart), 'dd/MM/yyyy')}
+                  </TableCell>
+                  <TableCell>{a.status}</TableCell>
+                  <TableCell>{a.reason}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Section>
+        <Section>
             <div className="flex justify-between items-center">
               <h2 className="font-medium">Historial de registros</h2>
-              <Button size="sm" onClick={() => setOpenRecord(true)}>
-                Nuevo registro
+              <Button size="sm" onClick={() => setOpenRecord(true)} className="flex items-center gap-1">
+                Nuevo registro <Plus size={14} />
               </Button>
             </div>
             <Table>
@@ -142,6 +174,8 @@ export default function PatientDetailsPage() {
                 placeholder="Email"
               />
               <Input
+                type="tel"
+                pattern="^\+\d{1,3}\s?\d{8}$"
                 value={info.phone}
                 onChange={(e) =>
                   setInfo((p) => ({ ...p, phone: e.target.value }))
@@ -176,8 +210,8 @@ export default function PatientDetailsPage() {
                   <b>Teléfono:</b> {patient.phone}
                 </p>
               )}
-              <Button size="sm" onClick={() => setEditing(true)} className="mt-2">
-                Editar
+              <Button size="sm" onClick={() => setEditing(true)} className="mt-2 flex items-center gap-1">
+                Editar <Pencil size={14} />
               </Button>
             </div>
           )}
@@ -199,6 +233,6 @@ export default function PatientDetailsPage() {
   )
 }
 
-const Wrapper = tw.div`space-y-4`
+const Wrapper = tw.div`space-y-4 px-2 sm:px-4 pt-4`
 const Section = tw.div`space-y-2`
 const InfoCard = tw.div`border p-4 rounded w-full lg:w-64 h-max`
