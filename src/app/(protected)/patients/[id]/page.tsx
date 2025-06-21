@@ -1,13 +1,19 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { useUser } from '@/contexts/UserContext'
-import { getPatientById, getMedicalRecords, updatePatient} from '@/db/patients'
-import { getAppointmentsInRange } from '@/db/appointments'
+import {
+  getPatientById,
+  getMedicalRecords,
+  updatePatient,
+  deletePatient,
+  deleteMedicalRecord,
+} from '@/db/patients'
+import { getAppointmentsInRange, deleteAppointment } from '@/db/appointments'
 import type { Patient, MedicalRecord, Appointment } from '@/types/db'
 import CreateAppointmentModal from '@/components/CreateAppointmentModal'
 import MedicalRecordFormModal from '@/components/MedicalRecordFormModal'
-import { Plus, Pencil } from 'lucide-react'
+import { Plus, Pencil, Trash } from 'lucide-react'
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -17,12 +23,15 @@ import { format } from 'date-fns'
 
 export default function PatientDetailsPage() {
   const params = useParams<{ id: string }>()
+  const router = useRouter()
   const { tenant } = useUser()
   const [patient, setPatient] = useState<Patient | null>(null)
   const [records, setRecords] = useState<MedicalRecord[]>([])
   const [appointments, setAppointments] = useState<Appointment[]>([])
   const [openAppt, setOpenAppt] = useState(false)
+  const [editingAppt, setEditingAppt] = useState<Appointment | null>(null)
   const [openRecord, setOpenRecord] = useState(false)
+  const [editingRecord, setEditingRecord] = useState<MedicalRecord | null>(null)
   const [editing, setEditing] = useState(false)
   const [info, setInfo] = useState({ firstName: '', lastName: '', email: '', phone: '' })
 
@@ -87,6 +96,7 @@ export default function PatientDetailsPage() {
                   <TableHead>Fecha</TableHead>
                   <TableHead>Estado</TableHead>
                   <TableHead>Notas</TableHead>
+                  <TableHead></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -97,6 +107,19 @@ export default function PatientDetailsPage() {
                     </TableCell>
                     <TableCell>{a.status}</TableCell>
                     <TableCell>{a.reason}</TableCell>
+                    <TableCell className="flex gap-2">
+                      <button onClick={() => { setEditingAppt(a); setOpenAppt(true); }}>
+                        <Pencil size={16} />
+                      </button>
+                      <button onClick={async () => {
+                        if (confirm('Eliminar cita?')) {
+                          await deleteAppointment(a.appointmentId)
+                          setAppointments((prev) => prev.filter(p => p.appointmentId !== a.appointmentId))
+                        }
+                      }}>
+                        <Trash size={16} />
+                      </button>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -110,6 +133,7 @@ export default function PatientDetailsPage() {
                 <TableHead>Fecha</TableHead>
                 <TableHead>Estado</TableHead>
                 <TableHead>Notas</TableHead>
+                <TableHead></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -120,6 +144,19 @@ export default function PatientDetailsPage() {
                   </TableCell>
                   <TableCell>{a.status}</TableCell>
                   <TableCell>{a.reason}</TableCell>
+                  <TableCell className="flex gap-2">
+                    <button onClick={() => { setEditingAppt(a); setOpenAppt(true); }}>
+                      <Pencil size={16} />
+                    </button>
+                    <button onClick={async () => {
+                      if (confirm('Eliminar cita?')) {
+                        await deleteAppointment(a.appointmentId)
+                        setAppointments((prev) => prev.filter(p => p.appointmentId !== a.appointmentId))
+                      }
+                    }}>
+                      <Trash size={16} />
+                    </button>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -133,17 +170,31 @@ export default function PatientDetailsPage() {
               </Button>
             </div>
             <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Resumen</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {records.map((r) => (
-                  <TableRow key={r.recordId}>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Resumen</TableHead>
+                <TableHead></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {records.map((r) => (
+                <TableRow key={r.recordId}>
                     <TableCell>{r.summary}</TableCell>
-                  </TableRow>
-                ))}
+                    <TableCell className="flex gap-2">
+                      <button onClick={() => { setEditingRecord(r); setOpenRecord(true); }}>
+                        <Pencil size={16} />
+                      </button>
+                      <button onClick={async () => {
+                        if (confirm('Eliminar registro?')) {
+                          await deleteMedicalRecord(r.recordId)
+                          setRecords((prev) => prev.filter(p => p.recordId !== r.recordId))
+                        }
+                      }}>
+                        <Trash size={16} />
+                      </button>
+                    </TableCell>
+                </TableRow>
+              ))}
               </TableBody>
             </Table>
           </Section>
@@ -213,21 +264,59 @@ export default function PatientDetailsPage() {
               <Button size="sm" onClick={() => setEditing(true)} className="mt-2 flex items-center gap-1">
                 Editar <Pencil size={14} />
               </Button>
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={async () => {
+                  if (
+                    confirm('Eliminar paciente y todos sus registros?')
+                  ) {
+                    for (const a of appointments) {
+                      await deleteAppointment(a.appointmentId)
+                    }
+                    for (const r of records) {
+                      await deleteMedicalRecord(r.recordId)
+                    }
+                    await deletePatient(patient.patientId)
+                    toast.success('Paciente eliminado')
+                    router.push('/patients')
+                  }
+                }}
+                className="mt-2"
+              >
+                Eliminar
+              </Button>
             </div>
           )}
         </InfoCard>
       </div>
       <CreateAppointmentModal
         open={openAppt}
-        onClose={() => setOpenAppt(false)}
+        onClose={() => {
+          setOpenAppt(false)
+          setEditingAppt(null)
+        }}
         patientId={patient.patientId}
+        appointment={editingAppt}
         onCreated={(a) => setAppointments((prev) => [...prev, a])}
+        onUpdated={(a) =>
+          setAppointments((prev) =>
+            prev.map((p) => (p.appointmentId === a.appointmentId ? a : p)),
+          )
+        }
       />
       <MedicalRecordFormModal
         open={openRecord}
-        onClose={() => setOpenRecord(false)}
+        onClose={() => {
+          setOpenRecord(false)
+          setEditingRecord(null)
+        }}
         patientId={patient.patientId}
+        record={editingRecord}
         onCreated={(r) => setRecords((prev) => [...prev, r])}
+        onUpdated={(r) =>
+          setRecords((prev) => prev.map((p) => (p.recordId === r.recordId ? r : p)))
+        }
       />
     </Wrapper>
   )
