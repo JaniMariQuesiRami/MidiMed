@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useEffect, useState } from 'react'
 import { getPatients } from '@/db/patients'
-import { createAppointment } from '@/db/appointments'
+import { createAppointment, updateAppointment } from '@/db/appointments'
 import { useUser } from '@/contexts/UserContext'
 import type { Patient, Appointment } from '@/types/db'
 import { toast } from 'sonner'
@@ -37,11 +37,15 @@ export default function CreateAppointmentModal({
   onClose,
   onCreated,
   patientId,
+  appointment,
+  onUpdated,
 }: {
   open: boolean
   onClose: () => void
   onCreated?: (appt: Appointment) => void
   patientId?: string
+  appointment?: Appointment | null
+  onUpdated?: (appt: Appointment) => void
 }) {
   const { user, tenant } = useUser()
   const [patients, setPatients] = useState<Patient[]>([])
@@ -50,30 +54,46 @@ export default function CreateAppointmentModal({
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
-      patientId: patientId ?? '',
-      providerId: '',
-      date: '',
-      time: '',
-      duration: '',
-      notes: '',
+      patientId: appointment?.patientId ?? patientId ?? '',
+      providerId: appointment?.providerId ?? '',
+      date: appointment
+        ? appointment.scheduledStart.slice(0, 10)
+        : '',
+      time: appointment
+        ? appointment.scheduledStart.slice(11, 16)
+        : '',
+      duration: appointment
+        ? (
+            (new Date(appointment.scheduledEnd).getTime() -
+              new Date(appointment.scheduledStart).getTime()) /
+            60000
+          ).toString()
+        : '',
+      notes: appointment?.reason ?? '',
     },
   })
 
   useEffect(() => {
     if (open)
       form.reset({
-        patientId: patientId ?? '',
-        providerId: '',
-        date: '',
-        time: '',
-        duration: '',
-        notes: '',
+        patientId: appointment?.patientId ?? patientId ?? '',
+        providerId: appointment?.providerId ?? '',
+        date: appointment ? appointment.scheduledStart.slice(0, 10) : '',
+        time: appointment ? appointment.scheduledStart.slice(11, 16) : '',
+        duration: appointment
+          ? (
+              (new Date(appointment.scheduledEnd).getTime() -
+                new Date(appointment.scheduledStart).getTime()) /
+              60000
+            ).toString()
+          : '',
+        notes: appointment?.reason ?? '',
       })
-  }, [open, patientId, form])
+  }, [open, patientId, appointment, form])
 
   useEffect(() => {
-    form.setValue('patientId', patientId ?? '')
-  }, [patientId, form])
+    form.setValue('patientId', appointment?.patientId ?? patientId ?? '')
+  }, [patientId, appointment, form])
 
   useEffect(() => {
     if (!open || !tenant) return
@@ -88,35 +108,55 @@ export default function CreateAppointmentModal({
       const start = new Date(`${values.date}T${values.time}`)
       const end = new Date(start.getTime() + Number(values.duration) * 60000)
       if (!user || !tenant) throw new Error('No user')
-      const appointmentId = await createAppointment({
-        patientId: values.patientId,
-        providerId: values.providerId,
-        scheduledStart: start.toISOString(),
-        scheduledEnd: end.toISOString(),
-        status: 'scheduled',
-        reason: values.notes ?? '',
-        medicalRecordId: null,
-        tenantId: tenant.tenantId,
-        createdBy: user.uid,
-      })
-      const newAppt: Appointment = {
-        appointmentId,
-        tenantId: tenant.tenantId,
-        patientId: values.patientId,
-        providerId: values.providerId,
-        scheduledStart: start.toISOString(),
-        scheduledEnd: end.toISOString(),
-        status: 'scheduled',
-        reason: values.notes ?? '',
-        createdBy: user.uid,
-        createdAt: new Date().toISOString(),
-        medicalRecordId: null,
+      if (appointment) {
+        await updateAppointment(appointment.appointmentId, {
+          ...appointment,
+          patientId: values.patientId,
+          providerId: values.providerId,
+          scheduledStart: start.toISOString(),
+          scheduledEnd: end.toISOString(),
+          reason: values.notes ?? '',
+        })
+        toast.success('Cita actualizada')
+        onUpdated?.({
+          ...appointment,
+          patientId: values.patientId,
+          providerId: values.providerId,
+          scheduledStart: start.toISOString(),
+          scheduledEnd: end.toISOString(),
+          reason: values.notes ?? '',
+        })
+      } else {
+        const appointmentId = await createAppointment({
+          patientId: values.patientId,
+          providerId: values.providerId,
+          scheduledStart: start.toISOString(),
+          scheduledEnd: end.toISOString(),
+          status: 'scheduled',
+          reason: values.notes ?? '',
+          medicalRecordId: null,
+          tenantId: tenant.tenantId,
+          createdBy: user.uid,
+        })
+        const newAppt: Appointment = {
+          appointmentId,
+          tenantId: tenant.tenantId,
+          patientId: values.patientId,
+          providerId: values.providerId,
+          scheduledStart: start.toISOString(),
+          scheduledEnd: end.toISOString(),
+          status: 'scheduled',
+          reason: values.notes ?? '',
+          createdBy: user.uid,
+          createdAt: new Date().toISOString(),
+          medicalRecordId: null,
+        }
+        toast.success('Cita creada')
+        onCreated?.(newAppt)
       }
-      toast.success('Cita creada')
-      onCreated?.(newAppt)
       onClose()
     } catch {
-      toast.error('No se pudo crear cita')
+      toast.error('No se pudo guardar cita')
     } finally {
       setLoading(false)
     }
@@ -126,7 +166,7 @@ export default function CreateAppointmentModal({
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Nueva cita</DialogTitle>
+          <DialogTitle>{appointment ? 'Editar cita' : 'Nueva cita'}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form
@@ -213,7 +253,11 @@ export default function CreateAppointmentModal({
               )}
             />
             <Button type="submit" disabled={loading} className="w-full flex items-center justify-center gap-1">
-              {loading ? 'Guardando...' : <>Crear <Plus size={16} /></>}
+              {loading
+                ? 'Guardando...'
+                : appointment
+                ? 'Guardar'
+                : <>Crear <Plus size={16} /></>}
             </Button>
           </form>
         </Form>

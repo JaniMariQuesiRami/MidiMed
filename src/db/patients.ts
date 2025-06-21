@@ -88,6 +88,10 @@ export async function updateMedicalRecord(id: string, data: MedicalRecordInput):
   await updateDoc(doc(db, 'medicalRecords', id), data)
 }
 
+export async function deleteMedicalRecord(id: string): Promise<void> {
+  await deleteDoc(doc(db, 'medicalRecords', id))
+}
+
 export async function uploadRecordAttachment(recordId: string, file: File): Promise<string> {
   const storageRef = ref(storage, `medicalRecords/${recordId}/${file.name}`)
   await uploadBytes(storageRef, file)
