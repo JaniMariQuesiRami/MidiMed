@@ -99,8 +99,12 @@ export default function DashboardCalendar() {
   useEffect(() => {
     const isMobile = window.innerWidth < 640
     setView(isMobile ? 'day' : 'month')
-    getPatients().then(setPatients).catch(() => {})
   }, [])
+
+  useEffect(() => {
+    if (!tenant) return
+    getPatients(tenant.tenantId).then(setPatients).catch(() => {})
+  }, [tenant])
 
   useEffect(() => {
     loadEvents().catch(() => {})

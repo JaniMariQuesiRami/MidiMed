@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { getPatients } from '@/db/patients'
+import { useUser } from '@/contexts/UserContext'
 import type { Patient } from '@/types/db'
 import { Table, TableBody, TableHead, TableHeader, TableRow, TableCell } from '@/components/ui/table'
 import { Input } from '@/components/ui/input'
@@ -11,14 +12,16 @@ import { Plus } from 'lucide-react'
 import CreatePatientModal from '@/components/CreatePatientModal'
 
 export default function PatientsPage() {
+  const { tenant } = useUser()
   const [patients, setPatients] = useState<Patient[]>([])
   const [search, setSearch] = useState('')
   const [open, setOpen] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
-    getPatients().then(setPatients).catch(() => {})
-  }, [])
+    if (!tenant) return
+    getPatients(tenant.tenantId).then(setPatients).catch(() => {})
+  }, [tenant])
 
   const filtered = patients.filter((p) =>
     `${p.firstName} ${p.lastName}`.toLowerCase().includes(search.toLowerCase())

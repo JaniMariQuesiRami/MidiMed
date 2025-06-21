@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { createPatient } from '@/db/patients'
+import { useUser } from '@/contexts/UserContext'
 import { toast } from 'sonner'
 import {
   Form,
@@ -26,18 +27,26 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>
 
 export default function CreatePatientModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const { user, tenant } = useUser()
   const form = useForm<FormValues>({
-  resolver: zodResolver(schema),
-  defaultValues: {
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-  },
-})
+    resolver: zodResolver(schema),
+    defaultValues: {
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+    },
+  })
   const submit = async (values: FormValues) => {
     try {
-      await createPatient({ ...values, birth: '', sex: 'O' })
+      if (!user || !tenant) throw new Error('No user')
+      await createPatient({
+        ...values,
+        birth: '',
+        sex: 'O',
+        tenantId: tenant.tenantId,
+        createdBy: user.uid,
+      })
       toast.success('Paciente creado')
       onClose()
     } catch {

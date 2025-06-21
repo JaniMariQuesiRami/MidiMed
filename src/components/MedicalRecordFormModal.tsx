@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { createMedicalRecord } from '@/db/patients'
+import { useUser } from '@/contexts/UserContext'
 import { toast } from 'sonner'
 import {
   Form,
@@ -34,23 +35,26 @@ export default function MedicalRecordFormModal({
   patientId: string
   onCreated?: (rec: MedicalRecord) => void
 }) {
+  const { user, tenant } = useUser()
   const form = useForm<FormValues>({ resolver: zodResolver(schema) })
 
   const submit = async (values: FormValues) => {
     try {
+      if (!user || !tenant) throw new Error('No user')
       const recordId = await createMedicalRecord(patientId, {
         summary: values.summary,
         details: { heightCm: 0, weightKg: 0, bloodPressure: '', notes: '' },
-        createdBy: 'system',
+        tenantId: tenant.tenantId,
+        createdBy: user.uid,
       })
       const newRec: MedicalRecord = {
-        tenantId: '',
+        tenantId: tenant.tenantId,
         patientId,
         recordId,
         summary: values.summary,
         details: { heightCm: 0, weightKg: 0, bloodPressure: '', notes: '' },
         createdAt: new Date().toISOString(),
-        createdBy: 'system',
+        createdBy: user.uid,
       }
       toast.success('Registro creado')
       onCreated?.(newRec)

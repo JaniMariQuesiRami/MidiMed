@@ -29,7 +29,9 @@ export async function getAppointmentsInRange(
   return snap.docs.map((d) => ({ ...(d.data() as Omit<Appointment, 'appointmentId'>), appointmentId: d.id }))
 }
 
-export async function createAppointment(data: AppointmentInput): Promise<string> {
+export async function createAppointment(
+  data: AppointmentInput & { tenantId: string; createdBy: string },
+): Promise<string> {
   const ref = doc(collection(db, 'appointments'))
   const now = new Date().toISOString()
   await setDoc(ref, {

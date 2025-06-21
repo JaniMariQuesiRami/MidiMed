@@ -18,12 +18,16 @@ import {
   MedicalRecordInput,
 } from '@/types/db'
 
-export async function getPatients(): Promise<Patient[]> {
-  const snap = await getDocs(collection(db, 'patients'))
+export async function getPatients(tenantId?: string): Promise<Patient[]> {
+  const base = collection(db, 'patients')
+  const q = tenantId ? query(base, where('tenantId', '==', tenantId)) : base
+  const snap = await getDocs(q)
   return snap.docs.map((d) => ({ ...(d.data() as Omit<Patient, 'patientId'>), patientId: d.id }))
 }
 
-export async function createPatient(data: PatientInput): Promise<string> {
+export async function createPatient(
+  data: PatientInput & { tenantId: string; createdBy: string },
+): Promise<string> {
   const refDoc = doc(collection(db, 'patients'))
   const now = new Date().toISOString()
   await setDoc(refDoc, {
@@ -48,13 +52,21 @@ export async function deletePatient(id: string): Promise<void> {
   await deleteDoc(doc(db, 'patients', id))
 }
 
-export async function getMedicalRecords(patientId: string): Promise<MedicalRecord[]> {
-  const q = query(collection(db, 'medicalRecords'), where('patientId', '==', patientId))
+export async function getMedicalRecords(
+  patientId: string,
+  tenantId?: string,
+): Promise<MedicalRecord[]> {
+  const conditions = [where('patientId', '==', patientId)]
+  if (tenantId) conditions.push(where('tenantId', '==', tenantId))
+  const q = query(collection(db, 'medicalRecords'), ...conditions)
   const snap = await getDocs(q)
   return snap.docs.map((d) => ({ ...(d.data() as Omit<MedicalRecord, 'recordId'>), recordId: d.id }))
 }
 
-export async function createMedicalRecord(patientId: string, data: MedicalRecordInput): Promise<string> {
+export async function createMedicalRecord(
+  patientId: string,
+  data: MedicalRecordInput & { tenantId: string; createdBy: string },
+): Promise<string> {
   const refDoc = doc(collection(db, 'medicalRecords'))
   const now = new Date().toISOString()
   await setDoc(refDoc, {

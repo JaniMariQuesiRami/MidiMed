@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { useEffect, useState } from 'react'
 import { getPatients } from '@/db/patients'
 import { createAppointment } from '@/db/appointments'
+import { useUser } from '@/contexts/UserContext'
 import type { Patient, Appointment } from '@/types/db'
 import { toast } from 'sonner'
 import {
@@ -42,6 +43,7 @@ export default function CreateAppointmentModal({
   onCreated?: (appt: Appointment) => void
   patientId?: string
 }) {
+  const { user, tenant } = useUser()
   const [patients, setPatients] = useState<Patient[]>([])
   const [loading, setLoading] = useState(false)
 
@@ -55,15 +57,18 @@ export default function CreateAppointmentModal({
   }, [patientId, form])
 
   useEffect(() => {
-    if (!open) return
-    getPatients().then(setPatients).catch(() => toast.error('Error cargando pacientes'))
-  }, [open])
+    if (!open || !tenant) return
+    getPatients(tenant.tenantId)
+      .then(setPatients)
+      .catch(() => toast.error('Error cargando pacientes'))
+  }, [open, tenant])
 
   const submit = async (values: FormValues) => {
     setLoading(true)
     try {
       const start = new Date(`${values.date}T${values.time}`)
       const end = new Date(start.getTime() + Number(values.duration) * 60000)
+      if (!user || !tenant) throw new Error('No user')
       const appointmentId = await createAppointment({
         patientId: values.patientId,
         providerId: values.providerId,
@@ -72,17 +77,19 @@ export default function CreateAppointmentModal({
         status: 'scheduled',
         reason: values.notes ?? '',
         medicalRecordId: null,
+        tenantId: tenant.tenantId,
+        createdBy: user.uid,
       })
       const newAppt: Appointment = {
         appointmentId,
-        tenantId: '',
+        tenantId: tenant.tenantId,
         patientId: values.patientId,
         providerId: values.providerId,
         scheduledStart: start.toISOString(),
         scheduledEnd: end.toISOString(),
         status: 'scheduled',
         reason: values.notes ?? '',
-        createdBy: 'system',
+        createdBy: user.uid,
         createdAt: new Date().toISOString(),
         medicalRecordId: null,
       }
