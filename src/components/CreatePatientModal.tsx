@@ -1,0 +1,99 @@
+'use client'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import { createPatient } from '@/db/patients'
+import { toast } from 'sonner'
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+
+const schema = z.object({
+  firstName: z.string().nonempty('Nombre'),
+  lastName: z.string().nonempty('Apellido'),
+  email: z.string().email().optional(),
+  phone: z.string().optional(),
+})
+
+type FormValues = z.infer<typeof schema>
+
+export default function CreatePatientModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const form = useForm<FormValues>({ resolver: zodResolver(schema) })
+  const submit = async (values: FormValues) => {
+    try {
+      await createPatient({ ...values, birth: '', sex: 'O', createdBy: 'system' })
+      toast.success('Paciente creado')
+      onClose()
+    } catch {
+      toast.error('Error al crear paciente')
+    }
+  }
+  return (
+    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Nuevo paciente</DialogTitle>
+        </DialogHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(submit)} className="space-y-3">
+            <FormField
+              control={form.control}
+              name="firstName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nombre</FormLabel>
+                  <Input {...field} />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="lastName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Apellido</FormLabel>
+                  <Input {...field} />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <Input type="email" {...field} />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="phone"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Teléfono</FormLabel>
+                  <Input {...field} />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button type="submit" className="w-full">
+              Crear
+            </Button>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  )
+}

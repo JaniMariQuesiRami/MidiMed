@@ -10,6 +10,13 @@ import {
 import { es } from 'date-fns/locale'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 import tw from 'tailwind-styled-components'
+import { getPatients } from '@/db/patients'
+import { getAppointmentsInRange } from '@/db/appointments'
+import CreateAppointmentModal from '@/components/CreateAppointmentModal'
+import AppointmentDetailsPopup from '@/components/AppointmentDetailsPopup'
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
+import type { Patient, Appointment } from '@/types/db'
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
 
 const locales = { es }
 const localizer = dateFnsLocalizer({
@@ -30,13 +37,37 @@ const views = [
 
 export default function DashboardCalendar() {
   const [view, setView] = useState<View | null>(null)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [events, setEvents] = useState([])
+  const [patients, setPatients] = useState<Patient[]>([])
+  const [patientFilter, setPatientFilter] = useState('')
+  const [events, setEvents] = useState<any[]>([])
+  const [open, setOpen] = useState(false)
+  const [selected, setSelected] = useState<Appointment | null>(null)
 
   useEffect(() => {
     const isMobile = window.innerWidth < 640
     setView(isMobile ? 'day' : 'month')
+    getPatients().then(setPatients).catch(() => {})
   }, [])
+
+  useEffect(() => {
+    if (!view) return
+    const start = new Date()
+    start.setDate(1)
+    const end = new Date(start)
+    end.setMonth(start.getMonth() + 1)
+    getAppointmentsInRange(start, end, patientFilter || undefined)
+      .then((list) =>
+        setEvents(
+          list.map((a) => ({
+            start: new Date(a.scheduledStart),
+            end: new Date(a.scheduledEnd),
+            title: a.patientId,
+            resource: a,
+          }))
+        )
+      )
+      .catch(() => {})
+  }, [view, patientFilter])
 
   const todayStr = format(new Date(), "EEEE, d 'de' MMMM yyyy", { locale: es })
   const title = todayStr.charAt(0).toUpperCase() + todayStr.slice(1)
@@ -47,6 +78,27 @@ export default function DashboardCalendar() {
     <Wrapper>
       <Header>
         <DateTitle>{title}</DateTitle>
+        <div className="flex items-center gap-2 ml-auto">
+          <Select value={patientFilter} onValueChange={setPatientFilter}>
+            <SelectTrigger className="w-40">
+              <SelectValue placeholder="Todos" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Todos</SelectItem>
+              {patients.map((p) => (
+                <SelectItem key={p.patientId} value={p.patientId}>
+                  {p.firstName} {p.lastName}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <button
+            className="bg-primary text-white px-3 py-1 rounded"
+            onClick={() => setOpen(true)}
+          >
+            Nueva cita
+          </button>
+        </div>
         <ViewSwitcher>
           {views.map(({ key, label }) => (
             <SwitchButton
@@ -68,12 +120,15 @@ export default function DashboardCalendar() {
             defaultView={view}
             view={view}
             onView={setView}
+            onSelectEvent={(e) => setSelected(e.resource as Appointment)}
             style={{ height: 'calc(100vh - 150px)' }}
             selectable
             components={{ toolbar: () => null }}
           />
         </div>
       </div>
+      <CreateAppointmentModal open={open} onClose={() => setOpen(false)} />
+      <AppointmentDetailsPopup appointment={selected} onClose={() => setSelected(null)} />
     </Wrapper>
   )
 }
