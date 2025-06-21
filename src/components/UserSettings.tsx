@@ -89,16 +89,16 @@ export default function UserSettings({ collapsed }: { collapsed: boolean }) {
 
 // styles
 const CardWrapper = tw.div`cursor-pointer`
-const FullCard = tw.div`mt-4 p-4 rounded-md border bg-muted`
-const CollapsedCard = tw.div`mt-4 p-3 rounded-md border bg-muted flex justify-center text-muted-foreground`
+const FullCard = tw.div`mt-4 p-4 rounded-xl border bg-muted/60 backdrop-blur-md`
+const CollapsedCard = tw.div`mt-4 p-3 rounded-xl border bg-muted/60 backdrop-blur-md flex justify-center text-muted-foreground`
 const TenantName = tw.p`text-sm font-semibold`
 const UserEmail = tw.p`text-xs text-muted-foreground`
 
 const ModalOverlay = tw.div`
-  fixed inset-0 bg-black/50 z-50 flex items-center justify-center
+  fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center
 `
 const ModalContent = tw.div`
-  bg-white dark:bg-background p-6 rounded-lg shadow-lg w-[300px]
+  bg-background/60 backdrop-blur-md p-6 rounded-xl shadow-lg w-[300px] border border-border/40
 `
 const ModalHeader = tw.div`
   flex justify-between items-center mb-4 text-lg font-medium

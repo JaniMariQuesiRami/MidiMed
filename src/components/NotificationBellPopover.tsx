@@ -69,6 +69,6 @@ export default function NotificationBellPopover() {
 }
 
 const Wrapper = tw.div`relative`
-const Popover = tw.div`absolute right-0 mt-2 w-64 rounded-md border bg-background shadow-lg z-50`
+const Popover = tw.div`absolute right-0 mt-2 w-64 rounded-xl border border-border/40 bg-background/60 backdrop-blur-md shadow-lg z-50`
 const Item = tw.div`flex justify-between items-center px-3 py-2 text-sm border-b last:border-0`
 

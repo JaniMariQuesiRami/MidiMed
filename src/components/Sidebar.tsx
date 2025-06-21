@@ -72,9 +72,9 @@ export default function Sidebar() {
 
 // styled components
 const Wrapper = tw.div<{ $collapsed: boolean }>`
-  relative h-full flex flex-col justify-between  transition-all
+  relative h-full flex flex-col justify-between transition-all
   ${({ $collapsed }) => ($collapsed ? 'w-16 p-2' : 'w-64 p-3')}
-  border-r border-sidebar-border bg-sidebar text-sidebar-foreground
+  border-r border-sidebar-border/40 bg-sidebar/60 backdrop-blur-lg text-sidebar-foreground
 `
 
 const TopSection = tw.div`flex flex-col gap-8`
@@ -91,7 +91,7 @@ const ToggleButton = tw.button`
 
 const ToggleFloating = tw.button`
   absolute right-[-26.5px] top-8 -translate-y-1/2
-  bg-sidebar border-r border-b border-t border-border rounded-r-md
+  bg-sidebar/60 backdrop-blur-lg border-r border-b border-t border-border/40 rounded-r-xl
   p-1 hover:bg-muted text-muted-foreground
   transition-all
 `

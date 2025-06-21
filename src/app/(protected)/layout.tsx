@@ -31,23 +31,23 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
 
 // styled components
 const LayoutWrapper = tw.div`
-  min-h-screen flex flex-col md:flex-row bg-background text-foreground
+  min-h-screen flex flex-col md:flex-row bg-background/60 backdrop-blur-lg text-foreground
 `
 
 const SidebarWrapper = tw.div`
-  hidden md:block transition-all
+  hidden md:block transition-all backdrop-blur-lg bg-sidebar/60 border-r border-sidebar-border/40
 `
 
 const ContentWrapper = tw.main`
-  flex-1 p-2 md:p-6
+  flex-1 p-2 md:p-6 bg-background/60 backdrop-blur-md
 `
 
 const MobileHeader = tw.div`
-  md:hidden py-2 px-3 flex items-center gap-4
+  md:hidden py-2 px-3 flex items-center gap-4 bg-background/60 backdrop-blur-lg border-b border-border/40
 `
 
 const BellWrapper = tw.div`ml-auto`
 
 const BottomTabsWrapper = tw.div`
-  md:hidden fixed bottom-0 left-0 w-full border-t border-border bg-background
+  md:hidden fixed bottom-0 left-0 w-full border-t border-border/40 bg-background/60 backdrop-blur-lg
 `
