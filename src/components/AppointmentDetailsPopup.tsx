@@ -74,7 +74,7 @@ export default function AppointmentDetailsPopup({
 
   return (
     <Overlay onClick={onClose}>
-      <Popup onClick={(e) => e.stopPropagation()}>
+      <Popup onClick={(e: React.MouseEvent<HTMLDivElement>) => e.stopPropagation()}>
         <h3 className="font-medium mb-2">Detalle de cita</h3>
         <p>
           <b>Paciente:</b>{' '}
@@ -92,8 +92,16 @@ export default function AppointmentDetailsPopup({
         {editing ? (
           <div className="space-y-2 mt-2">
             <div className="flex gap-2">
-              <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-              <Input type="time" value={time} onChange={(e) => setTime(e.target.value)} />
+              <Input
+                type="date"
+                value={date}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDate(e.target.value)}
+              />
+              <Input
+                type="time"
+                value={time}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTime(e.target.value)}
+              />
             </div>
             <div className="flex gap-2">
               <Button size="sm" onClick={save}>Guardar</Button>

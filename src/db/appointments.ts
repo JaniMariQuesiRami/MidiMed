@@ -9,7 +9,6 @@ import {
   getDoc,
   updateDoc,
   deleteDoc,
-  orderBy,
 } from 'firebase/firestore'
 import { Appointment, AppointmentInput } from '@/types/db'
 
@@ -19,46 +18,73 @@ export async function getAppointmentsInRange(
   patientId?: string,
   tenantId?: string,
 ): Promise<Appointment[]> {
-  const conditions = [
-    where('scheduledStart', '>=', start.toISOString()),
-    where('scheduledStart', '<=', end.toISOString()),
-  ]
-  if (patientId) conditions.push(where('patientId', '==', patientId))
-  if (tenantId) conditions.push(where('tenantId', '==', tenantId))
-  const q = query(
-    collection(db, 'appointments'),
-    ...conditions,
-    orderBy('scheduledStart'),
-  )
-  const snap = await getDocs(q)
-  return snap.docs.map((d) => ({ ...(d.data() as Omit<Appointment, 'appointmentId'>), appointmentId: d.id }))
+  try {
+    const conditions = [
+      where('scheduledStart', '>=', start.toISOString()),
+      where('scheduledStart', '<=', end.toISOString()),
+    ]
+    if (patientId) conditions.push(where('patientId', '==', patientId))
+    if (tenantId) conditions.push(where('tenantId', '==', tenantId))
+
+    const q = query(collection(db, 'appointments'), ...conditions)
+
+    const snap = await getDocs(q)
+
+    return snap.docs.map((d) => ({
+      ...(d.data() as Omit<Appointment, 'appointmentId'>),
+      appointmentId: d.id,
+    }))
+  } catch (err) {
+    console.error('Error in getAppointmentsInRange:', err)
+    return []
+  }
 }
 
 export async function createAppointment(
   data: AppointmentInput & { tenantId: string; createdBy: string },
 ): Promise<string> {
-  const ref = doc(collection(db, 'appointments'))
-  const now = new Date().toISOString()
-  await setDoc(ref, {
-    ...data,
-    appointmentId: ref.id,
-    createdAt: now,
-  })
-  return ref.id
+  try {
+    const ref = doc(collection(db, 'appointments'))
+    const now = new Date().toISOString()
+    await setDoc(ref, {
+      ...data,
+      appointmentId: ref.id,
+      createdAt: now,
+    })
+    return ref.id
+  } catch (err) {
+    console.error('Error in createAppointment:', err)
+    throw err
+  }
 }
 
 export async function getAppointmentById(id: string): Promise<Appointment> {
-  const ref = doc(db, 'appointments', id)
-  const snap = await getDoc(ref)
-  if (!snap.exists()) throw new Error('Appointment not found')
-  return snap.data() as Appointment
+  try {
+    const ref = doc(db, 'appointments', id)
+    const snap = await getDoc(ref)
+    if (!snap.exists()) throw new Error('Appointment not found')
+    return snap.data() as Appointment
+  } catch (err) {
+    console.error('Error in getAppointmentById:', err)
+    throw err
+  }
 }
 
 export async function updateAppointment(id: string, data: AppointmentInput): Promise<void> {
-  const ref = doc(db, 'appointments', id)
-  await updateDoc(ref, data)
+  try {
+    const ref = doc(db, 'appointments', id)
+    await updateDoc(ref, data)
+  } catch (err) {
+    console.error('Error in updateAppointment:', err)
+    throw err
+  }
 }
 
 export async function deleteAppointment(id: string): Promise<void> {
-  await deleteDoc(doc(db, 'appointments', id))
+  try {
+    await deleteDoc(doc(db, 'appointments', id))
+  } catch (err) {
+    console.error('Error in deleteAppointment:', err)
+    throw err
+  }
 }

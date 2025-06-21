@@ -23,6 +23,7 @@ import AppointmentDetailsPopup from '@/components/AppointmentDetailsPopup'
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
 import type { Patient, Appointment } from '@/types/db'
+import { toast } from 'sonner'
 
 const locales = { es }
 const localizer = dateFnsLocalizer({
@@ -80,7 +81,9 @@ export default function DashboardCalendar() {
     const nameMap = new Map(
       patients.map((p) => [p.patientId, `${p.firstName} ${p.lastName}`]),
     )
-    const filterId = patientFilter || undefined
+    const filterId = patientFilter === "all" ? undefined : patientFilter
+    console.log("Tenant ID:", tenant.tenantId)
+    console.log("Date Range:", start, end)
     const list = await getAppointmentsInRange(
       start,
       end,
@@ -104,12 +107,17 @@ export default function DashboardCalendar() {
 
   useEffect(() => {
     if (!tenant) return
-    getPatients(tenant.tenantId).then(setPatients).catch(() => {})
+    getPatients(tenant.tenantId).then(setPatients).catch(() => { })
   }, [tenant])
 
   useEffect(() => {
-    loadEvents().catch(() => {})
-  }, [loadEvents])
+    if (patients.length > 0) {
+      loadEvents().catch((err) => {
+        console.error('Error loading events in UI:', err)
+        toast.error('Error cargando citas')
+      })
+    }
+  }, [loadEvents, patients])
 
   const todayStr = format(date, "EEEE, d 'de' MMMM yyyy", { locale: es })
   const title = todayStr.charAt(0).toUpperCase() + todayStr.slice(1)
@@ -134,7 +142,7 @@ export default function DashboardCalendar() {
               <SelectValue placeholder="Todos" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos</SelectItem>
+              <SelectItem value="all">Todos</SelectItem>
               {patients.map((p) => (
                 <SelectItem key={p.patientId} value={p.patientId}>
                   {p.firstName} {p.lastName}
