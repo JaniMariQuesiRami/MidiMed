@@ -47,7 +47,7 @@ export default function AuthScreenLayout({ children }: Props) {
 // Styled components
 export const Background = tw.div`
   relative min-h-screen w-full flex items-center justify-center overflow-hidden
-  bg-gradient-to-tr from-[#0589c2] via-[#3abdd4] to-[#93efff] animate-gradient
+  bg-gradient-to-tr from-sky-200 via-blue-200 to-cyan-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-700 animate-gradient
 `
 
 export const BouncingLogo = tw(Image)`

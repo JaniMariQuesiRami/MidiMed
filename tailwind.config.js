@@ -9,12 +9,16 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: '#3abdd4',
-        danger: '#ff3564',
+        primary: '#0ea5e9',
+        danger: '#ef4444',
+        accent: '#38bdf8',
         secondary: {
-          DEFAULT: '#f9f9f9',
-          dark: '#1a1a1a',
+          DEFAULT: 'rgba(255,255,255,0.6)',
+          dark: 'rgba(30,41,59,0.6)',
         },
+      },
+      borderRadius: {
+        xl: '1rem',
       },
     },
   },
