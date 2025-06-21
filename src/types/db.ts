@@ -105,8 +105,7 @@ export type Notification = {
   title: string
   body: string
   type?: NotificationType
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
   isRead: boolean
   createdAt: string
   expiresAt?: string

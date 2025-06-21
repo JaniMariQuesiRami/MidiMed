@@ -39,9 +39,39 @@ export default function DashboardCalendar() {
   const [view, setView] = useState<View | null>(null)
   const [patients, setPatients] = useState<Patient[]>([])
   const [patientFilter, setPatientFilter] = useState('')
-  const [events, setEvents] = useState<any[]>([])
+  type CalendarEvent = {
+    start: Date
+    end: Date
+    title: string
+    resource: Appointment
+  }
+  const [events, setEvents] = useState<CalendarEvent[]>([])
   const [open, setOpen] = useState(false)
   const [selected, setSelected] = useState<Appointment | null>(null)
+
+  const loadEvents = async () => {
+    if (!view || patients.length === 0) return
+    const start = new Date()
+    start.setDate(1)
+    const end = new Date(start)
+    end.setMonth(start.getMonth() + 1)
+    const nameMap = new Map(
+      patients.map((p) => [p.patientId, `${p.firstName} ${p.lastName}`]),
+    )
+    const list = await getAppointmentsInRange(
+      start,
+      end,
+      patientFilter || undefined,
+    )
+    setEvents(
+      list.map((a) => ({
+        start: new Date(a.scheduledStart),
+        end: new Date(a.scheduledEnd),
+        title: nameMap.get(a.patientId) ?? a.patientId,
+        resource: a,
+      })),
+    )
+  }
 
   useEffect(() => {
     const isMobile = window.innerWidth < 640
@@ -50,24 +80,8 @@ export default function DashboardCalendar() {
   }, [])
 
   useEffect(() => {
-    if (!view) return
-    const start = new Date()
-    start.setDate(1)
-    const end = new Date(start)
-    end.setMonth(start.getMonth() + 1)
-    getAppointmentsInRange(start, end, patientFilter || undefined)
-      .then((list) =>
-        setEvents(
-          list.map((a) => ({
-            start: new Date(a.scheduledStart),
-            end: new Date(a.scheduledEnd),
-            title: a.patientId,
-            resource: a,
-          }))
-        )
-      )
-      .catch(() => {})
-  }, [view, patientFilter])
+    loadEvents().catch(() => {})
+  }, [view, patientFilter, patients])
 
   const todayStr = format(new Date(), "EEEE, d 'de' MMMM yyyy", { locale: es })
   const title = todayStr.charAt(0).toUpperCase() + todayStr.slice(1)
@@ -127,7 +141,11 @@ export default function DashboardCalendar() {
           />
         </div>
       </div>
-      <CreateAppointmentModal open={open} onClose={() => setOpen(false)} />
+      <CreateAppointmentModal
+        open={open}
+        onClose={() => setOpen(false)}
+        onCreated={() => loadEvents()}
+      />
       <AppointmentDetailsPopup appointment={selected} onClose={() => setSelected(null)} />
     </Wrapper>
   )

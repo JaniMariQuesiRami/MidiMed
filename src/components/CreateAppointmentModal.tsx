@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { useEffect, useState } from 'react'
 import { getPatients } from '@/db/patients'
 import { createAppointment } from '@/db/appointments'
+import type { Patient, Appointment } from '@/types/db'
 import { toast } from 'sonner'
 import {
   Form,
@@ -33,14 +34,25 @@ type FormValues = z.infer<typeof schema>
 export default function CreateAppointmentModal({
   open,
   onClose,
+  onCreated,
+  patientId,
 }: {
   open: boolean
   onClose: () => void
+  onCreated?: (appt: Appointment) => void
+  patientId?: string
 }) {
-  const [patients, setPatients] = useState([] as Patient[])
+  const [patients, setPatients] = useState<Patient[]>([])
   const [loading, setLoading] = useState(false)
 
-  const form = useForm<FormValues>({ resolver: zodResolver(schema) })
+  const form = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: { patientId: patientId ?? '' },
+  })
+
+  useEffect(() => {
+    form.setValue('patientId', patientId ?? '')
+  }, [patientId, form])
 
   useEffect(() => {
     if (!open) return
@@ -52,7 +64,7 @@ export default function CreateAppointmentModal({
     try {
       const start = new Date(`${values.date}T${values.time}`)
       const end = new Date(start.getTime() + Number(values.duration) * 60000)
-      await createAppointment({
+      const appointmentId = await createAppointment({
         patientId: values.patientId,
         providerId: values.providerId,
         scheduledStart: start.toISOString(),
@@ -62,7 +74,21 @@ export default function CreateAppointmentModal({
         createdBy: 'system',
         medicalRecordId: null,
       })
+      const newAppt: Appointment = {
+        appointmentId,
+        tenantId: '',
+        patientId: values.patientId,
+        providerId: values.providerId,
+        scheduledStart: start.toISOString(),
+        scheduledEnd: end.toISOString(),
+        status: 'scheduled',
+        reason: values.notes ?? '',
+        createdBy: 'system',
+        createdAt: new Date().toISOString(),
+        medicalRecordId: null,
+      }
       toast.success('Cita creada')
+      onCreated?.(newAppt)
       onClose()
     } catch (err) {
       toast.error('No se pudo crear cita')
