@@ -86,14 +86,15 @@ export default function AuthForm({ mode }: AuthFormProps) {
               </FieldGroup>
               <FieldGroup>
                 <Label htmlFor="phone">Teléfono</Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  placeholder="+502 5555-1234"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  disabled={loading}
-                />
+                  <Input
+                    id="phone"
+                    type="tel"
+                    pattern="^\+\d{1,3}\s?\d{8}$"
+                    placeholder="+502 55551234"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    disabled={loading}
+                  />
               </FieldGroup>
               <FieldGroup>
                 <Label htmlFor="address">Dirección</Label>

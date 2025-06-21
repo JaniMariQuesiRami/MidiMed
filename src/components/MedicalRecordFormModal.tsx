@@ -1,5 +1,6 @@
 'use client'
 import { useForm } from 'react-hook-form'
+import { useEffect } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { createMedicalRecord } from '@/db/patients'
@@ -36,7 +37,14 @@ export default function MedicalRecordFormModal({
   onCreated?: (rec: MedicalRecord) => void
 }) {
   const { user, tenant } = useUser()
-  const form = useForm<FormValues>({ resolver: zodResolver(schema) })
+  const form = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: { summary: '' },
+  })
+
+  useEffect(() => {
+    if (open) form.reset({ summary: '' })
+  }, [open, form])
 
   const submit = async (values: FormValues) => {
     try {

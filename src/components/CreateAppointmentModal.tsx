@@ -49,8 +49,27 @@ export default function CreateAppointmentModal({
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { patientId: patientId ?? '' },
+    defaultValues: {
+      patientId: patientId ?? '',
+      providerId: '',
+      date: '',
+      time: '',
+      duration: '',
+      notes: '',
+    },
   })
+
+  useEffect(() => {
+    if (open)
+      form.reset({
+        patientId: patientId ?? '',
+        providerId: '',
+        date: '',
+        time: '',
+        duration: '',
+        notes: '',
+      })
+  }, [open, patientId, form])
 
   useEffect(() => {
     form.setValue('patientId', patientId ?? '')

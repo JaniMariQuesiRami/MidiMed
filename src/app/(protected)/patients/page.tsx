@@ -71,7 +71,11 @@ export default function PatientsPage() {
           ))}
         </TableBody>
       </Table>
-      <CreatePatientModal open={open} onClose={() => setOpen(false)} />
+      <CreatePatientModal
+        open={open}
+        onClose={() => setOpen(false)}
+        onCreated={(p) => setPatients((prev) => [...prev, p])}
+      />
     </Wrapper>
   )
 }

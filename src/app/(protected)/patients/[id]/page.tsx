@@ -175,6 +175,7 @@ export default function PatientDetailsPage() {
               />
               <Input
                 type="tel"
+                pattern="^\+\d{1,3}\s?\d{8}$"
                 value={info.phone}
                 onChange={(e) =>
                   setInfo((p) => ({ ...p, phone: e.target.value }))

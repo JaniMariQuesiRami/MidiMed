@@ -80,10 +80,11 @@ export default function DashboardCalendar() {
     const nameMap = new Map(
       patients.map((p) => [p.patientId, `${p.firstName} ${p.lastName}`]),
     )
+    const filterId = patientFilter || undefined
     const list = await getAppointmentsInRange(
       start,
       end,
-      patientFilter || undefined,
+      filterId,
       tenant.tenantId,
     )
     setEvents(
@@ -133,7 +134,7 @@ export default function DashboardCalendar() {
               <SelectValue placeholder="Todos" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Todos</SelectItem>
+              <SelectItem value="">Todos</SelectItem>
               {patients.map((p) => (
                 <SelectItem key={p.patientId} value={p.patientId}>
                   {p.firstName} {p.lastName}
