@@ -16,7 +16,6 @@ import CreateAppointmentModal from '@/components/CreateAppointmentModal'
 import AppointmentDetailsPopup from '@/components/AppointmentDetailsPopup'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
 import type { Patient, Appointment } from '@/types/db'
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
 
 const locales = { es }
 const localizer = dateFnsLocalizer({
@@ -98,7 +97,7 @@ export default function DashboardCalendar() {
               <SelectValue placeholder="Todos" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos</SelectItem>
+              <SelectItem value="all">Todos</SelectItem>
               {patients.map((p) => (
                 <SelectItem key={p.patientId} value={p.patientId}>
                   {p.firstName} {p.lastName}

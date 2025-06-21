@@ -71,7 +71,6 @@ export default function CreateAppointmentModal({
         scheduledEnd: end.toISOString(),
         status: 'scheduled',
         reason: values.notes ?? '',
-        createdBy: 'system',
         medicalRecordId: null,
       })
       const newAppt: Appointment = {

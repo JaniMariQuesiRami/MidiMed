@@ -9,7 +9,6 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
@@ -26,10 +25,18 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>
 
 export default function CreatePatientModal({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const form = useForm<FormValues>({ resolver: zodResolver(schema) })
+  const form = useForm<FormValues>({
+  resolver: zodResolver(schema),
+  defaultValues: {
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+  },
+})
   const submit = async (values: FormValues) => {
     try {
-      await createPatient({ ...values, birth: '', sex: 'O', createdBy: 'system' })
+      await createPatient({ ...values, birth: '', sex: 'O' })
       toast.success('Paciente creado')
       onClose()
     } catch {
