@@ -1,8 +1,10 @@
 'use client'
 import { useForm } from 'react-hook-form'
+import { useEffect } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { createPatient } from '@/db/patients'
+import { useUser } from '@/contexts/UserContext'
 import { toast } from 'sonner'
 import {
   Form,
@@ -14,29 +16,65 @@ import {
 import { Input } from '@/components/ui/input'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
+import { Plus } from 'lucide-react'
+import type { Patient } from '@/types/db'
 
 const schema = z.object({
   firstName: z.string().nonempty('Nombre'),
   lastName: z.string().nonempty('Apellido'),
   email: z.string().email().optional(),
-  phone: z.string().optional(),
+  phone: z.string().regex(/^\+\d{1,3}\s?\d{8}$/).optional(),
 })
 
 type FormValues = z.infer<typeof schema>
 
-export default function CreatePatientModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+export default function CreatePatientModal({
+  open,
+  onClose,
+  onCreated,
+}: {
+  open: boolean
+  onClose: () => void
+  onCreated?: (p: Patient) => void
+}) {
+  const { user, tenant } = useUser()
   const form = useForm<FormValues>({
-  resolver: zodResolver(schema),
-  defaultValues: {
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-  },
-})
+    resolver: zodResolver(schema),
+    defaultValues: {
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+    },
+  })
+
+  useEffect(() => {
+    if (open) {
+      form.reset({ firstName: '', lastName: '', email: '', phone: '' })
+    }
+  }, [open, form])
   const submit = async (values: FormValues) => {
     try {
-      await createPatient({ ...values, birth: '', sex: 'O' })
+      if (!user || !tenant) throw new Error('No user')
+      const patientId = await createPatient({
+        ...values,
+        birth: '',
+        sex: 'O',
+        tenantId: tenant.tenantId,
+        createdBy: user.uid,
+      })
+      onCreated?.({
+        patientId,
+        firstName: values.firstName,
+        lastName: values.lastName,
+        email: values.email || null,
+        phone: values.phone || null,
+        birth: '',
+        sex: 'O',
+        tenantId: tenant.tenantId,
+        createdBy: user.uid,
+        createdAt: new Date().toISOString(),
+      })
       toast.success('Paciente creado')
       onClose()
     } catch {
@@ -57,7 +95,7 @@ export default function CreatePatientModal({ open, onClose }: { open: boolean; o
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Nombre</FormLabel>
-                  <Input {...field} />
+                    <Input {...field} />
                   <FormMessage />
                 </FormItem>
               )}
@@ -68,7 +106,7 @@ export default function CreatePatientModal({ open, onClose }: { open: boolean; o
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Apellido</FormLabel>
-                  <Input {...field} />
+                    <Input {...field} />
                   <FormMessage />
                 </FormItem>
               )}
@@ -90,13 +128,13 @@ export default function CreatePatientModal({ open, onClose }: { open: boolean; o
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Teléfono</FormLabel>
-                  <Input {...field} />
+                    <Input type="tel" pattern="^\\+\d{1,3}\s?\d{8}$" {...field} />
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full">
-              Crear
+            <Button type="submit" className="w-full flex items-center gap-1">
+              Crear <Plus size={16} />
             </Button>
           </form>
         </Form>

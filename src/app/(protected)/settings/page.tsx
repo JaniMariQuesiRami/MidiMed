@@ -32,7 +32,12 @@ export default function OrganizationSettingsPage() {
       <h1 className="text-lg font-medium">Ajustes de la clínica</h1>
       <div className="space-y-3 max-w-md">
         <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre" />
-        <Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Teléfono" />
+        <Input
+          type="tel"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          placeholder="Teléfono"
+        />
         <Input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Dirección" />
         <Button onClick={save}>Guardar</Button>
       </div>
@@ -40,4 +45,4 @@ export default function OrganizationSettingsPage() {
   )
 }
 
-const Wrapper = tw.div`space-y-4`
+const Wrapper = tw.div`space-y-4 px-2 sm:px-4 pt-4`

@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { useEffect, useState } from 'react'
 import { getPatients } from '@/db/patients'
 import { createAppointment } from '@/db/appointments'
+import { useUser } from '@/contexts/UserContext'
 import type { Patient, Appointment } from '@/types/db'
 import { toast } from 'sonner'
 import {
@@ -12,12 +13,12 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Select, SelectItem, SelectTrigger, SelectContent, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
+import { Plus } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 
 const schema = z.object({
@@ -42,28 +43,51 @@ export default function CreateAppointmentModal({
   onCreated?: (appt: Appointment) => void
   patientId?: string
 }) {
+  const { user, tenant } = useUser()
   const [patients, setPatients] = useState<Patient[]>([])
   const [loading, setLoading] = useState(false)
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { patientId: patientId ?? '' },
+    defaultValues: {
+      patientId: patientId ?? '',
+      providerId: '',
+      date: '',
+      time: '',
+      duration: '',
+      notes: '',
+    },
   })
+
+  useEffect(() => {
+    if (open)
+      form.reset({
+        patientId: patientId ?? '',
+        providerId: '',
+        date: '',
+        time: '',
+        duration: '',
+        notes: '',
+      })
+  }, [open, patientId, form])
 
   useEffect(() => {
     form.setValue('patientId', patientId ?? '')
   }, [patientId, form])
 
   useEffect(() => {
-    if (!open) return
-    getPatients().then(setPatients).catch(() => toast.error('Error cargando pacientes'))
-  }, [open])
+    if (!open || !tenant) return
+    getPatients(tenant.tenantId)
+      .then(setPatients)
+      .catch(() => toast.error('Error cargando pacientes'))
+  }, [open, tenant])
 
   const submit = async (values: FormValues) => {
     setLoading(true)
     try {
       const start = new Date(`${values.date}T${values.time}`)
       const end = new Date(start.getTime() + Number(values.duration) * 60000)
+      if (!user || !tenant) throw new Error('No user')
       const appointmentId = await createAppointment({
         patientId: values.patientId,
         providerId: values.providerId,
@@ -72,24 +96,26 @@ export default function CreateAppointmentModal({
         status: 'scheduled',
         reason: values.notes ?? '',
         medicalRecordId: null,
+        tenantId: tenant.tenantId,
+        createdBy: user.uid,
       })
       const newAppt: Appointment = {
         appointmentId,
-        tenantId: '',
+        tenantId: tenant.tenantId,
         patientId: values.patientId,
         providerId: values.providerId,
         scheduledStart: start.toISOString(),
         scheduledEnd: end.toISOString(),
         status: 'scheduled',
         reason: values.notes ?? '',
-        createdBy: 'system',
+        createdBy: user.uid,
         createdAt: new Date().toISOString(),
         medicalRecordId: null,
       }
       toast.success('Cita creada')
       onCreated?.(newAppt)
       onClose()
-    } catch (err) {
+    } catch {
       toast.error('No se pudo crear cita')
     } finally {
       setLoading(false)
@@ -186,8 +212,8 @@ export default function CreateAppointmentModal({
                 </FormItem>
               )}
             />
-            <Button type="submit" disabled={loading} className="w-full">
-              {loading ? 'Guardando...' : 'Crear'}
+            <Button type="submit" disabled={loading} className="w-full flex items-center justify-center gap-1">
+              {loading ? 'Guardando...' : <>Crear <Plus size={16} /></>}
             </Button>
           </form>
         </Form>
