@@ -190,6 +190,7 @@ export default function DashboardCalendar() {
         appointment={selected?.appt || null}
         patientName={selected?.name}
         onClose={() => setSelected(null)}
+        onUpdated={() => loadEvents()}
       />
     </Wrapper>
   )
