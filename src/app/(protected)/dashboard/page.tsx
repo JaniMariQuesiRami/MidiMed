@@ -58,6 +58,7 @@ export default function DashboardCalendar() {
   const [events, setEvents] = useState<CalendarEvent[]>([])
   const [open, setOpen] = useState(false)
   const [selected, setSelected] = useState<{ appt: Appointment; name: string } | null>(null)
+  const [slotStart, setSlotStart] = useState<Date | null>(null)
 
   const navigate = (step: number) => {
     if (view === 'month') setDate((d) => addMonths(d, step))
@@ -150,7 +151,10 @@ export default function DashboardCalendar() {
           />
           <button
             className="bg-primary text-white px-3 py-1 rounded flex items-center gap-1"
-            onClick={() => setOpen(true)}
+            onClick={() => {
+              setSlotStart(null)
+              setOpen(true)
+            }}
           >
             Nueva cita <Plus size={16} />
           </button>
@@ -181,6 +185,10 @@ export default function DashboardCalendar() {
             onSelectEvent={(e: CalendarEvent) =>
               setSelected({ appt: e.resource, name: e.title })
             }
+            onSelectSlot={(slot) => {
+              setSlotStart(slot.start)
+              setOpen(true)
+            }}
             style={{ height: 'calc(100vh - 150px)' }}
             selectable
             components={{ toolbar: () => null }}
@@ -189,8 +197,13 @@ export default function DashboardCalendar() {
       </div>
       <CreateAppointmentModal
         open={open}
-        onClose={() => setOpen(false)}
+        onClose={() => {
+          setOpen(false)
+          setSlotStart(null)
+        }}
         onCreated={() => loadEvents()}
+        initialStart={slotStart || undefined}
+        occupied={events.map((e) => ({ start: e.start, end: e.end }))}
       />
       <AppointmentDetailsPopup
         appointment={selected?.appt || null}

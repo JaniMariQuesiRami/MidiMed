@@ -17,6 +17,8 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Select, SelectItem, SelectTrigger, SelectContent, SelectValue } from '@/components/ui/select'
+import { DatePicker } from '@/components/ui/date-picker'
+import TimeSelect from '@/components/ui/time-select'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -40,6 +42,8 @@ export default function CreateAppointmentModal({
   patientId,
   appointment,
   onUpdated,
+  initialStart,
+  occupied = [],
 }: {
   open: boolean
   onClose: () => void
@@ -47,10 +51,13 @@ export default function CreateAppointmentModal({
   patientId?: string
   appointment?: Appointment | null
   onUpdated?: (appt: Appointment) => void
+  initialStart?: Date | null
+  occupied?: { start: Date; end: Date }[]
 }) {
   const { user, tenant } = useUser()
   const [patients, setPatients] = useState<Patient[]>([])
   const [loading, setLoading] = useState(false)
+  const [availableTimes, setAvailableTimes] = useState<string[]>([])
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -59,9 +66,13 @@ export default function CreateAppointmentModal({
       providerId: appointment?.providerId ?? '',
       date: appointment
         ? appointment.scheduledStart.slice(0, 10)
+        : initialStart
+        ? initialStart.toISOString().slice(0, 10)
         : '',
       time: appointment
         ? appointment.scheduledStart.slice(11, 16)
+        : initialStart
+        ? initialStart.toISOString().slice(11, 16)
         : '',
       duration: appointment
         ? (
@@ -69,7 +80,7 @@ export default function CreateAppointmentModal({
               new Date(appointment.scheduledStart).getTime()) /
             60000
           ).toString()
-        : '',
+        : tenant?.settings.appointmentDurationMinutes.toString() ?? '',
       notes: appointment?.reason ?? '',
     },
   })
@@ -79,18 +90,22 @@ export default function CreateAppointmentModal({
       form.reset({
         patientId: appointment?.patientId ?? patientId ?? '',
         providerId: appointment?.providerId ?? '',
-        date: appointment ? appointment.scheduledStart.slice(0, 10) : '',
-        time: appointment ? appointment.scheduledStart.slice(11, 16) : '',
+        date: appointment
+          ? appointment.scheduledStart.slice(0, 10)
+          : initialStart?.toISOString().slice(0, 10) ?? '',
+        time: appointment
+          ? appointment.scheduledStart.slice(11, 16)
+          : initialStart?.toISOString().slice(11, 16) ?? '',
         duration: appointment
           ? (
               (new Date(appointment.scheduledEnd).getTime() -
                 new Date(appointment.scheduledStart).getTime()) /
               60000
             ).toString()
-          : '',
+          : tenant?.settings.appointmentDurationMinutes.toString() ?? '',
         notes: appointment?.reason ?? '',
       })
-  }, [open, patientId, appointment, form])
+  }, [open, patientId, appointment, initialStart, tenant, form])
 
   useEffect(() => {
     form.setValue('patientId', appointment?.patientId ?? patientId ?? '')
@@ -103,9 +118,55 @@ export default function CreateAppointmentModal({
       .catch(() => toast.error('Error cargando pacientes'))
   }, [open, tenant])
 
+  const dateValue = form.watch('date')
+
+  useEffect(() => {
+    if (!tenant || !dateValue) {
+      setAvailableTimes([])
+      return
+    }
+    try {
+      const map = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const
+      const day = map[new Date(dateValue).getDay()]
+      const hours =
+        tenant.settings.workingHours[day as keyof typeof tenant.settings.workingHours]
+      if (!hours) {
+        setAvailableTimes([])
+        return
+      }
+      const [sh, sm] = hours[0].split(':').map(Number)
+      const [eh, em] = hours[1].split(':').map(Number)
+      const start = new Date(dateValue)
+      start.setHours(sh, sm, 0, 0)
+      const end = new Date(dateValue)
+      end.setHours(eh, em, 0, 0)
+
+      const slots: string[] = []
+      for (
+        let t = new Date(start);
+        t < end;
+        t = new Date(t.getTime() + tenant.settings.appointmentDurationMinutes * 60000)
+      ) {
+        const conflict = occupied.some(
+          (o) => t >= o.start && t < o.end &&
+            (!appointment || o.start.getTime() !== new Date(appointment.scheduledStart).getTime()),
+        )
+        if (!conflict) slots.push(t.toISOString().slice(11, 16))
+      }
+      setAvailableTimes(slots)
+    } catch (err) {
+      console.error('Error computing times', err)
+    }
+  }, [dateValue, tenant, occupied, appointment, form])
+
   const submit = async (values: FormValues) => {
     setLoading(true)
     try {
+      if (!availableTimes.includes(values.time)) {
+        toast.error('Horario no disponible')
+        setLoading(false)
+        return
+      }
       const start = new Date(`${values.date}T${values.time}`)
       const end = new Date(start.getTime() + Number(values.duration) * 60000)
       if (!user || !tenant) throw new Error('No user')
@@ -214,7 +275,12 @@ export default function CreateAppointmentModal({
                 render={({ field }) => (
                   <FormItem className="flex-1">
                     <FormLabel>Fecha</FormLabel>
-                    <Input type="date" {...field} />
+                    <DatePicker
+                      date={field.value ? new Date(field.value) : undefined}
+                      onChange={(d) =>
+                        field.onChange(d ? d.toISOString().slice(0, 10) : '')
+                      }
+                    />
                     <FormMessage />
                   </FormItem>
                 )}
@@ -225,7 +291,11 @@ export default function CreateAppointmentModal({
                 render={({ field }) => (
                   <FormItem className="flex-1">
                     <FormLabel>Hora</FormLabel>
-                    <Input type="time" {...field} />
+                    <TimeSelect
+                      value={field.value}
+                      onChange={field.onChange}
+                      options={availableTimes}
+                    />
                     <FormMessage />
                   </FormItem>
                 )}
