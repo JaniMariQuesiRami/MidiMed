@@ -16,7 +16,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Select, SelectItem, SelectTrigger, SelectContent, SelectValue } from '@/components/ui/select'
+import PatientAutocomplete from './PatientAutocomplete'
 import { DatePicker } from '@/components/ui/date-picker'
 import TimeSelect from '@/components/ui/time-select'
 import { Button } from '@/components/ui/button'
@@ -157,7 +157,7 @@ export default function CreateAppointmentModal({
     } catch (err) {
       console.error('Error computing times', err)
     }
-  }, [dateValue, tenant, occupied, appointment, form])
+  }, [dateValue, tenant, occupied, appointment, open])
 
   const submit = async (values: FormValues) => {
     setLoading(true)
@@ -241,18 +241,11 @@ export default function CreateAppointmentModal({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Paciente</FormLabel>
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccione" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {patients.map((p) => (
-                        <SelectItem key={p.patientId} value={p.patientId}>
-                          {p.firstName} {p.lastName}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <PatientAutocomplete
+                    patients={patients}
+                    value={field.value}
+                    onChange={(v) => field.onChange(v)}
+                  />
                   <FormMessage />
                 </FormItem>
               )}
@@ -280,6 +273,7 @@ export default function CreateAppointmentModal({
                       onChange={(d) =>
                         field.onChange(d ? d.toISOString().slice(0, 10) : '')
                       }
+                      disabled={{ before: new Date() }}
                     />
                     <FormMessage />
                   </FormItem>

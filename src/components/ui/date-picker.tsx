@@ -11,10 +11,12 @@ export function DatePicker({
   date,
   onChange,
   placeholder = "Fecha",
+  disabled,
 }: {
   date: Date | undefined
   onChange: (date: Date | undefined) => void
   placeholder?: string
+  disabled?: React.ComponentProps<typeof Calendar>["disabled"]
 }) {
   return (
     <Popover>
@@ -31,7 +33,13 @@ export function DatePicker({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
-        <Calendar mode="single" selected={date} onSelect={onChange} initialFocus />
+        <Calendar
+          mode="single"
+          selected={date}
+          onSelect={onChange}
+          initialFocus
+          disabled={disabled}
+        />
       </PopoverContent>
     </Popover>
   )
