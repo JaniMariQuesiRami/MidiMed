@@ -4,6 +4,8 @@ import BrandLogo from '@/components/BrandLogo'
 import { Button } from '@/components/ui/button'
 import LandingCarousel from '@/components/LandingCarousel'
 import { Copyright } from 'lucide-react'
+import Image from 'next/image'
+import './shine.css'
 
 export default function Home() {
   return (
@@ -11,8 +13,12 @@ export default function Home() {
       <Header>
         <BrandLogo />
         <nav className="flex gap-2">
-          <Button asChild variant="secondary">
-            <Link href="/signup">Sign Up</Link>
+          <Button
+            asChild
+            variant="secondary"
+            className="bg-primary text-white hover:bg-primary/50 relative overflow-hidden shine-btn"
+          >
+            <Link href="/signup">Crear cuenta</Link>
           </Button>
           <Button asChild variant="outline">
             <Link href="/login">Log In</Link>
@@ -22,12 +28,12 @@ export default function Home() {
       <Main>
         <div className="flex flex-col gap-8 flex-1">
           <Headline>
-            Easily manage your patients, appointments, and medical records.
+            Gestiona fácilmente tus pacientes, citas y expedientes médicos.
           </Headline>
           <LandingCarousel />
         </div>
         <Screenshot>
-          <span className="text-muted-foreground">App Screenshot</span>
+          <Image src="/phoneScreenshot.svg" alt="Captura de pantalla de la app" width={400} height={800} className="rounded-lg max-h-150" />
         </Screenshot>
       </Main>
       <Footer>
@@ -40,9 +46,11 @@ export default function Home() {
 }
 
 const Wrapper = tw.div`min-h-screen flex flex-col`
-const Header = tw.header`flex items-center justify-between px-6 py-4`
-const Main = tw.main`flex flex-col sm:flex-row gap-8 flex-1 items-start px-6`
+const Header = tw.header`flex items-center justify-between px-6 py-4 mb-16`
+const Main = tw.main`flex flex-col sm:flex-row gap-8 flex-1 items-start px-8`
 const Headline = tw.h1`text-4xl sm:text-5xl font-bold max-w-xl`
-const Screenshot = tw.div`hidden sm:flex items-center justify-center flex-1` +
-  ' rounded-xl border-2 border-dashed border-muted-foreground/50 p-4 h-auto'
+const Screenshot = tw.div`
+  hidden sm:flex items-center justify-center flex-1
+  rounded-xl border-2 border-primary p-4 h-auto bg-transparent
+`
 const Footer = tw.footer`flex justify-end px-6 py-4`

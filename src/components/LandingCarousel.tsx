@@ -1,56 +1,69 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { CalendarDays, FileText, BarChart2, MessageCircle, ShieldCheck, ChevronLeft, ChevronRight } from 'lucide-react'
+import {
+  CalendarDays,
+  FileText,
+  BarChart2,
+  MessageCircle,
+  ShieldCheck,
+} from 'lucide-react'
 import tw from 'tailwind-styled-components'
-import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 
 const features = [
-  { icon: CalendarDays, text: 'Smart appointment scheduling.' },
-  { icon: FileText, text: 'Patient medical record management.' },
-  { icon: BarChart2, text: 'Clinical statistics and reports.' },
-  { icon: MessageCircle, text: 'Automated patient chat.' },
-  { icon: ShieldCheck, text: 'Compliance with medical regulations.' },
+  { icon: CalendarDays, text: 'Agendamiento inteligente de citas.' },
+  { icon: FileText, text: 'Gestión de historias clínicas de pacientes.' },
+  { icon: BarChart2, text: 'Estadísticas y reportes clínicos.' },
+  { icon: MessageCircle, text: 'Chat automatizado con pacientes.' },
+  { icon: ShieldCheck, text: 'Cumplimiento de normativas médicas.' },
 ]
 
 export default function LandingCarousel() {
   const [index, setIndex] = useState(0)
 
   useEffect(() => {
-    const id = setInterval(() => setIndex(i => (i + 1) % features.length), 4000)
-    return () => clearInterval(id)
+    const interval = setInterval(() => {
+      setIndex(i => (i + 1) % features.length)
+    }, 3500)
+    return () => clearInterval(interval)
   }, [])
 
-  const prev = () => setIndex(i => (i - 1 + features.length) % features.length)
-  const next = () => setIndex(i => (i + 1) % features.length)
-
-  const FeatureIcon = features[index].icon
+  const getItem = (offset: number) => {
+    const i = (index + offset + features.length) % features.length
+    return features[i]
+  }
 
   return (
     <Wrapper>
-      <Slide>
-        <CardContent className="flex flex-col items-center gap-4 py-12">
-          <FeatureIcon className="w-12 h-12 text-primary" />
-          <p className="text-lg text-center font-medium">
-            {features[index].text}
-          </p>
-        </CardContent>
-      </Slide>
-      <Nav $position="left" onClick={prev} variant="ghost" size="icon">
-        <ChevronLeft className="w-6 h-6" />
-      </Nav>
-      <Nav $position="right" onClick={next} variant="ghost" size="icon">
-        <ChevronRight className="w-6 h-6" />
-      </Nav>
+      {[ -1, 0, 1 ].map(offset => {
+        const item = getItem(offset)
+        const Icon = item.icon
+
+        return (
+          <CardWrapper
+            key={offset}
+            className={cn(
+              'absolute w-full transition-all duration-700 ease-in-out flex flex-col items-center justify-center',
+              offset === 0 && 'z-30 translate-y-0 scale-100 opacity-100',
+              offset === -1 && 'z-20 -translate-y-24 scale-95 opacity-40 bg-muted',
+              offset === 1 && 'z-10 translate-y-24 scale-95 opacity-40 bg-muted'
+            )}
+          >
+            <Icon className="w-8 h-8 text-primary mb-2" />
+            <p className="text-center text-base font-medium">{item.text}</p>
+          </CardWrapper>
+        )
+      })}
     </Wrapper>
   )
 }
 
-const Wrapper = tw(Card)`relative overflow-hidden w-full`
-const Slide = tw.div`w-full h-full flex items-center justify-center`
-const Nav = tw(Button)<{ $position: 'left' | 'right' }>`
-  absolute top-1/2 -translate-y-1/2 z-10
-  ${(p) => (p.$position === 'left' ? 'left-2' : 'right-2')}
+// Styled Components
+const Wrapper = tw.div`
+  relative h-[460px] w-full overflow-hidden flex items-center justify-center
 `
 
+const CardWrapper = tw.div`
+  w-[320px] h-[200px] bg-background rounded-xl shadow-lg border border-border
+`
