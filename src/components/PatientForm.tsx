@@ -26,12 +26,8 @@ const schema = z.object({
       const d = new Date(v)
       return !isNaN(d.getTime()) && d <= new Date()
     }, "Fecha inválida"),
-  contact: z
-    .string()
-    .refine(
-      (v) => phoneRegex.test(v) || /.+@.+\..+/.test(v),
-      "Debe ser teléfono o email válido",
-    ),
+  phone: z.string().optional(),
+  email: z.string().email('Email inválido').optional().or(z.literal('')),
   allergies: z.string().optional(),
   notes: z.string().optional(),
 })
@@ -58,7 +54,8 @@ export default function PatientForm({
     defaultValues: {
       name: "",
       birthDate: "",
-      contact: "",
+      phone: "",
+      email: "",
       allergies: "",
       notes: "",
     },
@@ -69,7 +66,8 @@ export default function PatientForm({
       form.reset({
         name: initial?.name ?? "",
         birthDate: initial?.birthDate ?? "",
-        contact: initial?.contact ?? "",
+        phone: initial?.phone ?? "",
+        email: initial?.email ?? "",
         allergies: initial?.allergies ?? "",
         notes: initial?.notes ?? "",
       })
@@ -106,10 +104,21 @@ export default function PatientForm({
         />
         <FormField
           control={form.control}
-          name="contact"
+          name="phone"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Contacto (teléfono o email)</FormLabel>
+              <FormLabel>Teléfono</FormLabel>
+              <Input {...field} />
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
               <Input {...field} />
               <FormMessage />
             </FormItem>

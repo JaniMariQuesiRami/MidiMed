@@ -24,9 +24,6 @@ export default function EditPatientModal({
       if (!user) throw new Error("No user")
       const [firstName, ...rest] = values.name.trim().split(" ")
       const lastName = rest.join(" ")
-      const contact = /@/.test(values.contact)
-        ? { email: values.contact, phone: undefined }
-        : { phone: values.contact, email: undefined }
       await updatePatient(patient.patientId, {
         ...patient,
         firstName,
@@ -34,8 +31,9 @@ export default function EditPatientModal({
         birthDate: values.birthDate,
         allergies: values.allergies,
         notes: values.notes,
-        ...contact,
         sex: patient.sex,
+        ...(values.email ? { email: values.email } : {}),
+        ...(values.phone ? { phone: values.phone } : {}),
       })
       const updated: Patient = {
         ...patient,
@@ -44,8 +42,10 @@ export default function EditPatientModal({
         birthDate: values.birthDate,
         allergies: values.allergies,
         notes: values.notes,
-        ...contact,
         updatedAt: new Date().toISOString(),
+        sex: patient.sex,
+        ...(values.email ? { email: values.email } : {}),
+        ...(values.phone ? { phone: values.phone } : {}),
       }
       toast.success("Paciente actualizado")
       onUpdated?.(updated)
@@ -70,7 +70,8 @@ export default function EditPatientModal({
           initial={{
             name: `${patient.firstName} ${patient.lastName}`,
             birthDate: patient.birthDate,
-            contact: patient.email ?? patient.phone ?? "",
+            email: patient.email ?? '',
+            phone: patient.phone ?? '',
             allergies: patient.allergies,
             notes: patient.notes,
           }}

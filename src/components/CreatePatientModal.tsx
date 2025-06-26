@@ -22,9 +22,6 @@ export default function CreatePatientModal({
       if (!user || !tenant) throw new Error("No user")
       const [firstName, ...rest] = values.name.trim().split(" ")
       const lastName = rest.join(" ")
-      const contact = /@/.test(values.contact)
-        ? { email: values.contact }
-        : { phone: values.contact }
       const patientId = await createPatient({
         firstName,
         lastName,
@@ -32,7 +29,8 @@ export default function CreatePatientModal({
         sex: "O",
         allergies: values.allergies,
         notes: values.notes,
-        ...contact,
+        ...(values.email ? { email: values.email } : {}),
+        ...(values.phone ? { phone: values.phone } : {}),
         tenantId: tenant.tenantId,
         createdBy: user.uid,
       })
@@ -45,7 +43,8 @@ export default function CreatePatientModal({
         sex: "O",
         allergies: values.allergies,
         notes: values.notes,
-        ...contact,
+        ...(values.email ? { email: values.email } : {}),
+        ...(values.phone ? { phone: values.phone } : {}),
         createdBy: user.uid,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
