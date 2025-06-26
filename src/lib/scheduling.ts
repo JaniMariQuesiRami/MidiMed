@@ -5,7 +5,7 @@ export function getWorkingHoursForDate(
   settings: TenantSettings,
   date: Date,
 ): [string, string] | null {
-  const map = {
+  const map: Record<number, [string, string] | null> = {
     0: settings.workingHours.sun ?? null,
     1: settings.workingHours.mon,
     2: settings.workingHours.tue,
@@ -13,7 +13,7 @@ export function getWorkingHoursForDate(
     4: settings.workingHours.thu,
     5: settings.workingHours.fri,
     6: settings.workingHours.sat ?? null,
-  } as const
+  }
   return map[date.getDay()] ?? null
 }
 

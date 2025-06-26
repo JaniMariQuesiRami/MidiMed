@@ -41,6 +41,7 @@ const schema = z.object({
   month: z.string().nonempty('Mes'),
   day: z.string().nonempty('Día'),
   startTime: z.string().nonempty('Hora'),
+  endTime: z.string().nonempty('Fin'),
   notes: z.string().optional(),
 })
 
@@ -71,6 +72,7 @@ export default function CreateAppointmentModal({
   const [patients, setPatients] = useState<Patient[]>([])
   const [loading, setLoading] = useState(false)
   const [times, setTimes] = useState<string[]>([])
+  const [endTimes, setEndTimes] = useState<string[]>([])
   const [workingHours, setWorkingHours] = useState<[string, string] | null>(null)
   const currentYear = new Date().getFullYear().toString()
 
@@ -83,6 +85,7 @@ export default function CreateAppointmentModal({
       month: '',
       day: '',
       startTime: '',
+      endTime: '',
       notes: appointment?.reason ?? '',
     },
   })
@@ -99,6 +102,9 @@ export default function CreateAppointmentModal({
       : initialStart
         ? format(initialStart, 'HH:mm')
         : ''
+    const endTime = appointment
+      ? format(new Date(appointment.scheduledEnd), 'HH:mm')
+      : ''
     form.reset({
       patientId: appointment?.patientId ?? patientId ?? '',
       providerId: appointment?.providerId ?? '',
@@ -106,6 +112,7 @@ export default function CreateAppointmentModal({
       month,
       day,
       startTime,
+      endTime,
       notes: appointment?.reason ?? '',
     })
   }
@@ -160,6 +167,7 @@ export default function CreateAppointmentModal({
   }, [tenant, watchYear, watchMonth, watchDay, appointment])
 
   const watchStart = form.watch('startTime')
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [endTime, setEndTime] = useState('')
   const [outsideHours, setOutsideHours] = useState(false)
   useEffect(() => {
@@ -190,6 +198,35 @@ export default function CreateAppointmentModal({
     }
   }, [tenant, watchYear, watchMonth, watchDay, watchStart, workingHours])
 
+  useEffect(() => {
+    if (!watchStart) {
+      setEndTimes([])
+      form.setValue('endTime', '')
+      return
+    }
+    const startIdx = times.findIndex((t) => t === watchStart)
+    if (startIdx === -1) {
+      setEndTimes([])
+      form.setValue('endTime', '')
+      return
+    }
+    const afterStart = times.slice(startIdx + 1)
+    setEndTimes(afterStart)
+
+    // Preselect endTime to startTime + default duration if available
+    if (tenant && afterStart.length > 0) {
+      const [h, m] = watchStart.split(':').map(Number)
+      const endDate = new Date(0, 0, 0, h, m + tenant.settings.appointmentDurationMinutes)
+      const endStr = endDate
+        .toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false })
+      if (afterStart.includes(endStr)) {
+        form.setValue('endTime', endStr)
+      } else {
+        form.setValue('endTime', afterStart[0])
+      }
+    }
+  }, [watchStart, times, tenant, form])
+
   const submit = async (values: FormValues) => {
     setLoading(true)
     try {
@@ -201,7 +238,14 @@ export default function CreateAppointmentModal({
       )
       const [h, m] = values.startTime.split(':').map(Number)
       start.setHours(h, m, 0, 0)
-      const end = new Date(start.getTime() + tenant.settings.appointmentDurationMinutes * 60000)
+      let end: Date
+      if (values.endTime) {
+        const [eh, em] = values.endTime.split(':').map(Number)
+        end = new Date(start)
+        end.setHours(eh, em, 0, 0)
+      } else {
+        end = new Date(start.getTime() + tenant.settings.appointmentDurationMinutes * 60000)
+      }
       if (appointment) {
         await updateAppointment(appointment.appointmentId, {
           ...appointment,
@@ -388,10 +432,26 @@ export default function CreateAppointmentModal({
                   </FormItem>
                 )}
               />
-              <div className="flex-1">
-                <FormLabel>Fin</FormLabel>
-                <Input value={endTime} readOnly />
-              </div>
+              <FormField
+                control={form.control}
+                name="endTime"
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormLabel>Fin</FormLabel>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Fin" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {endTimes.map((t) => (
+                          <SelectItem key={t} value={t}>{t}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
             <FormField
               control={form.control}

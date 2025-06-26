@@ -97,7 +97,7 @@ export default function DashboardCalendar() {
       list.map((a) => ({
         start: new Date(a.scheduledStart),
         end: new Date(a.scheduledEnd),
-        title: nameMap.get(a.patientId) ?? a.patientId,
+        title: `${format(new Date(a.scheduledStart), 'HH:mm')} - ${nameMap.get(a.patientId) ?? a.patientId}`,
         resource: a,
       }))
     )
