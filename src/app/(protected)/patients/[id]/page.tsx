@@ -33,6 +33,7 @@ export default function PatientDetailsPage() {
   const [openRecord, setOpenRecord] = useState(false)
   const [editingRecord, setEditingRecord] = useState<MedicalRecord | null>(null)
   const [openEdit, setOpenEdit] = useState(false)
+  const [completingAppt, setCompletingAppt] = useState<Appointment | null>(null)
 
   useEffect(() => {
     getPatientById(params.id)
@@ -114,6 +115,11 @@ export default function PatientDetailsPage() {
                       }}>
                         <Trash size={16} />
                       </button>
+                      {a.status === 'scheduled' && new Date(a.scheduledStart) <= new Date() && !a.medicalRecordId && (
+                        <button onClick={() => { setEditingRecord(null); setCompletingAppt(a); setOpenRecord(true); }} className="text-primary" >
+                          Completar
+                        </button>
+                      )}
                     </TableCell>
                   </TableRow>
                   ))
@@ -159,6 +165,11 @@ export default function PatientDetailsPage() {
                     }}>
                       <Trash size={16} />
                     </button>
+                    {a.status === 'scheduled' && !a.medicalRecordId && (
+                      <button onClick={() => { setEditingRecord(null); setCompletingAppt(a); setOpenRecord(true); }} className="text-primary">
+                        Completar
+                      </button>
+                    )}
                   </TableCell>
                 </TableRow>
                 ))
@@ -287,10 +298,24 @@ export default function PatientDetailsPage() {
         onClose={() => {
           setOpenRecord(false)
           setEditingRecord(null)
+          setCompletingAppt(null)
         }}
         patientId={patient.patientId}
+        appointmentId={completingAppt?.appointmentId}
+        patientBirthDate={patient.birthDate}
         record={editingRecord}
-        onCreated={(r) => setRecords((prev) => [...prev, r])}
+        onCreated={(r) => {
+          setRecords((prev) => [...prev, r])
+          if (completingAppt) {
+            setAppointments((prev) =>
+              prev.map((p) =>
+                p.appointmentId === completingAppt.appointmentId
+                  ? { ...p, status: 'completed', medicalRecordId: r.recordId }
+                  : p,
+              ),
+            )
+          }
+        }}
         onUpdated={(r) =>
           setRecords((prev) => prev.map((p) => (p.recordId === r.recordId ? r : p)))
         }
