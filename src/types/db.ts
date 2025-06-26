@@ -47,15 +47,24 @@ export type User = {
 export type Patient = {
   tenantId: string
   patientId: string
+  /** Nombre del paciente */
   firstName: string
+  /** Apellido del paciente */
   lastName: string
-  birth: string
+  /** Fecha de nacimiento (YYYY-MM-DD) */
+  birthDate: string
   sex: "M" | "F" | "O"
   email?: string
   phone?: string
   address?: string
+  /** Alergias registradas */
+  allergies?: string
+  /** Notas adicionales u observaciones */
+  notes?: string
   createdBy: string
   createdAt: string
+  /** Última actualización si existe */
+  updatedAt?: string
   latestAppointmentId?: string
 }
 
@@ -127,7 +136,12 @@ export type Billing = {
 // Input types
 export type PatientInput = Omit<
   Patient,
-  "tenantId" | "patientId" | "createdAt" | "createdBy" | "latestAppointmentId"
+  | "tenantId"
+  | "patientId"
+  | "createdAt"
+  | "createdBy"
+  | "latestAppointmentId"
+  | "updatedAt"
 >
 
 export type AppointmentInput = Omit<

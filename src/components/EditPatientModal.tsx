@@ -1,59 +1,57 @@
 "use client"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import PatientForm, { PatientFormValues } from "./PatientForm"
-import { createPatient } from "@/db/patients"
+import { updatePatient } from "@/db/patients"
 import { useUser } from "@/contexts/UserContext"
 import { toast } from "sonner"
 import type { Patient } from "@/types/db"
 
-export default function CreatePatientModal({
+export default function EditPatientModal({
   open,
   onClose,
-  onCreated,
+  patient,
+  onUpdated,
 }: {
   open: boolean
   onClose: () => void
-  onCreated?: (p: Patient) => void
+  patient: Patient
+  onUpdated?: (p: Patient) => void
 }) {
-  const { user, tenant } = useUser()
+  const { user } = useUser()
 
   const submit = async (values: PatientFormValues) => {
     try {
-      if (!user || !tenant) throw new Error("No user")
+      if (!user) throw new Error("No user")
       const [firstName, ...rest] = values.name.trim().split(" ")
       const lastName = rest.join(" ")
       const contact = /@/.test(values.contact)
-        ? { email: values.contact }
-        : { phone: values.contact }
-      const patientId = await createPatient({
+        ? { email: values.contact, phone: undefined }
+        : { phone: values.contact, email: undefined }
+      await updatePatient(patient.patientId, {
+        ...patient,
         firstName,
         lastName,
         birthDate: values.birthDate,
-        sex: "O",
         allergies: values.allergies,
         notes: values.notes,
         ...contact,
-        tenantId: tenant.tenantId,
-        createdBy: user.uid,
+        sex: patient.sex,
       })
-      onCreated?.({
-        tenantId: tenant.tenantId,
-        patientId,
+      const updated: Patient = {
+        ...patient,
         firstName,
         lastName,
         birthDate: values.birthDate,
-        sex: "O",
         allergies: values.allergies,
         notes: values.notes,
         ...contact,
-        createdBy: user.uid,
-        createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-      })
-      toast.success("Paciente creado")
+      }
+      toast.success("Paciente actualizado")
+      onUpdated?.(updated)
       onClose()
     } catch {
-      toast.error("Error al crear paciente")
+      toast.error("Error al guardar paciente")
     }
   }
 
@@ -61,13 +59,21 @@ export default function CreatePatientModal({
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Nuevo paciente</DialogTitle>
+          <DialogTitle>Editar paciente</DialogTitle>
         </DialogHeader>
         <PatientForm
           open={open}
           onSubmit={submit}
           onClose={onClose}
-          submitLabel="Crear"
+          submitLabel="Guardar"
+          updatedAt={patient.updatedAt}
+          initial={{
+            name: `${patient.firstName} ${patient.lastName}`,
+            birthDate: patient.birthDate,
+            contact: patient.email ?? patient.phone ?? "",
+            allergies: patient.allergies,
+            notes: patient.notes,
+          }}
         />
       </DialogContent>
     </Dialog>

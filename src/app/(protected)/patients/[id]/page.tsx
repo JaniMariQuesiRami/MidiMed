@@ -5,7 +5,6 @@ import { useUser } from '@/contexts/UserContext'
 import {
   getPatientById,
   getMedicalRecords,
-  updatePatient,
   deletePatient,
   deleteMedicalRecord,
 } from '@/db/patients'
@@ -15,12 +14,12 @@ import CreateAppointmentModal from '@/components/CreateAppointmentModal'
 import MedicalRecordFormModal from '@/components/MedicalRecordFormModal'
 import { Plus, Pencil, Trash } from 'lucide-react'
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table'
-import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import tw from 'tailwind-styled-components'
 import { format } from 'date-fns'
 import LoadingSpinner from '@/components/LoadingSpinner'
+import EditPatientModal from '@/components/EditPatientModal'
 
 export default function PatientDetailsPage() {
   const params = useParams<{ id: string }>()
@@ -33,19 +32,12 @@ export default function PatientDetailsPage() {
   const [editingAppt, setEditingAppt] = useState<Appointment | null>(null)
   const [openRecord, setOpenRecord] = useState(false)
   const [editingRecord, setEditingRecord] = useState<MedicalRecord | null>(null)
-  const [editing, setEditing] = useState(false)
-  const [info, setInfo] = useState({ firstName: '', lastName: '', email: '', phone: '' })
+  const [openEdit, setOpenEdit] = useState(false)
 
   useEffect(() => {
     getPatientById(params.id)
       .then((p) => {
         setPatient(p)
-        setInfo({
-          firstName: p.firstName,
-          lastName: p.lastName,
-          email: p.email ?? '',
-          phone: p.phone ?? '',
-        })
       })
       .catch(() => {})
     if (tenant)
@@ -74,16 +66,6 @@ export default function PatientDetailsPage() {
     (a) => new Date(a.scheduledStart) >= new Date(),
   )
 
-  const saveInfo = async () => {
-    if (!patient) return
-    await updatePatient(patient.patientId, {
-      ...patient,
-      ...info,
-    })
-    toast.success('Información guardada')
-    setEditing(false)
-    setPatient({ ...patient, ...info })
-  }
 
   return (
     <Wrapper>
@@ -231,93 +213,58 @@ export default function PatientDetailsPage() {
         </div>
         <InfoCard>
           <h3 className="font-medium mb-2">Información</h3>
-          {editing ? (
-            <div className="space-y-2">
-              <Input
-                value={info.firstName}
-                onChange={(e) =>
-                  setInfo((p) => ({ ...p, firstName: e.target.value }))
-                }
-                placeholder="Nombre"
-              />
-              <Input
-                value={info.lastName}
-                onChange={(e) =>
-                  setInfo((p) => ({ ...p, lastName: e.target.value }))
-                }
-                placeholder="Apellido"
-              />
-              <Input
-                value={info.email}
-                onChange={(e) =>
-                  setInfo((p) => ({ ...p, email: e.target.value }))
-                }
-                placeholder="Email"
-              />
-              <Input
-                type="tel"
-                pattern="^\+\d{1,3}\s?\d{8}$"
-                value={info.phone}
-                onChange={(e) =>
-                  setInfo((p) => ({ ...p, phone: e.target.value }))
-                }
-                placeholder="Teléfono"
-              />
-              <div className="flex gap-2">
-                <Button size="sm" onClick={saveInfo}>
-                  Guardar
-                </Button>
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  onClick={() => setEditing(false)}
-                >
-                  Cancelar
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-1 text-sm">
+          <div className="space-y-1 text-sm">
+            <p>
+              <b>Nombre:</b> {patient.firstName} {patient.lastName}
+            </p>
+            {patient.email && (
               <p>
-                <b>Nombre:</b> {patient.firstName} {patient.lastName}
+                <b>Email:</b> {patient.email}
               </p>
-              {patient.email && (
-                <p>
-                  <b>Email:</b> {patient.email}
-                </p>
-              )}
-              {patient.phone && (
-                <p>
-                  <b>Teléfono:</b> {patient.phone}
-                </p>
-              )}
-              <Button size="sm" onClick={() => setEditing(true)} className="mt-2 flex items-center gap-1">
-                Editar <Pencil size={14} />
-              </Button>
-              <Button
-                size="sm"
-                variant="destructive"
-                onClick={async () => {
-                  if (
-                    confirm('Eliminar paciente y todos sus registros?')
-                  ) {
-                    for (const a of appointments) {
-                      await deleteAppointment(a.appointmentId)
-                    }
-                    for (const r of records) {
-                      await deleteMedicalRecord(r.recordId)
-                    }
-                    await deletePatient(patient.patientId)
-                    toast.success('Paciente eliminado')
-                    router.push('/patients')
+            )}
+            {patient.phone && (
+              <p>
+                <b>Teléfono:</b> {patient.phone}
+              </p>
+            )}
+            {patient.allergies && (
+              <p>
+                <b>Alergias:</b> {patient.allergies}
+              </p>
+            )}
+            {patient.notes && (
+              <p>
+                <b>Notas:</b> {patient.notes}
+              </p>
+            )}
+            <Button
+              size="sm"
+              onClick={() => setOpenEdit(true)}
+              className="mt-2 flex items-center gap-1"
+            >
+              Editar <Pencil size={14} />
+            </Button>
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={async () => {
+                if (confirm('Eliminar paciente y todos sus registros?')) {
+                  for (const a of appointments) {
+                    await deleteAppointment(a.appointmentId)
                   }
-                }}
-                className="mt-2"
-              >
-                Eliminar
-              </Button>
-            </div>
-          )}
+                  for (const r of records) {
+                    await deleteMedicalRecord(r.recordId)
+                  }
+                  await deletePatient(patient.patientId)
+                  toast.success('Paciente eliminado')
+                  router.push('/patients')
+                }
+              }}
+              className="mt-2"
+            >
+              Eliminar
+            </Button>
+          </div>
         </InfoCard>
       </div>
       <CreateAppointmentModal
@@ -347,6 +294,12 @@ export default function PatientDetailsPage() {
         onUpdated={(r) =>
           setRecords((prev) => prev.map((p) => (p.recordId === r.recordId ? r : p)))
         }
+      />
+      <EditPatientModal
+        open={openEdit}
+        onClose={() => setOpenEdit(false)}
+        patient={patient}
+        onUpdated={(p) => setPatient(p)}
       />
     </Wrapper>
   )

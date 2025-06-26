@@ -38,12 +38,13 @@ export async function createPatient(
 ): Promise<string> {
   try {
     const refDoc = doc(collection(db, 'patients'))
-    const now = new Date().toISOString()
-    await setDoc(refDoc, {
+  const now = new Date().toISOString()
+  await setDoc(refDoc, {
       ...data,
       patientId: refDoc.id,
       createdAt: now,
-    })
+      updatedAt: now,
+  })
     return refDoc.id
   } catch (err) {
     console.error('Error in createPatient:', err)
@@ -64,7 +65,10 @@ export async function getPatientById(id: string): Promise<Patient> {
 
 export async function updatePatient(id: string, data: PatientInput): Promise<void> {
   try {
-    await updateDoc(doc(db, 'patients', id), data)
+    await updateDoc(doc(db, 'patients', id), {
+      ...data,
+      updatedAt: new Date().toISOString(),
+    })
   } catch (err) {
     console.error('Error in updatePatient:', err)
     throw err
