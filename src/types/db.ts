@@ -8,6 +8,8 @@ export type TenantSettings = {
     wed: [string, string]
     thu: [string, string]
     fri: [string, string]
+    sat?: [string, string]
+    sun?: [string, string]
   }
 }
 

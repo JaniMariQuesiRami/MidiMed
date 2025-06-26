@@ -42,13 +42,14 @@ export async function signUp({
 		address,
 		settings: {
 			appointmentDurationMinutes: 30,
-			workingHours: {
-				mon: ['08:00', '17:00'],
-				tue: ['08:00', '17:00'],
-				wed: ['08:00', '17:00'],
-				thu: ['08:00', '17:00'],
-				fri: ['08:00', '15:00'],
-			},
+                        workingHours: {
+                                mon: ['08:00', '17:00'],
+                                tue: ['08:00', '17:00'],
+                                wed: ['08:00', '17:00'],
+                                thu: ['08:00', '17:00'],
+                                fri: ['08:00', '15:00'],
+                                sat: ['08:00', '12:00'],
+                        },
 		},
 		counters: {
 			patients: 0,

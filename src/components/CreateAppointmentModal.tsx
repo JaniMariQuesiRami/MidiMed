@@ -71,6 +71,7 @@ export default function CreateAppointmentModal({
   const [patients, setPatients] = useState<Patient[]>([])
   const [loading, setLoading] = useState(false)
   const [times, setTimes] = useState<string[]>([])
+  const [workingHours, setWorkingHours] = useState<[string, string] | null>(null)
   const currentYear = new Date().getFullYear().toString()
 
   const form = useForm<FormValues>({
@@ -134,10 +135,7 @@ export default function CreateAppointmentModal({
       if (!tenant || !watchYear || !watchMonth || !watchDay) return
       const date = new Date(Number(watchYear), Number(watchMonth) - 1, Number(watchDay))
       const hours = getWorkingHoursForDate(tenant.settings, date)
-      if (!hours) {
-        setTimes([])
-        return
-      }
+      setWorkingHours(hours)
       try {
         const list = await getAppointmentsInRange(
           startOfDay(date),
@@ -148,7 +146,6 @@ export default function CreateAppointmentModal({
         setTimes(
           generateTimeSlots(
             date,
-            hours,
             list,
             tenant.settings.appointmentDurationMinutes,
             10,
@@ -164,9 +161,11 @@ export default function CreateAppointmentModal({
 
   const watchStart = form.watch('startTime')
   const [endTime, setEndTime] = useState('')
+  const [outsideHours, setOutsideHours] = useState(false)
   useEffect(() => {
     if (!tenant || !watchYear || !watchMonth || !watchDay || !watchStart) {
       setEndTime('')
+      setOutsideHours(false)
       return
     }
     const date = new Date(
@@ -178,7 +177,18 @@ export default function CreateAppointmentModal({
     date.setHours(h, m, 0, 0)
     const end = new Date(date.getTime() + tenant.settings.appointmentDurationMinutes * 60000)
     setEndTime(format(end, 'HH:mm'))
-  }, [tenant, watchYear, watchMonth, watchDay, watchStart])
+    if (workingHours) {
+      const [whStartH, whStartM] = workingHours[0].split(':').map(Number)
+      const [whEndH, whEndM] = workingHours[1].split(':').map(Number)
+      const startMinutes = h * 60 + m
+      const endMinutes = startMinutes + tenant.settings.appointmentDurationMinutes
+      const whStart = whStartH * 60 + whStartM
+      const whEnd = whEndH * 60 + whEndM
+      setOutsideHours(startMinutes < whStart || endMinutes > whEnd)
+    } else {
+      setOutsideHours(true)
+    }
+  }, [tenant, watchYear, watchMonth, watchDay, watchStart, workingHours])
 
   const submit = async (values: FormValues) => {
     setLoading(true)
@@ -255,6 +265,11 @@ export default function CreateAppointmentModal({
         <DialogHeader>
           <DialogTitle>{appointment ? 'Editar cita' : 'Nueva cita'}</DialogTitle>
         </DialogHeader>
+        {outsideHours && (
+          <div className="bg-yellow-50 border border-yellow-300 text-yellow-800 rounded p-2 text-sm">
+            La hora seleccionada está fuera del horario registrado.
+          </div>
+        )}
         <Form {...form}>
           <form onSubmit={form.handleSubmit(submit)} className="space-y-3">
             <FormField
@@ -297,7 +312,7 @@ export default function CreateAppointmentModal({
                 render={({ field }) => (
                   <FormItem className="flex-1">
                     <FormLabel>Año</FormLabel>
-                    <Select value={field.value} onValueChange={field.onChange} disabled>
+                    <Select value={field.value} onValueChange={field.onChange}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>

@@ -6,27 +6,27 @@ export function getWorkingHoursForDate(
   date: Date,
 ): [string, string] | null {
   const map = {
-    0: null, // Sunday
+    0: settings.workingHours.sun ?? null,
     1: settings.workingHours.mon,
     2: settings.workingHours.tue,
     3: settings.workingHours.wed,
     4: settings.workingHours.thu,
     5: settings.workingHours.fri,
-    6: null, // Saturday
+    6: settings.workingHours.sat ?? null,
   } as const
   return map[date.getDay()] ?? null
 }
 
 export function generateTimeSlots(
   date: Date,
-  workingHours: [string, string],
   existing: Appointment[],
   durationMinutes: number,
   stepMinutes = 10,
   ignoreId?: string,
+  workingHours?: [string, string],
 ): string[] {
-  const [startH, startM] = workingHours[0].split(':').map(Number)
-  const [endH, endM] = workingHours[1].split(':').map(Number)
+  const [startH, startM] = (workingHours?.[0] ?? '00:00').split(':').map(Number)
+  const [endH, endM] = (workingHours?.[1] ?? '23:59').split(':').map(Number)
 
   const start = new Date(date)
   start.setHours(startH, startM, 0, 0)
