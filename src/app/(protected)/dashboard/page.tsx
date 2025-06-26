@@ -208,6 +208,7 @@ export default function DashboardCalendar() {
         onCreated={() => loadEvents()}
         initialDate={slotDate}
         initialStart={slotStart}
+        patientId={patientFilter !== 'all' ? patientFilter : undefined}
       />
       <AppointmentDetailsPopup
         appointment={selected?.appt || null}
