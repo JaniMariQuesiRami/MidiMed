@@ -77,7 +77,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     await signOut(auth)
     setUser(null)
     setTenant(null)
-    router.push('/login')
+    router.push('/')
   }
 
   return (
