@@ -1,48 +1,28 @@
 'use client'
-import { useEffect, useState } from 'react'
-import { getOrganization, updateOrganization } from '@/db/organization'
-import { useUser } from '@/contexts/UserContext'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
+import { useState } from 'react'
+import OrganizationSettingsForm from '@/components/OrganizationSettingsForm'
+import TeamSettings from '@/components/TeamSettings'
 import tw from 'tailwind-styled-components'
 
-export default function OrganizationSettingsPage() {
-  const { tenant } = useUser()
-  const [name, setName] = useState('')
-  const [phone, setPhone] = useState('')
-  const [address, setAddress] = useState('')
-
-  useEffect(() => {
-    if (!tenant) return
-    getOrganization(tenant.tenantId).then((t) => {
-      setName(t.name)
-      setPhone(t.phone)
-      setAddress(t.address)
-    })
-  }, [tenant])
-
-  if (!tenant) return null
-
-  const save = async () => {
-    await updateOrganization(tenant.tenantId, { name, phone, address })
-  }
+export default function SettingsPage() {
+  const [tab, setTab] = useState<'org' | 'team'>('org')
 
   return (
     <Wrapper>
-      <h1 className="text-lg font-medium">Ajustes de la clínica</h1>
-      <div className="space-y-3 max-w-md">
-        <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre" />
-        <Input
-          type="tel"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          placeholder="Teléfono"
-        />
-        <Input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Dirección" />
-        <Button onClick={save}>Guardar</Button>
-      </div>
+      <Tabs>
+        <Tab $active={tab === 'org'} onClick={() => setTab('org')}>
+          Organización
+        </Tab>
+        <Tab $active={tab === 'team'} onClick={() => setTab('team')}>
+          Equipo
+        </Tab>
+      </Tabs>
+      {tab === 'org' ? <OrganizationSettingsForm /> : <TeamSettings />}
     </Wrapper>
   )
 }
 
-const Wrapper = tw.div`space-y-4 px-2 sm:px-4 pt-4`
+const Wrapper = tw.div`px-2 sm:px-4`
+const Tabs = tw.div`flex gap-4 border-b pt-4`
+const Tab = tw.button<{ $active?: boolean }>`pb-2 text-sm font-medium transition-colors
+  ${({ $active }) => ($active ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground hover:text-foreground')}`

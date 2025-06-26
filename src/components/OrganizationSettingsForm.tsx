@@ -1,0 +1,51 @@
+'use client'
+import { useEffect, useState } from 'react'
+import { getOrganization, updateOrganization } from '@/db/organization'
+import { useUser } from '@/contexts/UserContext'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import tw from 'tailwind-styled-components'
+import { toast } from 'sonner'
+
+export default function OrganizationSettingsForm() {
+  const { tenant } = useUser()
+  const [name, setName] = useState('')
+  const [phone, setPhone] = useState('')
+  const [address, setAddress] = useState('')
+
+  useEffect(() => {
+    if (!tenant) return
+    getOrganization(tenant.tenantId)
+      .then((t) => {
+        setName(t.name)
+        setPhone(t.phone)
+        setAddress(t.address)
+      })
+      .catch(() => toast.error('Error cargando datos'))
+  }, [tenant])
+
+  if (!tenant) return null
+
+  const save = async () => {
+    try {
+      await updateOrganization(tenant.tenantId, { name, phone, address })
+      toast.success('Guardado')
+    } catch {
+      toast.error('No se pudo guardar')
+    }
+  }
+
+  return (
+    <Wrapper>
+      <h1 className="text-lg font-medium">Ajustes de la clínica</h1>
+      <div className="space-y-3 max-w-md">
+        <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre" />
+        <Input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Teléfono" />
+        <Input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Dirección" />
+        <Button onClick={save}>Guardar</Button>
+      </div>
+    </Wrapper>
+  )
+}
+
+const Wrapper = tw.div`space-y-4 px-2 sm:px-4 pt-4`
