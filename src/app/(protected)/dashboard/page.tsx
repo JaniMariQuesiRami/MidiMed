@@ -57,6 +57,8 @@ export default function DashboardCalendar() {
   }
   const [events, setEvents] = useState<CalendarEvent[]>([])
   const [open, setOpen] = useState(false)
+  const [slotDate, setSlotDate] = useState<Date | null>(null)
+  const [slotStart, setSlotStart] = useState<Date | null>(null)
   const [selected, setSelected] = useState<{ appt: Appointment; name: string } | null>(null)
 
   const navigate = (step: number) => {
@@ -95,7 +97,7 @@ export default function DashboardCalendar() {
       list.map((a) => ({
         start: new Date(a.scheduledStart),
         end: new Date(a.scheduledEnd),
-        title: nameMap.get(a.patientId) ?? a.patientId,
+        title: `${format(new Date(a.scheduledStart), 'HH:mm')} - ${nameMap.get(a.patientId) ?? a.patientId}`,
         resource: a,
       }))
     )
@@ -150,7 +152,11 @@ export default function DashboardCalendar() {
           />
           <button
             className="bg-primary text-white px-3 py-1 rounded flex items-center gap-1"
-            onClick={() => setOpen(true)}
+            onClick={() => {
+              setSlotDate(new Date())
+              setSlotStart(null)
+              setOpen(true)
+            }}
           >
             Nueva cita <Plus size={16} />
           </button>
@@ -181,6 +187,11 @@ export default function DashboardCalendar() {
             onSelectEvent={(e: CalendarEvent) =>
               setSelected({ appt: e.resource, name: e.title })
             }
+            onSelectSlot={(slot) => {
+              setSlotDate(slot.start)
+              setSlotStart(view === 'month' ? null : slot.start)
+              setOpen(true)
+            }}
             style={{ height: 'calc(100vh - 150px)' }}
             selectable
             components={{ toolbar: () => null }}
@@ -189,8 +200,15 @@ export default function DashboardCalendar() {
       </div>
       <CreateAppointmentModal
         open={open}
-        onClose={() => setOpen(false)}
+        onClose={() => {
+          setOpen(false)
+          setSlotDate(null)
+          setSlotStart(null)
+        }}
         onCreated={() => loadEvents()}
+        initialDate={slotDate}
+        initialStart={slotStart}
+        patientId={patientFilter !== 'all' ? patientFilter : undefined}
       />
       <AppointmentDetailsPopup
         appointment={selected?.appt || null}
