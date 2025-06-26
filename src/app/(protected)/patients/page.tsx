@@ -40,9 +40,15 @@ export default function PatientsPage() {
       .finally(() => setLoading(false))
   }, [tenant])
 
-  const filtered = allPatients.filter((p) =>
-    `${p.firstName} ${p.lastName}`.toLowerCase().includes(search.toLowerCase())
-  )
+  const filtered = allPatients.filter((p) => {
+    const name = `${p.firstName} ${p.lastName}`.toLowerCase()
+    return (
+      name.includes(search.toLowerCase()) ||
+      p.patientId.toLowerCase().includes(search.toLowerCase()) ||
+      (p.phone || '').toLowerCase().includes(search.toLowerCase()) ||
+      (p.email || '').toLowerCase().includes(search.toLowerCase())
+    )
+  })
 
   const paginated = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE)
@@ -51,7 +57,7 @@ export default function PatientsPage() {
     <Wrapper>
       <Header>
         <Input
-          placeholder="Buscar"
+          placeholder="Busca por nombre, teléfono, email..."
           value={search}
           onChange={(e) => {
             setSearch(e.target.value)
