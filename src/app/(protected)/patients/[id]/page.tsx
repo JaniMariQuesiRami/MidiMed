@@ -1,7 +1,7 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
-import { useUser } from '@/contexts/UserContext'
+import { UserContext } from '@/contexts/UserContext'
 import {
   getPatientById,
   getMedicalRecords,
@@ -22,7 +22,7 @@ import { Plus } from 'lucide-react'
 
 export default function PatientDetailsPage() {
   const params = useParams<{ id: string }>()
-  const { tenant } = useUser()
+  const { tenant } = useContext(UserContext)
   const [patient, setPatient] = useState<Patient | null>(null)
   const [records, setRecords] = useState<MedicalRecord[]>([])
   const [appointments, setAppointments] = useState<Appointment[]>([])

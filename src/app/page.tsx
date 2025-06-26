@@ -51,6 +51,6 @@ const Main = tw.main`flex flex-col sm:flex-row gap-8 flex-1 items-start px-8`
 const Headline = tw.h1`text-4xl sm:text-5xl font-bold max-w-xl`
 const Screenshot = tw.div`
   hidden sm:flex items-center justify-center flex-1
-  rounded-xl border-2 border-primary p-4 h-auto bg-transparent
+  rounded-xl border-primary p-4 h-auto bg-transparent
 `
 const Footer = tw.footer`flex justify-end px-6 py-4`

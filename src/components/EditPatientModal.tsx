@@ -2,7 +2,8 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import PatientForm, { PatientFormValues } from "./PatientForm"
 import { updatePatient } from "@/db/patients"
-import { useUser } from "@/contexts/UserContext"
+import { useContext } from 'react'
+import { UserContext } from '@/contexts/UserContext'
 import { toast } from "sonner"
 import type { Patient } from "@/types/db"
 
@@ -17,7 +18,7 @@ export default function EditPatientModal({
   patient: Patient
   onUpdated?: (p: Patient) => void
 }) {
-  const { user } = useUser()
+  const { user } = useContext(UserContext)
 
   const submit = async (values: PatientFormValues) => {
     try {

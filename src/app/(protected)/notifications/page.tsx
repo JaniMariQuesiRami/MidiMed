@@ -1,12 +1,12 @@
 'use client'
-import { useEffect, useState } from 'react'
-import { useUser } from '@/contexts/UserContext'
+import { useContext, useEffect, useState } from 'react'
+import { UserContext } from '@/contexts/UserContext'
 import { getNotifications, markNotificationAsRead } from '@/db/notifications'
 import type { Notification } from '@/types/db'
 import tw from 'tailwind-styled-components'
 
 export default function NotificationsPage() {
-  const { user } = useUser()
+  const { user } = useContext(UserContext)
   const [items, setItems] = useState<Notification[]>([])
 
   useEffect(() => {
