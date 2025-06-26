@@ -16,8 +16,6 @@ import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { format } from "date-fns"
 
-const phoneRegex = /^\+?\d{7,15}$/
-
 const schema = z.object({
   name: z.string().min(2, "Nombre requerido"),
   birthDate: z
