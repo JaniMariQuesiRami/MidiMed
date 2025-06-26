@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { createMedicalRecord, updateMedicalRecord } from '@/db/patients'
-import { updateAppointment } from '@/db/appointments'
+import { updateAppointment, getAppointmentById } from '@/db/appointments'
 import { useUser } from '@/contexts/UserContext'
 import { toast } from 'sonner'
 import {
@@ -27,6 +27,7 @@ const schema = z.object({
   weightKg: z.string().optional(),
   bloodPressure: z.string().optional(),
   temperatureC: z.string().optional(),
+  age: z.string().optional(),
   diagnosis: z.string().optional(),
   medications: z.string().optional(),
   followUp: z.string().optional(),
@@ -40,7 +41,6 @@ export default function MedicalRecordFormModal({
   onClose,
   patientId,
   appointmentId,
-  patientBirthDate,
   onCreated,
   record,
   onUpdated,
@@ -63,6 +63,7 @@ export default function MedicalRecordFormModal({
       weightKg: '',
       bloodPressure: '',
       temperatureC: '',
+      age: '',
       diagnosis: '',
       medications: '',
       followUp: '',
@@ -79,6 +80,7 @@ export default function MedicalRecordFormModal({
         weightKg: record?.details.weightKg?.toString() ?? '',
         bloodPressure: record?.details.bloodPressure ?? '',
         temperatureC: record?.details.temperatureC?.toString() ?? '',
+        age: record?.details.age?.toString() ?? '',
         diagnosis: record?.details.diagnosis ?? '',
         medications: record?.details.prescribedMedications?.join(', ') ?? '',
         followUp: record?.details.followUpInstructions ?? '',
@@ -90,22 +92,17 @@ export default function MedicalRecordFormModal({
     try {
       if (!user || !tenant) throw new Error('No user')
       const details = {
-        heightCm: values.heightCm ? Number(values.heightCm) : undefined,
-        weightKg: values.weightKg ? Number(values.weightKg) : undefined,
-        bloodPressure: values.bloodPressure || undefined,
-        temperatureC: values.temperatureC ? Number(values.temperatureC) : undefined,
-        age: patientBirthDate
-          ? Math.floor(
-              (Date.now() - new Date(patientBirthDate).getTime()) /
-                (1000 * 60 * 60 * 24 * 365.25),
-            )
-          : undefined,
-        diagnosis: values.diagnosis || undefined,
-        prescribedMedications: values.medications
-          ? values.medications.split(',').map((m) => m.trim()).filter(Boolean)
-          : undefined,
-        followUpInstructions: values.followUp || undefined,
-        notes: values.notes || undefined,
+        ...(values.heightCm ? { heightCm: Number(values.heightCm) } : {}),
+        ...(values.weightKg ? { weightKg: Number(values.weightKg) } : {}),
+        ...(values.bloodPressure ? { bloodPressure: values.bloodPressure } : {}),
+        ...(values.temperatureC ? { temperatureC: Number(values.temperatureC) } : {}),
+        ...(values.age ? { age: Number(values.age) } : {}),
+        ...(values.diagnosis ? { diagnosis: values.diagnosis } : {}),
+        ...(values.medications
+          ? { prescribedMedications: values.medications.split(',').map((m) => m.trim()).filter(Boolean) }
+          : {}),
+        ...(values.followUp ? { followUpInstructions: values.followUp } : {}),
+        ...(values.notes ? { notes: values.notes } : {}),
         summary: values.summary,
       }
       if (record) {
@@ -127,7 +124,10 @@ export default function MedicalRecordFormModal({
           ...(appointmentId ? { appointmentId } : {}),
         })
         if (appointmentId) {
+          // Fetch current appointment to get all required fields
+          const currentAppt = await getAppointmentById(appointmentId)
           await updateAppointment(appointmentId, {
+            ...currentAppt,
             status: 'completed',
             medicalRecordId: recordId,
           })
@@ -155,7 +155,7 @@ export default function MedicalRecordFormModal({
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{record ? 'Editar registro' : 'Nuevo registro'}</DialogTitle>
+          <DialogTitle>{record ? 'Editar registro' : 'Nuevo registro al historial'}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(submit)} className="space-y-3">
@@ -211,6 +211,17 @@ export default function MedicalRecordFormModal({
                   <FormItem>
                     <FormLabel>Temperatura (°C)</FormLabel>
                     <Input type="number" {...field} />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="age"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Edad</FormLabel>
+                    <Input type="number" min={0} {...field} />
                     <FormMessage />
                   </FormItem>
                 )}
