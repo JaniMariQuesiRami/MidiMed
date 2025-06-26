@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { format } from "date-fns"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 const schema = z.object({
   name: z.string().min(2, "Nombre requerido"),
@@ -26,6 +27,8 @@ const schema = z.object({
     }, "Fecha inválida"),
   phone: z.string().optional(),
   email: z.string().email('Email inválido').optional().or(z.literal('')),
+  sex: z.enum(["M", "F", "O"]),
+  address: z.string().optional(),
   allergies: z.string().optional(),
   notes: z.string().optional(),
 })
@@ -54,6 +57,8 @@ export default function PatientForm({
       birthDate: "",
       phone: "",
       email: "",
+      sex: "O",
+      address: "",
       allergies: "",
       notes: "",
     },
@@ -66,6 +71,8 @@ export default function PatientForm({
         birthDate: initial?.birthDate ?? "",
         phone: initial?.phone ?? "",
         email: initial?.email ?? "",
+        sex: initial?.sex ?? "O",
+        address: initial?.address ?? "",
         allergies: initial?.allergies ?? "",
         notes: initial?.notes ?? "",
       })
@@ -117,6 +124,37 @@ export default function PatientForm({
           render={({ field }) => (
             <FormItem>
               <FormLabel>Email</FormLabel>
+              <Input {...field} />
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="sex"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Sexo</FormLabel>
+              <Select value={field.value} onValueChange={field.onChange}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Selecciona sexo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="M">Masculino</SelectItem>
+                  <SelectItem value="F">Femenino</SelectItem>
+                  <SelectItem value="O">Otro</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="address"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Dirección</FormLabel>
               <Input {...field} />
               <FormMessage />
             </FormItem>

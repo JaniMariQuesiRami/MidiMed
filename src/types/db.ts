@@ -74,10 +74,16 @@ export type MedicalRecordAttachment = {
 }
 
 export type MedicalRecordDetails = {
-  heightCm: number
-  weightKg: number
-  bloodPressure: string
-  notes: string
+  heightCm?: number
+  weightKg?: number
+  bloodPressure?: string
+  temperatureC?: number
+  age?: number
+  summary: string
+  diagnosis?: string
+  prescribedMedications?: string[]
+  followUpInstructions?: string
+  notes?: string
 }
 
 export type MedicalRecord = {
@@ -89,6 +95,7 @@ export type MedicalRecord = {
   createdAt: string
   createdBy: string
   attachments?: MedicalRecordAttachment[]
+  appointmentId?: string
 }
 
 export type AppointmentStatus = "scheduled" | "completed" | "cancelled"

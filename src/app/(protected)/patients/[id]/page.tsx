@@ -1,29 +1,27 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import { useUser } from '@/contexts/UserContext'
 import {
   getPatientById,
   getMedicalRecords,
-  deletePatient,
   deleteMedicalRecord,
 } from '@/db/patients'
 import { getAppointmentsInRange, deleteAppointment } from '@/db/appointments'
-import type { Patient, MedicalRecord, Appointment } from '@/types/db'
+import type { Patient, MedicalRecord, Appointment, AppointmentStatus } from '@/types/db'
 import CreateAppointmentModal from '@/components/CreateAppointmentModal'
 import MedicalRecordFormModal from '@/components/MedicalRecordFormModal'
-import { Plus, Pencil, Trash } from 'lucide-react'
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table'
-import { Button } from '@/components/ui/button'
-import { toast } from 'sonner'
 import tw from 'tailwind-styled-components'
-import { format } from 'date-fns'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import EditPatientModal from '@/components/EditPatientModal'
+import PatientInfoCard from '@/components/PatientInfoCard'
+import PatientAppointmentsTable from '@/components/PatientAppointmentsTable'
+import PatientRecordsTable from '@/components/PatientRecordsTable'
+import { Button } from '@/components/ui/button'
+import { Plus } from 'lucide-react'
 
 export default function PatientDetailsPage() {
   const params = useParams<{ id: string }>()
-  const router = useRouter()
   const { tenant } = useUser()
   const [patient, setPatient] = useState<Patient | null>(null)
   const [records, setRecords] = useState<MedicalRecord[]>([])
@@ -33,15 +31,25 @@ export default function PatientDetailsPage() {
   const [openRecord, setOpenRecord] = useState(false)
   const [editingRecord, setEditingRecord] = useState<MedicalRecord | null>(null)
   const [openEdit, setOpenEdit] = useState(false)
+  const [completingAppt, setCompletingAppt] = useState<Appointment | null>(null)
+
+  const translateStatus = (status: AppointmentStatus) => {
+    switch (status) {
+      case 'scheduled': return 'Agendada'
+      case 'completed': return 'Completada'
+      case 'cancelled': return 'Cancelada'
+      default: return status
+    }
+  }
 
   useEffect(() => {
     getPatientById(params.id)
       .then((p) => {
         setPatient(p)
       })
-      .catch(() => {})
+      .catch(() => { })
     if (tenant)
-      getMedicalRecords(params.id, tenant.tenantId).then(setRecords).catch(() => {})
+      getMedicalRecords(params.id, tenant.tenantId).then(setRecords).catch(() => { })
     const start = new Date()
     start.setMonth(start.getMonth() - 12)
     const end = new Date()
@@ -49,7 +57,7 @@ export default function PatientDetailsPage() {
     if (tenant)
       getAppointmentsInRange(start, end, params.id, tenant.tenantId)
         .then(setAppointments)
-        .catch(() => {})
+        .catch(() => { })
   }, [params.id, tenant])
 
   if (!patient)
@@ -69,203 +77,70 @@ export default function PatientDetailsPage() {
 
   return (
     <Wrapper>
-      <div className="flex flex-col lg:flex-row gap-4">
+      <div className="flex flex-col lg:flex-row gap-4 h-full">
         <div className="flex-1 space-y-4">
           <Section>
-            <div className="flex justify-between items-center">
-              <h2 className="font-medium">Citas futuras</h2>
+            <div className="flex justify-between items-center mb-2">
+              <h2 className="font-medium text-lg">Citas futuras</h2>
               <Button size="sm" onClick={() => setOpenAppt(true)} className="flex items-center gap-1">
                 Nueva cita <Plus size={14} />
               </Button>
             </div>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Fecha</TableHead>
-                  <TableHead>Estado</TableHead>
-                  <TableHead>Notas</TableHead>
-                  <TableHead></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {future.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={4} className="py-4 text-center">
-                      No hay citas futuras
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  future.map((a) => (
-                    <TableRow key={a.appointmentId}>
-                    <TableCell>
-                      {format(new Date(a.scheduledStart), 'dd/MM/yyyy')}
-                    </TableCell>
-                    <TableCell>{a.status}</TableCell>
-                    <TableCell>{a.reason}</TableCell>
-                    <TableCell className="flex gap-2">
-                      <button onClick={() => { setEditingAppt(a); setOpenAppt(true); }}>
-                        <Pencil size={16} />
-                      </button>
-                      <button onClick={async () => {
-                        if (confirm('Eliminar cita?')) {
-                          await deleteAppointment(a.appointmentId)
-                          setAppointments((prev) => prev.filter(p => p.appointmentId !== a.appointmentId))
-                        }
-                      }}>
-                        <Trash size={16} />
-                      </button>
-                    </TableCell>
-                  </TableRow>
-                  ))
-                )}
-              </TableBody>
-          </Table>
-        </Section>
-        <Section>
-          <h2 className="font-medium">Citas pasadas</h2>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Fecha</TableHead>
-                <TableHead>Estado</TableHead>
-                <TableHead>Notas</TableHead>
-                <TableHead></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {past.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={4} className="py-4 text-center">
-                    No hay citas pasadas
-                  </TableCell>
-                </TableRow>
-              ) : (
-                past.map((a) => (
-                  <TableRow key={a.appointmentId}>
-                  <TableCell>
-                    {format(new Date(a.scheduledStart), 'dd/MM/yyyy')}
-                  </TableCell>
-                  <TableCell>{a.status}</TableCell>
-                  <TableCell>{a.reason}</TableCell>
-                  <TableCell className="flex gap-2">
-                    <button onClick={() => { setEditingAppt(a); setOpenAppt(true); }}>
-                      <Pencil size={16} />
-                    </button>
-                    <button onClick={async () => {
-                      if (confirm('Eliminar cita?')) {
-                        await deleteAppointment(a.appointmentId)
-                        setAppointments((prev) => prev.filter(p => p.appointmentId !== a.appointmentId))
-                      }
-                    }}>
-                      <Trash size={16} />
-                    </button>
-                  </TableCell>
-                </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </Section>
-        <Section>
-            <div className="flex justify-between items-center">
-              <h2 className="font-medium">Historial de registros</h2>
+            <PatientAppointmentsTable
+              title=""
+              appointments={future}
+              records={records}
+              onEdit={(a) => { setEditingAppt(a); setOpenAppt(true); }}
+              onDelete={async (a) => {
+                if (confirm('Eliminar cita?')) {
+                  await deleteAppointment(a.appointmentId)
+                  setAppointments((prev) => prev.filter(p => p.appointmentId !== a.appointmentId))
+                }
+              }}
+              onComplete={(a) => { setEditingRecord(null); setCompletingAppt(a); setOpenRecord(true); }}
+              onViewRecord={(r) => { setEditingRecord(r); setOpenRecord(true); }}
+              translateStatus={translateStatus}
+            />
+          </Section>
+          <Section>
+            <h2 className="font-medium text-lg mb-2">Citas pasadas</h2>
+            <PatientAppointmentsTable
+              title=""
+              appointments={past}
+              records={records}
+              onEdit={(a) => { setEditingAppt(a); setOpenAppt(true); }}
+              onDelete={async (a) => {
+                if (confirm('Eliminar cita?')) {
+                  await deleteAppointment(a.appointmentId)
+                  setAppointments((prev) => prev.filter(p => p.appointmentId !== a.appointmentId))
+                }
+              }}
+              onComplete={(a) => { setEditingRecord(null); setCompletingAppt(a); setOpenRecord(true); }}
+              onViewRecord={(r) => { setEditingRecord(r); setOpenRecord(true); }}
+              translateStatus={translateStatus}
+            />
+          </Section>
+          <Section>
+            <div className="flex justify-between items-center mb-2">
+              <h2 className="font-medium text-lg">Historial de registros médicos</h2>
               <Button size="sm" onClick={() => setOpenRecord(true)} className="flex items-center gap-1">
                 Nuevo registro <Plus size={14} />
               </Button>
             </div>
-            <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Resumen</TableHead>
-                <TableHead></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {records.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={2} className="py-4 text-center">
-                    No hay registros
-                  </TableCell>
-                </TableRow>
-              ) : (
-                records.map((r) => (
-                  <TableRow key={r.recordId}>
-                    <TableCell>{r.summary}</TableCell>
-                    <TableCell className="flex gap-2">
-                      <button onClick={() => { setEditingRecord(r); setOpenRecord(true); }}>
-                        <Pencil size={16} />
-                      </button>
-                      <button onClick={async () => {
-                        if (confirm('Eliminar registro?')) {
-                          await deleteMedicalRecord(r.recordId)
-                          setRecords((prev) => prev.filter(p => p.recordId !== r.recordId))
-                        }
-                      }}>
-                        <Trash size={16} />
-                      </button>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-            </Table>
-          </Section>
-        </div>
-        <InfoCard>
-          <h3 className="font-medium mb-2">Información</h3>
-          <div className="space-y-1 text-sm">
-            <p>
-              <b>Nombre:</b> {patient.firstName} {patient.lastName}
-            </p>
-            {patient.email && (
-              <p>
-                <b>Email:</b> {patient.email}
-              </p>
-            )}
-            {patient.phone && (
-              <p>
-                <b>Teléfono:</b> {patient.phone}
-              </p>
-            )}
-            {patient.allergies && (
-              <p>
-                <b>Alergias:</b> {patient.allergies}
-              </p>
-            )}
-            {patient.notes && (
-              <p>
-                <b>Notas:</b> {patient.notes}
-              </p>
-            )}
-            <Button
-              size="sm"
-              onClick={() => setOpenEdit(true)}
-              className="mt-2 flex items-center gap-1"
-            >
-              Editar <Pencil size={14} />
-            </Button>
-            <Button
-              size="sm"
-              variant="destructive"
-              onClick={async () => {
-                if (confirm('Eliminar paciente y todos sus registros?')) {
-                  for (const a of appointments) {
-                    await deleteAppointment(a.appointmentId)
-                  }
-                  for (const r of records) {
-                    await deleteMedicalRecord(r.recordId)
-                  }
-                  await deletePatient(patient.patientId)
-                  toast.success('Paciente eliminado')
-                  router.push('/patients')
+            <PatientRecordsTable
+              records={records}
+              appointments={appointments}
+              onEdit={(r) => { setEditingRecord(r); setOpenRecord(true); }}
+              onDelete={async (r) => {
+                if (confirm('Eliminar registro?')) {
+                  await deleteMedicalRecord(r.recordId)
+                  setRecords((prev) => prev.filter(p => p.recordId !== r.recordId))
                 }
               }}
-              className="mt-2"
-            >
-              Eliminar
-            </Button>
-          </div>
-        </InfoCard>
+            />
+          </Section>
+        </div>
+        <PatientInfoCard patient={patient} onEdit={() => setOpenEdit(true)} />
       </div>
       <CreateAppointmentModal
         open={openAppt}
@@ -287,10 +162,24 @@ export default function PatientDetailsPage() {
         onClose={() => {
           setOpenRecord(false)
           setEditingRecord(null)
+          setCompletingAppt(null)
         }}
         patientId={patient.patientId}
+        appointmentId={completingAppt?.appointmentId}
+        patientBirthDate={patient.birthDate}
         record={editingRecord}
-        onCreated={(r) => setRecords((prev) => [...prev, r])}
+        onCreated={(r) => {
+          setRecords((prev) => [...prev, r])
+          if (completingAppt) {
+            setAppointments((prev) =>
+              prev.map((p) =>
+                p.appointmentId === completingAppt.appointmentId
+                  ? { ...p, status: 'completed', medicalRecordId: r.recordId }
+                  : p,
+              ),
+            )
+          }
+        }}
         onUpdated={(r) =>
           setRecords((prev) => prev.map((p) => (p.recordId === r.recordId ? r : p)))
         }
@@ -306,5 +195,4 @@ export default function PatientDetailsPage() {
 }
 
 const Wrapper = tw.div`space-y-4 px-2 sm:px-4 pt-4`
-const Section = tw.div`space-y-2`
-const InfoCard = tw.div`border p-4 rounded w-full lg:w-64 h-max`
+const Section = tw.div`space-y-2 mb-6`

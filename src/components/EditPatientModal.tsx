@@ -31,9 +31,10 @@ export default function EditPatientModal({
         birthDate: values.birthDate,
         allergies: values.allergies,
         notes: values.notes,
-        sex: patient.sex,
+        sex: values.sex,
         ...(values.email ? { email: values.email } : {}),
         ...(values.phone ? { phone: values.phone } : {}),
+        ...(values.address ? { address: values.address } : {}),
       })
       const updated: Patient = {
         ...patient,
@@ -43,9 +44,10 @@ export default function EditPatientModal({
         allergies: values.allergies,
         notes: values.notes,
         updatedAt: new Date().toISOString(),
-        sex: patient.sex,
+        sex: values.sex,
         ...(values.email ? { email: values.email } : {}),
         ...(values.phone ? { phone: values.phone } : {}),
+        ...(values.address ? { address: values.address } : {}),
       }
       toast.success("Paciente actualizado")
       onUpdated?.(updated)
@@ -72,6 +74,8 @@ export default function EditPatientModal({
             birthDate: patient.birthDate,
             email: patient.email ?? '',
             phone: patient.phone ?? '',
+            sex: patient.sex,
+            address: patient.address ?? '',
             allergies: patient.allergies,
             notes: patient.notes,
           }}
