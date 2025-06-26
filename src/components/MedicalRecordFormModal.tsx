@@ -1,11 +1,11 @@
 'use client'
 import { useForm } from 'react-hook-form'
-import { useEffect } from 'react'
+import { useEffect, useContext } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { createMedicalRecord, updateMedicalRecord } from '@/db/patients'
 import { updateAppointment, getAppointmentById } from '@/db/appointments'
-import { useUser } from '@/contexts/UserContext'
+import { UserContext } from '@/contexts/UserContext'
 import { toast } from 'sonner'
 import {
   Form,
@@ -54,7 +54,7 @@ export default function MedicalRecordFormModal({
   record?: MedicalRecord | null
   onUpdated?: (rec: MedicalRecord) => void
 }) {
-  const { user, tenant } = useUser()
+  const { user, tenant } = useContext(UserContext)
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {

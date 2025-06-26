@@ -1,7 +1,7 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { getUsersByTenant } from '@/db/users'
-import { useUser } from '@/contexts/UserContext'
+import { UserContext } from '@/contexts/UserContext'
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import InviteUserModal from './InviteUserModal'
@@ -12,7 +12,7 @@ import LoadingSpinner from './LoadingSpinner'
 import type { User } from '@/types/db'
 
 export default function TeamSettings() {
-  const { tenant } = useUser()
+  const { tenant } = useContext(UserContext)
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(false)
   const [inviteOpen, setInviteOpen] = useState(false)

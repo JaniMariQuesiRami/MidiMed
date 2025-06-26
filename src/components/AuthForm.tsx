@@ -34,6 +34,34 @@ export default function AuthForm({ mode }: AuthFormProps) {
         toast.success('Cuenta creada exitosamente')
       } else {
         await signInWithEmailAndPassword(auth, email, password)
+
+        const user = auth.currentUser
+        if (user) {
+          const { getDoc, doc, runTransaction, updateDoc } = await import('firebase/firestore')
+          const { db } = await import('@/lib/firebase')
+
+          const invitedRef = doc(db, 'users', email)
+          const invitedSnap = await getDoc(invitedRef)
+
+          if (invitedSnap.exists()) {
+            const invitedData = invitedSnap.data()
+            const finalRef = doc(db, 'users', user.uid)
+
+            await runTransaction(db, async (tx) => {
+              tx.set(finalRef, {
+                ...invitedData,
+                uid: user.uid,
+                lastLoginAt: new Date().toISOString(),
+              })
+              tx.delete(invitedRef)
+            })
+          } else {
+            // Always update lastLoginAt for regular logins
+            const userRef = doc(db, 'users', user.uid)
+            await updateDoc(userRef, { lastLoginAt: new Date().toISOString() })
+          }
+        }
+
         toast.success('Inicio de sesión exitoso')
       }
     } catch (err: unknown) {
@@ -81,15 +109,15 @@ export default function AuthForm({ mode }: AuthFormProps) {
               </FieldGroup>
               <FieldGroup>
                 <Label htmlFor="phone">Teléfono</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    pattern="^\+\d{1,3}\s?\d{8}$"
-                    placeholder="+502 55551234"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    disabled={loading}
-                  />
+                <Input
+                  id="phone"
+                  type="tel"
+                  pattern="^\+\d{1,3}\s?\d{8}$"
+                  placeholder="+502 55551234"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  disabled={loading}
+                />
               </FieldGroup>
               <FieldGroup>
                 <Label htmlFor="address">Dirección</Label>

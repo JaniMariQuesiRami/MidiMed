@@ -1,4 +1,9 @@
-import { db } from '@/lib/firebase'
+import { auth, db } from '@/lib/firebase'
+import {
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
+  updateProfile,
+} from 'firebase/auth'
 import {
   collection,
   doc,
@@ -24,19 +29,34 @@ export async function inviteUser(
   tenantId: string,
   email: string,
   role: UserRole = 'staff',
+  invitedBy: string = '',
 ): Promise<void> {
   try {
-    const ref = doc(collection(db, 'users'))
+    const displayName = email.split('@')[0]
     const now = new Date().toISOString()
-    await setDoc(ref, {
+
+    // 1. Crear usuario en Auth con contraseña temporal
+    const tempPassword = `Temp-${Math.floor(Math.random() * 1000000)}`
+    const userCredential = await createUserWithEmailAndPassword(auth, email, tempPassword)
+    const authUser = userCredential.user
+
+    // 2. Asignar displayName opcionalmente
+    await updateProfile(authUser, { displayName })
+
+    // 3. Crear documento en Firestore
+    await setDoc(doc(db, 'users', authUser.uid), {
       tenantId,
-      uid: ref.id,
+      uid: authUser.uid,
       email,
-      displayName: '',
+      displayName,
       role,
+      invitedBy,
       createdAt: now,
       lastLoginAt: '',
     })
+
+    // 4. Enviar email para establecer nueva contraseña
+    await sendPasswordResetEmail(auth, email)
   } catch (err) {
     console.error('Error in inviteUser:', err)
     throw err

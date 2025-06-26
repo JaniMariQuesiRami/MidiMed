@@ -12,10 +12,11 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { inviteUser } from '@/db/users'
-import { useUser } from '@/contexts/UserContext'
+import { UserContext } from '@/contexts/UserContext'
 import { toast } from 'sonner'
 import tw from 'tailwind-styled-components'
 import type { UserRole } from '@/types/db'
+import { useState, useContext } from 'react'
 
 const schema = z.object({
   email: z.string().email('Correo inválido'),
@@ -33,16 +34,19 @@ export default function InviteUserModal({
   onClose: () => void
   onInvited?: () => void
 }) {
-  const { tenant } = useUser()
+  const { tenant, user } = useContext(UserContext)
   const form = useForm<InviteFormValues>({
     resolver: zodResolver(schema),
     defaultValues: { email: '', role: 'staff' },
   })
+  const [loading, setLoading] = useState(false)
 
   const submit = async (values: InviteFormValues) => {
     if (!tenant) return
     try {
-      await inviteUser(tenant.tenantId, values.email, values.role as UserRole)
+      setLoading(true)
+      await inviteUser(tenant.tenantId, values.email, values.role as UserRole, user?.uid)
+      setLoading(false)
       toast.success('Usuario invitado')
       form.reset({ email: '', role: 'staff' })
       onInvited?.()
@@ -57,7 +61,7 @@ export default function InviteUserModal({
         <DialogHeader>
           <DialogTitle>Invitar usuario</DialogTitle>
         </DialogHeader>
-        <form onSubmit={form.handleSubmit(submit)} className="space-y-3">
+        <form onSubmit={form.handleSubmit(submit)} className="space-y-3" autoComplete='off'>
           <div className="space-y-1">
             <Input placeholder="correo@ejemplo.com" {...form.register('email')} />
             {form.formState.errors.email && (
@@ -82,8 +86,8 @@ export default function InviteUserModal({
               <ErrorText>{form.formState.errors.role.message}</ErrorText>
             )}
           </div>
-          <Button type="submit" className="w-full">
-            Invitar
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? 'Invitando...' : 'Invitar'}
           </Button>
         </form>
       </DialogContent>

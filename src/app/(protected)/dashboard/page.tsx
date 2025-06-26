@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useContext } from 'react'
 import { Calendar, View, dateFnsLocalizer } from 'react-big-calendar'
 import {
   format,
@@ -17,7 +17,7 @@ import 'react-big-calendar/lib/css/react-big-calendar.css'
 import tw from 'tailwind-styled-components'
 import { getPatients } from '@/db/patients'
 import { getAppointmentsInRange } from '@/db/appointments'
-import { useUser } from '@/contexts/UserContext'
+import { UserContext } from '@/contexts/UserContext'
 import CreateAppointmentModal from '@/components/CreateAppointmentModal'
 import AppointmentDetailsPopup from '@/components/AppointmentDetailsPopup'
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
@@ -44,7 +44,7 @@ const views = [
 ]
 
 export default function DashboardCalendar() {
-  const { tenant } = useUser()
+  const { tenant } = useContext(UserContext)
   const [view, setView] = useState<View | null>(null)
   const [date, setDate] = useState(new Date())
   const [patients, setPatients] = useState<Patient[]>([])

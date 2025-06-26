@@ -2,14 +2,14 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useContext } from 'react'
 import { getPatients } from '@/db/patients'
 import {
   createAppointment,
   updateAppointment,
   getAppointmentsInRange,
 } from '@/db/appointments'
-import { useUser } from '@/contexts/UserContext'
+import { UserContext } from '@/contexts/UserContext'
 import type { Patient, Appointment } from '@/types/db'
 import { toast } from 'sonner'
 import {
@@ -68,7 +68,7 @@ export default function CreateAppointmentModal({
   initialDate,
   initialStart,
 }: Props) {
-  const { user, tenant } = useUser()
+  const { user, tenant } = useContext(UserContext)
   const [patients, setPatients] = useState<Patient[]>([])
   const [loading, setLoading] = useState(false)
   const [times, setTimes] = useState<string[]>([])

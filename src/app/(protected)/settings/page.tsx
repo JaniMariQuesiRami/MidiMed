@@ -14,7 +14,7 @@ export default function SettingsPage() {
           Organización
         </Tab>
         <Tab $active={tab === 'team'} onClick={() => setTab('team')}>
-          Equipo
+          Usuarios
         </Tab>
       </Tabs>
       {tab === 'org' ? <OrganizationSettingsForm /> : <TeamSettings />}

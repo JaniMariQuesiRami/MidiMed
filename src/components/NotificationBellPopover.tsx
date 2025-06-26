@@ -1,15 +1,15 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { Bell } from 'lucide-react'
 import { getNotifications, markNotificationAsRead } from '@/db/notifications'
-import { useUser } from '@/contexts/UserContext'
+import { UserContext } from '@/contexts/UserContext'
 import { toast } from 'sonner'
 import tw from 'tailwind-styled-components'
 import { Notification } from '@/types/db'
 import LoadingSpinner from './LoadingSpinner'
 
 export default function NotificationBellPopover() {
-  const { user } = useUser()
+  const { user } = useContext(UserContext)
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [notifications, setNotifications] = useState([] as Notification[])

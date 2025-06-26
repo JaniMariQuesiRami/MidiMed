@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { getPatients } from '@/db/patients'
-import { useUser } from '@/contexts/UserContext'
+import { UserContext } from '@/contexts/UserContext'
 import type { Patient } from '@/types/db'
 import {
   Table,
@@ -23,7 +23,7 @@ import LoadingSpinner from '@/components/LoadingSpinner'
 const PAGE_SIZE = 10
 
 export default function PatientsPage() {
-  const { tenant } = useUser()
+  const { tenant } = useContext(UserContext)
   const [allPatients, setAllPatients] = useState<Patient[]>([])
   const [search, setSearch] = useState('')
   const [open, setOpen] = useState(false)
