@@ -14,6 +14,8 @@ import {
 } from 'date-fns'
 import { es } from 'date-fns/locale'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
+// Custom calendar styles for a modern, borderless look
+import '@/app/(protected)/dashboard/rbc-modern.css'
 import tw from 'tailwind-styled-components'
 import { getPatients } from '@/db/patients'
 import { getAppointmentsInRange } from '@/db/appointments'
@@ -136,13 +138,20 @@ export default function DashboardCalendar() {
     <Wrapper>
       <Header>
         <DateTitle>{title}</DateTitle>
-        <div className="flex gap-2 ml-auto sm:ml-0">
+        <div className="flex gap-2 ml-auto sm:ml-0 items-center">
           <IconButton onClick={() => navigate(-1)}>
             <ChevronLeft size={20} />
           </IconButton>
           <IconButton onClick={() => navigate(1)}>
             <ChevronRight size={20} />
           </IconButton>
+          <button
+            className="ml-2 px-3 py-1 rounded bg-primary text-white font-medium text-sm hover:bg-primary/90 transition"
+            onClick={() => setDate(new Date())}
+            type="button"
+          >
+            Ir a hoy
+          </button>
         </div>
         <div className="flex items-center gap-2 ml-auto">
           <PatientAutocomplete
@@ -175,7 +184,7 @@ export default function DashboardCalendar() {
       </Header>
       <div className="overflow-x-auto w-full">
         <div className="md:min-w-[700px] md:max-w-auto max-w-[100vw]">
-          <Calendar
+          <ModernCalendar
             culture="es"
             localizer={localizer}
             events={events}
@@ -184,9 +193,10 @@ export default function DashboardCalendar() {
             date={date}
             onNavigate={setDate}
             onView={setView}
-            onSelectEvent={(e: CalendarEvent) =>
+            onSelectEvent={(event: object, _e?: React.SyntheticEvent) => {
+              const e = event as CalendarEvent
               setSelected({ appt: e.resource, name: e.title })
-            }
+            }}
             onSelectSlot={(slot) => {
               setSlotDate(slot.start)
               setSlotStart(view === 'month' ? null : slot.start)
@@ -194,7 +204,23 @@ export default function DashboardCalendar() {
             }}
             style={{ height: 'calc(100vh - 150px)' }}
             selectable
-            components={{ toolbar: () => null }}
+            components={{
+              toolbar: () => null,
+              event: ({ event }) => {
+                // Only show patient name (no hour) in week view
+                // event.title is "HH:mm - Nombre Paciente" or just "Nombre Paciente"
+                // event can be CalendarEvent or raw event object
+                const title = (event && typeof event === 'object' && 'title' in event) ? (event as any).title : '';
+                let name = title;
+                if (view === 'week' || view === 'day') {
+                  // Remove hour prefix if present
+                  name = name.replace(/^\d{2}:\d{2} - /, '');
+                }
+                return (
+                  <div className="font-semibold text-white text-sm px-1 truncate" style={{lineHeight:'1.2'}}>{name}</div>
+                );
+              }
+            }}
           />
         </div>
       </div>
@@ -221,6 +247,7 @@ export default function DashboardCalendar() {
 }
 
 // Styled components
+const ModernCalendar = tw(Calendar)`bg-white rounded-2xl shadow-sm p-2`;
 const Wrapper = tw.div`flex flex-col gap-4 px-2 sm:px-4 pt-4`
 const Header = tw.div`flex flex-col sm:flex-row sm:items-center sm:justify-between sticky top-0 z-10 bg-white px-2 sm:px-4 py-2 gap-2`
 const DateTitle = tw.h1`text-lg font-semibold w-full sm:w-auto`
