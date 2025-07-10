@@ -2,7 +2,7 @@
 import { useContext, useEffect, useState, useMemo } from 'react'
 import { format, startOfDay, endOfDay } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { Clock, User, CheckCircle, Stethoscope, Info } from 'lucide-react'
+import { Clock, User, CheckCircle, Stethoscope, Info, Plus } from 'lucide-react'
 import tw from 'tailwind-styled-components'
 import { UserContext } from '@/contexts/UserContext'
 import { getAppointmentsInRange } from '@/db/appointments'
@@ -12,6 +12,7 @@ import { toast } from 'sonner'
 import LoadingSpinner from './LoadingSpinner'
 import MedicalRecordFormModal from './MedicalRecordFormModal'
 import AppointmentDetailsPopup from './AppointmentDetailsPopup'
+import CreateAppointmentModal from './CreateAppointmentModal'
 
 export default function MobileHomeDashboard() {
   const { user, tenant } = useContext(UserContext)
@@ -23,6 +24,7 @@ export default function MobileHomeDashboard() {
   const [completingAppt, setCompletingAppt] = useState<Appointment | null>(null)
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null)
   const [viewingRecord, setViewingRecord] = useState<MedicalRecord | null>(null)
+  const [openCreate, setOpenCreate] = useState(false)
 
   const today = useMemo(() => new Date(), [])
   const todayStr = format(today, 'EEEE d \'de\' MMMM', { locale: es })
@@ -123,7 +125,16 @@ export default function MobileHomeDashboard() {
 
       {/* Today's Appointments Section */}
       <Section>
-        <SectionTitle>Citas de hoy</SectionTitle>
+        <SectionTitle className="flex items-center justify-between">
+          <span>Citas de hoy</span>
+          <button
+            className="flex items-center gap-1 text-primary font-medium text-sm hover:underline px-2 rounded transition"
+            onClick={() => setOpenCreate(true)}
+            type="button"
+          >
+            <Plus size={16} /> Crear cita
+          </button>
+        </SectionTitle>
         
         <SegmentedControl>
           <SegmentButton 
@@ -250,6 +261,25 @@ export default function MobileHomeDashboard() {
           }}
         />
       )}
+
+      {/* Modal de creación de cita */}
+      <CreateAppointmentModal
+        open={openCreate}
+        onClose={() => setOpenCreate(false)}
+        initialDate={today}
+        onCreated={() => {
+          setOpenCreate(false)
+          // Recargar citas del día
+          if (tenant) {
+            getAppointmentsInRange(
+              startOfDay(today),
+              endOfDay(today),
+              undefined,
+              tenant.tenantId
+            ).then(setTodayAppointments)
+          }
+        }}
+      />
     </Container>
   )
 }
@@ -300,7 +330,7 @@ const CalendarIconWrapper = tw.div`
 `
 
 const Section = tw.div`
-  space-y-4
+  space-y-2
 `
 
 const SectionTitle = tw.h3`
