@@ -162,3 +162,18 @@ export async function uploadRecordAttachment(recordId: string, file: File): Prom
     throw err
   }
 }
+
+export async function getAllMedicalRecords(tenantId: string): Promise<MedicalRecord[]> {
+  try {
+    const q = query(collection(db, 'medicalRecords'), where('tenantId', '==', tenantId))
+    const snap = await getDocs(q)
+    
+    return snap.docs.map((d) => ({
+      ...(d.data() as Omit<MedicalRecord, 'recordId'>),
+      recordId: d.id,
+    }))
+  } catch (err) {
+    console.error('Error in getAllMedicalRecords:', err)
+    return []
+  }
+}

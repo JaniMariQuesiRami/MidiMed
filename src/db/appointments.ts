@@ -88,3 +88,18 @@ export async function deleteAppointment(id: string): Promise<void> {
     throw err
   }
 }
+
+export async function getAllAppointments(tenantId: string): Promise<Appointment[]> {
+  try {
+    const q = query(collection(db, 'appointments'), where('tenantId', '==', tenantId))
+    const snap = await getDocs(q)
+    
+    return snap.docs.map((d) => ({
+      ...(d.data() as Omit<Appointment, 'appointmentId'>),
+      appointmentId: d.id,
+    }))
+  } catch (err) {
+    console.error('Error in getAllAppointments:', err)
+    return []
+  }
+}

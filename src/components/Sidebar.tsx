@@ -9,6 +9,7 @@ import {
   ChevronsLeft,
   ChevronsRight,
   Bell,
+  BarChart3,
 } from 'lucide-react'
 import { useState } from 'react'
 import Image from 'next/image'
@@ -19,6 +20,7 @@ const navItems = [
   { href: '/dashboard', label: 'Calendario', icon: Calendar },
   { href: '/patients', label: 'Pacientes', icon: Users },
   { href: '/notifications', label: 'Notificaciones', icon: Bell },
+  { href: '/reports', label: 'Reportes', icon: BarChart3 },
   { href: '/settings', label: 'Ajustes', icon: Settings },
 ]
 
