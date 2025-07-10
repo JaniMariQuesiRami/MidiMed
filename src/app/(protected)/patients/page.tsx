@@ -149,5 +149,5 @@ export default function PatientsPage() {
   )
 }
 
-const Wrapper = tw.div`flex flex-col gap-4 px-2 sm:px-4 pt-4`
+const Wrapper = tw.div`flex flex-col gap-4 px-2 sm:px-4 pt-8`
 const Header = tw.div`flex justify-between items-center`

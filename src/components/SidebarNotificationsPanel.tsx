@@ -109,66 +109,77 @@ export default function SidebarNotificationsPanel({
         {unreadCount > 0 && <Badge>{unreadCount}</Badge>}
       </BellButton>
       <Dialog open={open} onOpenChange={(v) => !v && setOpen(false)}>
-        <DialogContent
-          showCloseButton={false}
-          className="fixed right-0 top-0 h-full max-w-xs w-full rounded-none p-0"
-        >
-          <PanelWrapper>
-            <Header>
-              <DialogHeader>
-                <DialogTitle>Notificaciones</DialogTitle>
-              </DialogHeader>
-              <Tabs>
-                <Tab $active={tab === "all"} onClick={() => setTab("all")}>Todo</Tab>
-                <Tab
-                  $active={tab === "archived"}
-                  onClick={() => setTab("archived")}
-                >
-                  Archivado
-                </Tab>
-              </Tabs>
-            </Header>
-            <List ref={listRef}>
-              {notifications.length === 0 ? (
-                <EmptyState>No hay notificaciones</EmptyState>
-              ) : (
-                notifications.map((n) => (
-                  <Item key={n.notificationId} $unread={!n.isRead}>
-                    <div>
-                      <p className="font-medium">{n.title}</p>
-                      <p className="text-sm text-muted-foreground">{n.body}</p>
-                    </div>
-                    <div className="flex gap-2">
-                      {!n.isRead && (
-                        <Button
-                          variant="link"
-                          size="sm"
-                          onClick={() => markRead(n.notificationId)}
-                        >
-                          Leer
-                        </Button>
-                      )}
-                      {tab !== "archived" && (
-                        <Button
-                          variant="link"
-                          size="sm"
-                          onClick={() => archive(n.notificationId)}
-                        >
-                          Archivar
-                        </Button>
-                      )}
-                    </div>
-                  </Item>
-                ))
-              )}
-              {loadingMore && (
-                <div className="py-4 flex justify-center">
-                  <LoadingSpinner className="h-4 w-4" />
-                </div>
-              )}
-            </List>
-          </PanelWrapper>
-        </DialogContent>
+        <div className="fixed inset-0 z-50">
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setOpen(false)}
+          />
+          <DialogContent
+            showCloseButton={false}
+            className="fixed right-0 top-0 h-full max-w-xs w-full rounded-none p-0 z-50 shadow-2xl bg-white dark:bg-background border-l border-border"
+            style={{ boxShadow: "rgba(0,0,0,0.15) -4px 0px 24px" }}
+          >
+            <PanelWrapper>
+              <Header>
+                <DialogHeader>
+                  <DialogTitle>Notificaciones</DialogTitle>
+                </DialogHeader>
+                <Tabs>
+                  <Tab $active={tab === "all"} onClick={() => setTab("all")}>
+                    Todo
+                  </Tab>
+                  <Tab
+                    $active={tab === "archived"}
+                    onClick={() => setTab("archived")}
+                  >
+                    Archivado
+                  </Tab>
+                </Tabs>
+              </Header>
+              <List ref={listRef}>
+                {notifications.length === 0 ? (
+                  <EmptyState>No hay notificaciones</EmptyState>
+                ) : (
+                  notifications.map((n) => (
+                    <Item key={n.notificationId} $unread={!n.isRead}>
+                      <div>
+                        <p className="font-medium">{n.title}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {n.body}
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+                        {!n.isRead && (
+                          <Button
+                            variant="link"
+                            size="sm"
+                            onClick={() => markRead(n.notificationId)}
+                          >
+                            Leer
+                          </Button>
+                        )}
+                        {tab !== "archived" && (
+                          <Button
+                            variant="link"
+                            size="sm"
+                            onClick={() => archive(n.notificationId)}
+                          >
+                            Archivar
+                          </Button>
+                        )}
+                      </div>
+                    </Item>
+                  ))
+                )}
+                {loadingMore && (
+                  <div className="py-4 flex justify-center">
+                    <LoadingSpinner className="h-4 w-4" />
+                  </div>
+                )}
+              </List>
+            </PanelWrapper>
+          </DialogContent>
+        </div>
       </Dialog>
     </>
   )

@@ -8,16 +8,17 @@ import {
   Settings,
   ChevronsLeft,
   ChevronsRight,
+  Bell,
 } from 'lucide-react'
 import { useState } from 'react'
 import Image from 'next/image'
 import UserSettings from '@/components/UserSettings'
-import SidebarNotificationsPanel from './SidebarNotificationsPanel'
 import tw from 'tailwind-styled-components'
 
 const navItems = [
   { href: '/dashboard', label: 'Calendario', icon: Calendar },
   { href: '/patients', label: 'Pacientes', icon: Users },
+  { href: '/notifications', label: 'Notificaciones', icon: Bell },
   { href: '/settings', label: 'Ajustes', icon: Settings },
 ]
 
@@ -61,7 +62,6 @@ export default function Sidebar() {
               </Link>
             </NavItem>
           ))}
-          <SidebarNotificationsPanel collapsed={collapsed} />
         </NavList>
       </TopSection>
 
