@@ -74,15 +74,16 @@ export default function PatientsPage() {
       </Header>
 
       <div className="border rounded-lg overflow-hidden shadow-sm">
-        <Table>
-          <TableHeader className="bg-muted">
-            <TableRow>
-              <TableHead>Nombre</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Teléfono</TableHead>
-              <TableHead></TableHead>
-            </TableRow>
-          </TableHeader>
+        <div className="overflow-x-auto">
+          <Table className="min-w-[100px]">
+            <TableHeader className="bg-muted">
+              <TableRow>
+                <TableHead>Nombre</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Teléfono</TableHead>
+                <TableHead></TableHead>
+              </TableRow>
+            </TableHeader>
           <TableBody>
             {loading ? (
               <TableRow>
@@ -114,6 +115,7 @@ export default function PatientsPage() {
             )}
           </TableBody>
         </Table>
+        </div>
 
         {!loading && filtered.length > 0 && (
           <div className="flex justify-between items-center p-2 text-sm">
