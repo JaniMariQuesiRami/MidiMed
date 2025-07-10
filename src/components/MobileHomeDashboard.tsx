@@ -1,11 +1,11 @@
 'use client'
-import { useContext, useEffect, useState } from 'react'
-import { format, isToday, startOfDay, endOfDay } from 'date-fns'
+import { useContext, useEffect, useState, useMemo } from 'react'
+import { format, startOfDay, endOfDay } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { Calendar, Clock, User, CheckCircle, Stethoscope, Info } from 'lucide-react'
+import { Clock, User, CheckCircle, Stethoscope, Info } from 'lucide-react'
 import tw from 'tailwind-styled-components'
 import { UserContext } from '@/contexts/UserContext'
-import { getAppointmentsInRange, updateAppointment } from '@/db/appointments'
+import { getAppointmentsInRange } from '@/db/appointments'
 import { getPatients, getMedicalRecords } from '@/db/patients'
 import type { Patient, Appointment, MedicalRecord } from '@/types/db'
 import { toast } from 'sonner'
@@ -17,7 +17,6 @@ export default function MobileHomeDashboard() {
   const { user, tenant } = useContext(UserContext)
   const [todayAppointments, setTodayAppointments] = useState<Appointment[]>([])
   const [patients, setPatients] = useState<Patient[]>([])
-  const [records, setRecords] = useState<MedicalRecord[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'pending' | 'completed'>('pending')
   const [openRecord, setOpenRecord] = useState(false)
@@ -25,7 +24,7 @@ export default function MobileHomeDashboard() {
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null)
   const [viewingRecord, setViewingRecord] = useState<MedicalRecord | null>(null)
 
-  const today = new Date()
+  const today = useMemo(() => new Date(), [])
   const todayStr = format(today, 'EEEE d \'de\' MMMM', { locale: es })
   const firstName = user?.displayName?.split(' ')[0] || 'Doctor'
 
@@ -46,8 +45,6 @@ export default function MobileHomeDashboard() {
         
         setTodayAppointments(appointmentsData)
         setPatients(patientsData)
-      } catch (error) {
-        toast.error('Error al cargar datos')
       } finally {
         setLoading(false)
       }
@@ -247,7 +244,7 @@ export default function MobileHomeDashboard() {
                 setSelectedAppointment(null)
                 setOpenRecord(true)
               }
-            } catch (error) {
+            } catch {
               toast.error('Error al cargar el registro médico')
             }
           }}

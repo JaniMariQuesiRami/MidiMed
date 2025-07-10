@@ -199,7 +199,7 @@ export default function DashboardCalendar() {
             date={date}
             onNavigate={setDate}
             onView={setView}
-            onSelectEvent={(event: object, _e?: React.SyntheticEvent) => {
+            onSelectEvent={(event: object) => {
               const e = event as CalendarEvent
               setSelected({ appt: e.resource, name: e.title })
             }}
@@ -212,12 +212,11 @@ export default function DashboardCalendar() {
             selectable
             components={{
               toolbar: () => null,
-              event: ({ event }) => {
+              event: (props) => {
+                const event = props.event as CalendarEvent;
                 // Only show patient name (no hour) in week view
                 // event.title is "HH:mm - Nombre Paciente" or just "Nombre Paciente"
-                // event can be CalendarEvent or raw event object
-                const title = (event && typeof event === 'object' && 'title' in event) ? (event as any).title : '';
-                let name = title;
+                let name = event.title;
                 if (view === 'week' || view === 'day') {
                   // Remove hour prefix if present
                   name = name.replace(/^\d{2}:\d{2} - /, '');

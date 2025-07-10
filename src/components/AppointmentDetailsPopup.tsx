@@ -3,7 +3,7 @@
 import { Appointment } from '@/types/db'
 import { format } from 'date-fns'
 import tw from 'tailwind-styled-components'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { updateAppointment } from '@/db/appointments'
 import { toast } from 'sonner'
