@@ -78,9 +78,9 @@ export default function PatientsPage() {
           <Table className="min-w-[100px]">
             <TableHeader className="bg-muted">
               <TableRow>
-                <TableHead>Nombre</TableHead>
+                <TableHead className="min-w-[150px]">Nombre</TableHead>
                 <TableHead>Email</TableHead>
-                <TableHead>Teléfono</TableHead>
+                <TableHead className="min-w-[150px]">Teléfono</TableHead>
                 <TableHead></TableHead>
               </TableRow>
             </TableHeader>
@@ -104,9 +104,9 @@ export default function PatientsPage() {
                   className="cursor-pointer hover:bg-[var(--primary-soft)]"
                   onClick={() => router.push(`/patients/${p.patientId}`)}
                 >
-                  <TableCell>{p.firstName} {p.lastName}</TableCell>
+                  <TableCell className="min-w-max">{p.firstName} {p.lastName}</TableCell>
                   <TableCell>{p.email}</TableCell>
-                  <TableCell>{p.phone}</TableCell>
+                  <TableCell className="min-w-max">{p.phone}</TableCell>
                   <TableCell>
                     <Link className="text-primary" href={`/patients/${p.patientId}`}>Ver</Link>
                   </TableCell>
@@ -151,5 +151,5 @@ export default function PatientsPage() {
   )
 }
 
-const Wrapper = tw.div`flex flex-col gap-4 px-2 sm:px-4 pt-4`
+const Wrapper = tw.div`flex flex-col gap-4 px-2 sm:px-4 pt-8`
 const Header = tw.div`flex justify-between items-center`

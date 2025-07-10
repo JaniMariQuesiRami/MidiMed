@@ -5,10 +5,10 @@ import { usePathname } from 'next/navigation'
 import {
   Calendar,
   Users,
-  Bell,
   Settings,
   ChevronsLeft,
   ChevronsRight,
+  Bell,
 } from 'lucide-react'
 import { useState } from 'react'
 import Image from 'next/image'
