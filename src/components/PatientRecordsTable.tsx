@@ -10,14 +10,15 @@ export default function PatientRecordsTable({ records, appointments, onEdit, onD
   onDelete: (r: MedicalRecord) => void,
 }) {
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Resumen</TableHead>
-          <TableHead>Cita relacionada</TableHead>
-          <TableHead></TableHead>
-        </TableRow>
-      </TableHeader>
+    <div className="overflow-x-auto">
+      <Table className="min-w-[500px]">
+        <TableHeader>
+          <TableRow>
+            <TableHead>Resumen</TableHead>
+            <TableHead>Cita relacionada</TableHead>
+            <TableHead></TableHead>
+          </TableRow>
+        </TableHeader>
       <TableBody>
         {records.length === 0 ? (
           <TableRow>
@@ -42,5 +43,6 @@ export default function PatientRecordsTable({ records, appointments, onEdit, onD
         )}
       </TableBody>
     </Table>
+    </div>
   )
 }

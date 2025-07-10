@@ -1,6 +1,6 @@
 'use client'
 import { useContext, useEffect, useState } from 'react'
-import { Bell } from 'lucide-react'
+import { Bell, X } from 'lucide-react'
 import { getNotifications, markNotificationAsRead } from '@/db/notifications'
 import { UserContext } from '@/contexts/UserContext'
 import { toast } from 'sonner'
@@ -41,34 +41,125 @@ export default function NotificationBellPopover() {
 
   if (!user) return null
 
+  const unreadCount = notifications.length
+
   return (
-    <Wrapper onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
-      <Bell size={20} />
+    <>
+      <BellButton onClick={() => setOpen(true)}>
+        <Bell size={20} />
+        {unreadCount > 0 && (
+          <Badge>{unreadCount > 9 ? '9+' : unreadCount}</Badge>
+        )}
+      </BellButton>
+
+      {/* Desktop Popover */}
+      <DesktopWrapper 
+        onMouseEnter={() => setOpen(true)} 
+        onMouseLeave={() => setOpen(false)}
+        className="hidden md:block"
+      >
+        <Bell size={20} />
+        {unreadCount > 0 && (
+          <Badge>{unreadCount > 9 ? '9+' : unreadCount}</Badge>
+        )}
+        {open && (
+          <Popover>
+            {loading ? (
+              <div className="p-2 flex justify-center">
+                <LoadingSpinner className="h-4 w-4" />
+              </div>
+            ) : notifications.length === 0 ? (
+              <div className="p-2 text-sm">Sin notificaciones</div>
+            ) : (
+              notifications.map((n) => (
+                <Item key={n.notificationId}>
+                  <span>{n.title}</span>
+                  <button className="text-xs text-primary" onClick={() => markRead(n.notificationId)}>
+                    Marcar leída
+                  </button>
+                </Item>
+              ))
+            )}
+          </Popover>
+        )}
+      </DesktopWrapper>
+
+      {/* Mobile Modal */}
       {open && (
-        <Popover>
-          {loading ? (
-            <div className="p-2 flex justify-center">
-              <LoadingSpinner className="h-4 w-4" />
-            </div>
-          ) : notifications.length === 0 ? (
-            <div className="p-2 text-sm">Sin notificaciones</div>
-          ) : (
-            notifications.map((n) => (
-              <Item key={n.notificationId}>
-                <span>{n.title}</span>
-                <button className="text-xs text-primary" onClick={() => markRead(n.notificationId)}>
-                  Marcar leída
-                </button>
-              </Item>
-            ))
-          )}
-        </Popover>
+        <MobileModal onClick={() => setOpen(false)}>
+          <ModalContent onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+            <ModalHeader>
+              <h3 className="text-lg font-semibold">Notificaciones</h3>
+              <button onClick={() => setOpen(false)}>
+                <X size={20} />
+              </button>
+            </ModalHeader>
+            <ModalBody>
+              {loading ? (
+                <div className="p-4 flex justify-center">
+                  <LoadingSpinner className="h-4 w-4" />
+                </div>
+              ) : notifications.length === 0 ? (
+                <div className="p-4 text-center text-muted-foreground">
+                  Sin notificaciones nuevas
+                </div>
+              ) : (
+                notifications.map((n) => (
+                  <NotificationItem key={n.notificationId}>
+                    <div className="flex-1">
+                      <p className="font-medium">{n.title}</p>
+                      {n.body && (
+                        <p className="text-sm text-muted-foreground">{n.body}</p>
+                      )}
+                    </div>
+                    <button 
+                      className="text-sm text-primary font-medium" 
+                      onClick={() => markRead(n.notificationId)}
+                    >
+                      Marcar leída
+                    </button>
+                  </NotificationItem>
+                ))
+              )}
+            </ModalBody>
+          </ModalContent>
+        </MobileModal>
       )}
-    </Wrapper>
+    </>
   )
 }
 
 const Wrapper = tw.div`relative`
+const DesktopWrapper = tw.div`relative`
 const Popover = tw.div`absolute right-0 mt-2 w-64 rounded-md border bg-background shadow-lg z-50`
 const Item = tw.div`flex justify-between items-center px-3 py-2 text-sm border-b last:border-0`
+
+const BellButton = tw.button`
+  relative p-1 rounded hover:bg-muted transition md:hidden
+`
+
+const Badge = tw.span`
+  absolute -top-1 -right-1 h-5 w-5 text-xs font-medium text-white 
+  bg-red-500 rounded-full flex items-center justify-center
+`
+
+const MobileModal = tw.div`
+  fixed inset-0 bg-black/50 z-50 flex items-end md:hidden
+`
+
+const ModalContent = tw.div`
+  bg-background rounded-t-2xl w-full max-h-[80vh] flex flex-col
+`
+
+const ModalHeader = tw.div`
+  flex items-center justify-between p-4 border-b
+`
+
+const ModalBody = tw.div`
+  flex-1 overflow-y-auto
+`
+
+const NotificationItem = tw.div`
+  flex items-start gap-3 p-4 border-b last:border-0
+`
 

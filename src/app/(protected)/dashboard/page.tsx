@@ -24,6 +24,7 @@ import CreateAppointmentModal from '@/components/CreateAppointmentModal'
 import AppointmentDetailsPopup from '@/components/AppointmentDetailsPopup'
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
 import PatientAutocomplete from '@/components/PatientAutocomplete'
+import MobileHomeDashboard from '@/components/MobileHomeDashboard'
 import type { Patient, Appointment } from '@/types/db'
 import { toast } from 'sonner'
 import LoadingSpinner from '@/components/LoadingSpinner'
@@ -135,56 +136,61 @@ export default function DashboardCalendar() {
     )
 
   return (
-    <Wrapper>
-      <Header>
-        <DateTitle>{title}</DateTitle>
-        <div className="flex gap-2 ml-auto sm:ml-0 items-center">
-          <IconButton onClick={() => navigate(-1)}>
-            <ChevronLeft size={20} />
-          </IconButton>
-          <IconButton onClick={() => navigate(1)}>
-            <ChevronRight size={20} />
-          </IconButton>
-          <button
-            className="ml-2 px-3 py-1 rounded bg-primary text-white font-medium text-sm hover:bg-primary/90 transition"
-            onClick={() => setDate(new Date())}
-            type="button"
-          >
-            Ir a hoy
-          </button>
-        </div>
-        <div className="flex items-center gap-2 ml-auto">
-          <PatientAutocomplete
-            patients={patients}
-            value={patientFilter}
-            onChange={(v) => setPatientFilter(v || 'all')}
-          />
-          <button
-            className="bg-primary text-white px-3 py-1 rounded flex items-center gap-1"
-            onClick={() => {
-              setSlotDate(new Date())
-              setSlotStart(null)
-              setOpen(true)
-            }}
-          >
-            Nueva cita <Plus size={16} />
-          </button>
-        </div>
-        <ViewSwitcher>
-          {views.map(({ key, label }) => (
-            <SwitchButton
-              key={key}
-              $active={view === key}
-              onClick={() => setView(key)}
+    <>
+      {/* Mobile Home Dashboard */}
+      <MobileHomeDashboard />
+      
+      {/* Desktop Calendar View */}
+      <DesktopWrapper>
+        <Header>
+          <DateTitle>{title}</DateTitle>
+          <div className="flex gap-2 ml-auto sm:ml-0 items-center">
+            <IconButton onClick={() => navigate(-1)}>
+              <ChevronLeft size={20} />
+            </IconButton>
+            <IconButton onClick={() => navigate(1)}>
+              <ChevronRight size={20} />
+            </IconButton>
+            <button
+              className="ml-2 px-3 py-1 rounded bg-primary text-white font-medium text-sm hover:bg-primary/90 transition"
+              onClick={() => setDate(new Date())}
+              type="button"
             >
-              {label}
-            </SwitchButton>
-          ))}
-        </ViewSwitcher>
-      </Header>
-      <div className="overflow-x-auto w-full">
-        <div className="md:min-w-[700px] md:max-w-auto max-w-[100vw]">
-          <ModernCalendar
+              Ir a hoy
+            </button>
+          </div>
+          <div className="flex items-center gap-2 ml-auto">
+            <PatientAutocomplete
+              patients={patients}
+              value={patientFilter}
+              onChange={(v) => setPatientFilter(v || 'all')}
+            />
+            <button
+              className="bg-primary text-white px-3 py-1 rounded flex items-center gap-1"
+              onClick={() => {
+                setSlotDate(new Date())
+                setSlotStart(null)
+                setOpen(true)
+              }}
+            >
+              Nueva cita <Plus size={16} />
+            </button>
+          </div>
+          <ViewSwitcher>
+            {views.map(({ key, label }) => (
+              <SwitchButton
+                key={key}
+                $active={view === key}
+                onClick={() => setView(key)}
+              >
+                {label}
+              </SwitchButton>
+            ))}
+          </ViewSwitcher>
+        </Header>
+        <div className="overflow-x-auto w-full">
+          <div className="md:min-w-[700px] md:max-w-auto max-w-[100vw]">
+            <ModernCalendar
             culture="es"
             localizer={localizer}
             events={events}
@@ -224,6 +230,8 @@ export default function DashboardCalendar() {
           />
         </div>
       </div>
+      </DesktopWrapper>
+
       <CreateAppointmentModal
         open={open}
         onClose={() => {
@@ -242,13 +250,13 @@ export default function DashboardCalendar() {
         onClose={() => setSelected(null)}
         onUpdated={() => loadEvents()}
       />
-    </Wrapper>
+    </>
   )
 }
 
 // Styled components
 const ModernCalendar = tw(Calendar)`bg-white rounded-2xl shadow-sm p-2`;
-const Wrapper = tw.div`flex flex-col gap-4 px-2 sm:px-4 pt-4`
+const DesktopWrapper = tw.div`hidden md:flex md:flex-col gap-4 px-2 sm:px-4 pt-4`
 const Header = tw.div`flex flex-col sm:flex-row sm:items-center sm:justify-between sticky top-0 z-10 bg-white px-2 sm:px-4 py-2 gap-2`
 const DateTitle = tw.h1`text-lg font-semibold w-full sm:w-auto`
 const ViewSwitcher = tw.div`flex gap-2 sm:flex`

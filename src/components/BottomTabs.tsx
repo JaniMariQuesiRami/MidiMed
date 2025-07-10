@@ -2,23 +2,30 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Calendar, Users, Bell, Settings } from 'lucide-react'
+import { Calendar, Users, Bell, Settings, Home } from 'lucide-react'
 import tw from 'tailwind-styled-components'
 
 const tabs = [
-  { href: '/dashboard', icon: <Calendar size={20} />, label: 'Inicio' },
+  { href: '/dashboard', icon: <Home size={20} />, label: 'Inicio' },
   { href: '/patients', icon: <Users size={20} />, label: 'Pacientes' },
-  { href: '/notifications', icon: <Bell size={20} />, label: 'Notificaciones' },
   { href: '/settings', icon: <Settings size={20} />, label: 'Ajustes' },
 ]
 
 export default function BottomTabs() {
   const pathname = usePathname()
 
+  const isTabActive = (href: string) => {
+    if (href === '/patients') {
+      // Keep patients tab active for all patient-related pages
+      return pathname.startsWith('/patients')
+    }
+    return pathname === href
+  }
+
   return (
     <Wrapper>
       {tabs.map(({ href, icon }, idx) => (
-        <TabLink key={idx} href={href} $active={pathname === href}>
+        <TabLink key={idx} href={href} $active={isTabActive(href)}>
           {icon}
         </TabLink>
       ))}
