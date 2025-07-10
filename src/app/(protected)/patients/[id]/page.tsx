@@ -194,5 +194,5 @@ export default function PatientDetailsPage() {
   )
 }
 
-const Wrapper = tw.div`space-y-4 px-2 sm:px-4 pt-4`
+const Wrapper = tw.div`space-y-4 px-2 sm:px-4 pt-4 pb-16 md:pb-0`
 const Section = tw.div`space-y-2 mb-6`

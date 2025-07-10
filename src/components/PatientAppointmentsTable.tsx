@@ -16,15 +16,16 @@ export default function PatientAppointmentsTable({ title, appointments, records,
   return (
     <div className="mb-4">
       <h2 className="font-medium">{title}</h2>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Fecha</TableHead>
-            <TableHead>Estado</TableHead>
-            <TableHead>Notas</TableHead>
-            <TableHead></TableHead>
-          </TableRow>
-        </TableHeader>
+      <div className="overflow-x-auto">
+        <Table className="min-w-[600px]">
+          <TableHeader>
+            <TableRow>
+              <TableHead>Fecha</TableHead>
+              <TableHead>Estado</TableHead>
+              <TableHead>Notas</TableHead>
+              <TableHead></TableHead>
+            </TableRow>
+          </TableHeader>
         <TableBody>
           {appointments.length === 0 ? (
             <TableRow>
@@ -56,6 +57,7 @@ export default function PatientAppointmentsTable({ title, appointments, records,
           )}
         </TableBody>
       </Table>
+      </div>
     </div>
   )
 }

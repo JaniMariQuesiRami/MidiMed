@@ -115,6 +115,10 @@ export default function CreateAppointmentModal({
       endTime,
       notes: appointment?.reason ?? '',
     })
+    // Forzar el valor de endTime si estamos editando
+    if (appointment && endTime) {
+      form.setValue('endTime', endTime)
+    }
   }
 
   useEffect(() => {
@@ -199,6 +203,7 @@ export default function CreateAppointmentModal({
   }, [tenant, watchYear, watchMonth, watchDay, watchStart, workingHours])
 
   useEffect(() => {
+    if (times.length === 0) return;
     if (!watchStart) {
       setEndTimes([])
       form.setValue('endTime', '')
@@ -207,25 +212,48 @@ export default function CreateAppointmentModal({
     const startIdx = times.findIndex((t) => t === watchStart)
     if (startIdx === -1) {
       setEndTimes([])
-      form.setValue('endTime', '')
+      if (!appointment) {
+        form.setValue('endTime', '')
+      }
       return
     }
     const afterStart = times.slice(startIdx + 1)
+
+    if (appointment) {
+      const apptEnd = format(new Date(appointment.scheduledEnd), 'HH:mm')
+      if (!afterStart.includes(apptEnd)) {
+        afterStart.push(apptEnd)
+        afterStart.sort()
+      }
+    }
     setEndTimes(afterStart)
 
     // Preselect endTime to startTime + default duration if available
     if (tenant && afterStart.length > 0) {
-      const [h, m] = watchStart.split(':').map(Number)
-      const endDate = new Date(0, 0, 0, h, m + tenant.settings.appointmentDurationMinutes)
-      const endStr = endDate
-        .toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false })
-      if (afterStart.includes(endStr)) {
-        form.setValue('endTime', endStr)
-      } else {
-        form.setValue('endTime', afterStart[0])
+      // Si estamos editando una cita, forzar el valor de endTime a la hora de la cita SIEMPRE que el modal esté abierto y el valor esté en la lista
+      if (appointment && open) {
+        const apptEnd = format(new Date(appointment.scheduledEnd), 'HH:mm')
+        if (afterStart.includes(apptEnd)) {
+          if (form.getValues('endTime') !== apptEnd) {
+            form.setValue('endTime', apptEnd, { shouldDirty: false, shouldTouch: false })
+          }
+          return
+        }
+      }
+      // Si no es edición o el valor no está en la lista, setear el primer valor disponible
+      if (!afterStart.includes(form.getValues('endTime'))) {
+        const [h, m] = watchStart.split(':').map(Number)
+        const endDate = new Date(0, 0, 0, h, m + tenant.settings.appointmentDurationMinutes)
+        const endStr = endDate
+          .toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false })
+        if (afterStart.includes(endStr)) {
+          form.setValue('endTime', endStr)
+        } else {
+          form.setValue('endTime', afterStart[0])
+        }
       }
     }
-  }, [watchStart, times, tenant, form])
+  }, [watchStart, times, tenant, form, appointment, open])
 
   const submit = async (values: FormValues) => {
     setLoading(true)
