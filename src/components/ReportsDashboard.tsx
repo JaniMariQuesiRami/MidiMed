@@ -8,6 +8,7 @@ import tw from 'tailwind-styled-components'
 import { Bar } from 'react-chartjs-2'
 import { Chart, CategoryScale, LinearScale, BarElement, Tooltip, Legend } from 'chart.js'
 import { Button } from '@/components/ui/button'
+import { toast } from 'sonner'
 
 Chart.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend)
 
@@ -181,7 +182,7 @@ export default function ReportsDashboard() {
 
       // Crear contenedor temporal para el PDF
       const pdfContainer = document.createElement('div')
-      pdfContainer.style.fontFamily = 'Arial, sans-serif'
+      pdfContainer.style.fontFamily = '"Source Sans Pro", sans-serif'
       pdfContainer.style.backgroundColor = '#ffffff'
       pdfContainer.style.padding = '20px'
 
@@ -364,10 +365,10 @@ export default function ReportsDashboard() {
 
     } catch (error) {
       console.error('Error al generar PDF:', error)
-      alert('Error al generar el PDF. Por favor, intenta nuevamente.')
+      toast.error('Error al generar el PDF. Por favor, intenta nuevamente.')
 
       // Limpiar en caso de error
-      const tempContainer = document.querySelector('div[style*="font-family: Arial"]')
+      const tempContainer = document.querySelector('div[style*="font-family: Source Sans Pro"]')
       if (tempContainer) {
         document.body.removeChild(tempContainer)
       }
