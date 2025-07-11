@@ -22,8 +22,7 @@ const sourceSansPro = localFont({
 
 
 export const metadata: Metadata = {
-  title:
-    "MidiMed - Gestiona fácilmente tus pacientes, citas y expedientes médicos",
+  title: "MidiMed",
   description:
     "Gestiona fácilmente tus pacientes, citas y expedientes médicos.",
   keywords: [
