@@ -1,18 +1,25 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { UserProvider } from '@/contexts/UserContext'
 import { Toaster } from "sonner";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+const sourceSansPro = localFont({
+  variable: "--font-source-sans-pro",
+  src: [
+    {
+      path: "../../node_modules/@fontsource/source-sans-pro/files/source-sans-pro-latin-400-normal.woff2",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../../node_modules/@fontsource/source-sans-pro/files/source-sans-pro-latin-700-normal.woff2",
+      weight: "700",
+      style: "normal",
+    },
+  ],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "MidiMed",
@@ -30,7 +37,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${sourceSansPro.variable} font-sans antialiased`}
       >
         <UserProvider>
           {children}
