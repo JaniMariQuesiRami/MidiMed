@@ -22,10 +22,51 @@ const sourceSansPro = localFont({
 
 
 export const metadata: Metadata = {
-  title: "MidiMed",
-  description: "Gestión moderna de pacientes y citas para clínicas y consultorios.",
+  title:
+    "MidiMed - Gestiona fácilmente tus pacientes, citas y expedientes médicos",
+  description:
+    "Gestiona fácilmente tus pacientes, citas y expedientes médicos.",
+  keywords: [
+    "pacientes",
+    "citas",
+    "expedientes médicos",
+    "gestión clínica",
+    "MidiMed",
+  ],
+  authors: [{ name: "MidiMed" }],
+  openGraph: {
+    title:
+      "MidiMed - Gestiona fácilmente tus pacientes, citas y expedientes médicos",
+    description:
+      "Gestiona fácilmente tus pacientes, citas y expedientes médicos.",
+    url: "https://midimed.app",
+    siteName: "MidiMed",
+    images: [
+      {
+        url: "/logoPrimary.svg",
+        width: 800,
+        height: 600,
+        alt: "MidiMed logo",
+      },
+    ],
+    locale: "es_ES",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title:
+      "MidiMed - Gestiona fácilmente tus pacientes, citas y expedientes médicos",
+    description:
+      "Gestiona fácilmente tus pacientes, citas y expedientes médicos.",
+    images: ["/logoPrimary.svg"],
+    creator: "@midimed",
+  },
   icons: {
     icon: "/logo.svg",
+  },
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
   },
 };
 
@@ -35,7 +76,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="es">
       <body
         className={`${sourceSansPro.variable} font-sans antialiased`}
       >
