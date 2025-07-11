@@ -4,13 +4,14 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useEffect, useState, useContext } from 'react'
 import { getPatients } from '@/db/patients'
+import { getUsersByTenant } from '@/db/users'
 import {
   createAppointment,
   updateAppointment,
   getAppointmentsInRange,
 } from '@/db/appointments'
 import { UserContext } from '@/contexts/UserContext'
-import type { Patient, Appointment } from '@/types/db'
+import type { Patient, Appointment, User } from '@/types/db'
 import { toast } from 'sonner'
 import {
   Form,
@@ -70,6 +71,7 @@ export default function CreateAppointmentModal({
 }: Props) {
   const { user, tenant } = useContext(UserContext)
   const [patients, setPatients] = useState<Patient[]>([])
+  const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(false)
   const [times, setTimes] = useState<string[]>([])
   const [endTimes, setEndTimes] = useState<string[]>([])
@@ -80,7 +82,7 @@ export default function CreateAppointmentModal({
     resolver: zodResolver(schema),
     defaultValues: {
       patientId: appointment?.patientId ?? patientId ?? '',
-      providerId: appointment?.providerId ?? '',
+      providerId: appointment?.providerId ?? user?.uid ?? '',
       year: currentYear,
       month: '',
       day: '',
@@ -107,7 +109,7 @@ export default function CreateAppointmentModal({
       : ''
     form.reset({
       patientId: appointment?.patientId ?? patientId ?? '',
-      providerId: appointment?.providerId ?? '',
+      providerId: appointment?.providerId ?? user?.uid ?? '',
       year,
       month,
       day,
@@ -128,13 +130,23 @@ export default function CreateAppointmentModal({
 
   useEffect(() => {
     form.setValue('patientId', appointment?.patientId ?? patientId ?? '')
-  }, [patientId, appointment, form])
+    // Si no hay appointment (nueva cita) y hay usuario, setear el providerId al usuario actual
+    if (!appointment && user?.uid) {
+      form.setValue('providerId', user.uid)
+    }
+  }, [patientId, appointment, form, user])
 
   useEffect(() => {
     if (!open || !tenant) return
-    getPatients(tenant.tenantId)
-      .then(setPatients)
-      .catch(() => toast.error('Error cargando pacientes'))
+    Promise.all([
+      getPatients(tenant.tenantId),
+      getUsersByTenant(tenant.tenantId)
+    ])
+      .then(([patientsData, usersData]) => {
+        setPatients(patientsData)
+        setUsers(usersData)
+      })
+      .catch(() => toast.error('Error cargando datos'))
   }, [open, tenant])
 
   const watchYear = form.watch('year')
@@ -372,7 +384,18 @@ export default function CreateAppointmentModal({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Doctor</FormLabel>
-                  <Input {...field} />
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccione un doctor" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {users.map((u) => (
+                        <SelectItem key={u.uid} value={u.uid}>
+                          {u.displayName} ({u.role})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
