@@ -62,7 +62,7 @@ export async function generateReportPDF({
 
   // Crear contenedor temporal para el PDF
   const pdfContainer = document.createElement('div')
-  pdfContainer.style.fontFamily = 'Arial, sans-serif'
+  pdfContainer.style.fontFamily = '"Source Sans Pro", sans-serif'
   pdfContainer.style.backgroundColor = '#ffffff'
   pdfContainer.style.padding = '20px'
   pdfContainer.style.position = 'fixed'
