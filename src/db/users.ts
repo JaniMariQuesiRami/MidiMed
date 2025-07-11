@@ -1,7 +1,6 @@
 import { auth, db } from '@/lib/firebase'
 import {
   createUserWithEmailAndPassword,
-  sendPasswordResetEmail,
   updateProfile,
 } from 'firebase/auth'
 import {
@@ -10,9 +9,10 @@ import {
   getDocs,
   query,
   setDoc,
+  updateDoc,
   where,
 } from 'firebase/firestore'
-import type { User, UserRole } from '@/types/db'
+import type { User, UserRole, Invite } from '@/types/db'
 
 export async function getUsersByTenant(tenantId: string): Promise<User[]> {
   try {
@@ -30,35 +30,101 @@ export async function inviteUser(
   email: string,
   role: UserRole = 'staff',
   invitedBy: string = '',
-): Promise<void> {
+): Promise<string> { // Retorna la contraseña temporal
   try {
     const displayName = email.split('@')[0]
     const now = new Date().toISOString()
-
-    // 1. Crear usuario en Auth con contraseña temporal
     const tempPassword = `Temp-${Math.floor(Math.random() * 1000000)}`
-    const userCredential = await createUserWithEmailAndPassword(auth, email, tempPassword)
-    const authUser = userCredential.user
+    
+    // Crear ID único para la invitación
+    const inviteRef = doc(collection(db, 'invites'))
+    const inviteId = inviteRef.id
 
-    // 2. Asignar displayName opcionalmente
-    await updateProfile(authUser, { displayName })
+    // Fecha de expiración (30 días)
+    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
 
-    // 3. Crear documento en Firestore
-    await setDoc(doc(db, 'users', authUser.uid), {
+    // Crear invitación con contraseña temporal
+    await setDoc(inviteRef, {
       tenantId,
-      uid: authUser.uid,
+      inviteId,
       email,
       displayName,
       role,
       invitedBy,
       createdAt: now,
-      lastLoginAt: '',
+      status: 'pending',
+      expiresAt,
+      tempPassword // Guardamos la contraseña temporal
     })
-
-    // 4. Enviar email para establecer nueva contraseña
-    await sendPasswordResetEmail(auth, email)
+    
+    return tempPassword
+    
   } catch (err) {
     console.error('Error in inviteUser:', err)
+    throw err
+  }
+}
+
+export async function getInvitesByTenant(tenantId: string): Promise<Invite[]> {
+  try {
+    const q = query(
+      collection(db, 'invites'), 
+      where('tenantId', '==', tenantId),
+      where('status', '==', 'pending')
+    )
+    const snap = await getDocs(q)
+    return snap.docs.map((d) => ({ 
+      ...(d.data() as Omit<Invite, 'inviteId'>), 
+      inviteId: d.id 
+    }))
+  } catch (err) {
+    console.error('Error in getInvitesByTenant:', err)
+    return []
+  }
+}
+
+export async function loginWithInvitation(email: string, tempPassword: string): Promise<void> {
+  try {
+    // Buscar invitación pendiente
+    const invitesQuery = query(
+      collection(db, 'invites'), 
+      where('email', '==', email),
+      where('status', '==', 'pending'),
+      where('tempPassword', '==', tempPassword)
+    )
+    const invitesSnap = await getDocs(invitesQuery)
+
+    if (invitesSnap.empty) {
+      throw new Error('Invitación no encontrada o contraseña incorrecta')
+    }
+
+    const inviteDoc = invitesSnap.docs[0]
+    const invitationData = inviteDoc.data()
+
+    // Crear usuario en Firebase Auth
+    const userCredential = await createUserWithEmailAndPassword(auth, email, tempPassword)
+    const user = userCredential.user
+
+    // Actualizar perfil
+    await updateProfile(user, { displayName: invitationData.displayName })
+
+    // Crear documento de usuario
+    await setDoc(doc(db, 'users', user.uid), {
+      tenantId: invitationData.tenantId,
+      uid: user.uid,
+      email: invitationData.email,
+      displayName: invitationData.displayName,
+      role: invitationData.role,
+      invitedBy: invitationData.invitedBy,
+      createdAt: invitationData.createdAt,
+      lastLoginAt: new Date().toISOString(),
+    })
+
+    // Marcar invitación como aceptada
+    await updateDoc(inviteDoc.ref, { status: 'accepted' })
+
+  } catch (err) {
+    console.error('Error in loginWithInvitation:', err)
     throw err
   }
 }

@@ -80,14 +80,13 @@ const translateSex = (s: "M" | "F" | "O") => {
 
 const safeFormatDate = (dateString?: string): string => {
   if (!dateString) return 'No especificado'
-  
   try {
     const date = new Date(dateString)
     if (isNaN(date.getTime())) {
       return 'Fecha inválida'
     }
     return format(date, 'dd/MM/yyyy')
-  } catch (error) {
+  } catch {
     return 'Fecha inválida'
   }
 }

@@ -45,12 +45,21 @@ export default function InviteUserModal({
     if (!tenant) return
     try {
       setLoading(true)
-      await inviteUser(tenant.tenantId, values.email, values.role as UserRole, user?.uid)
+      const tempPassword = await inviteUser(tenant.tenantId, values.email, values.role as UserRole, user?.uid)
       setLoading(false)
-      toast.success('Usuario invitado')
+      
+      // Mostrar contraseña temporal en toast para que el admin la copie
+      toast.success(
+        `Usuario invitado exitosamente.\nContraseña temporal: ${tempPassword}\n¡Cópiala y compártela con el usuario!`,
+        {
+          duration: 10000, // 10 segundos para dar tiempo a copiar
+        }
+      )
+      
       form.reset({ email: '', role: 'staff' })
       onInvited?.()
     } catch {
+      setLoading(false)
       toast.error('No se pudo invitar usuario')
     }
   }

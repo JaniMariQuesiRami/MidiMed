@@ -88,8 +88,6 @@ export default function DashboardCalendar() {
       patients.map((p) => [p.patientId, `${p.firstName} ${p.lastName}`]),
     )
     const filterId = patientFilter === "all" ? undefined : patientFilter
-    console.log("Tenant ID:", tenant.tenantId)
-    console.log("Date Range:", start, end)
     const list = await getAppointmentsInRange(
       start,
       end,
