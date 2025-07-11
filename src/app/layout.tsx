@@ -20,16 +20,6 @@ const sourceSansPro = localFont({
   ],
 });
 
-const geistMono = localFont({
-  variable: "--font-geist-mono",
-  src: [
-    {
-      path: "../../node_modules/@fontsource/geist-mono/files/geist-mono-latin-400-normal.woff2",
-      weight: "400",
-      style: "normal",
-    },
-  ],
-});
 
 export const metadata: Metadata = {
   title: "MidiMed",
@@ -47,7 +37,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${sourceSansPro.variable} ${geistMono.variable} font-sans antialiased`}
+        className={`${sourceSansPro.variable} font-sans antialiased`}
       >
         <UserProvider>
           {children}
