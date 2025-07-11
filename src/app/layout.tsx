@@ -43,10 +43,10 @@ export const metadata: Metadata = {
     siteName: "MidiMed",
     images: [
       {
-        url: "/logoPrimary.svg",
-        width: 800,
-        height: 600,
-        alt: "MidiMed logo",
+        url: "/screenshot.png",
+        width: 1200,
+        height: 630,
+        alt: "MidiMed preview",
       },
     ],
     locale: "es_ES",
@@ -58,7 +58,7 @@ export const metadata: Metadata = {
       "MidiMed - Gestiona fácilmente tus pacientes, citas y expedientes médicos",
     description:
       "Gestiona fácilmente tus pacientes, citas y expedientes médicos.",
-    images: ["/logoPrimary.svg"],
+    images: ["/screenshot.png"],
     creator: "@midimed",
   },
   icons: {
