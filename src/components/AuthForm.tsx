@@ -33,33 +33,40 @@ export default function AuthForm({ mode }: AuthFormProps) {
         await signUp({ email, password, displayName, tenantName, phone, address })
         toast.success('Cuenta creada exitosamente')
       } else {
-        await signInWithEmailAndPassword(auth, email, password)
+        // Intentar login normal primero
+        try {
+          await signInWithEmailAndPassword(auth, email, password)
+        } catch (loginError) {
+          // Si falla, intentar login con invitación
+          if (
+            typeof loginError === 'object' &&
+            loginError !== null &&
+            'code' in loginError &&
+            (loginError.code === 'auth/user-not-found' ||
+              loginError.code === 'auth/wrong-password' ||
+              loginError.code === 'auth/invalid-credential')
+          ) {
+            const { loginWithInvitation } = await import('@/db/users')
+            try {
+              await loginWithInvitation(email, password)
+              toast.success('¡Bienvenido! Tu cuenta ha sido activada.')
+              return
+            } catch {
+              throw loginError // Mostrar error original si ambos fallan
+            }
+          } else {
+            throw loginError
+          }
+        }
 
+        // Si login normal fue exitoso, actualizar lastLoginAt
         const user = auth.currentUser
         if (user) {
-          const { getDoc, doc, runTransaction, updateDoc } = await import('firebase/firestore')
+          const { doc, updateDoc } = await import('firebase/firestore')
           const { db } = await import('@/lib/firebase')
-
-          const invitedRef = doc(db, 'users', email)
-          const invitedSnap = await getDoc(invitedRef)
-
-          if (invitedSnap.exists()) {
-            const invitedData = invitedSnap.data()
-            const finalRef = doc(db, 'users', user.uid)
-
-            await runTransaction(db, async (tx) => {
-              tx.set(finalRef, {
-                ...invitedData,
-                uid: user.uid,
-                lastLoginAt: new Date().toISOString(),
-              })
-              tx.delete(invitedRef)
-            })
-          } else {
-            // Always update lastLoginAt for regular logins
-            const userRef = doc(db, 'users', user.uid)
-            await updateDoc(userRef, { lastLoginAt: new Date().toISOString() })
-          }
+          
+          const userRef = doc(db, 'users', user.uid)
+          await updateDoc(userRef, { lastLoginAt: new Date().toISOString() })
         }
 
         toast.success('Inicio de sesión exitoso')
