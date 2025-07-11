@@ -130,6 +130,19 @@ export type Notification = {
   expiresAt?: string
 }
 
+export type Invite = {
+  tenantId: string
+  inviteId: string
+  email: string
+  displayName: string
+  role: UserRole
+  invitedBy: string
+  createdAt: string
+  status: "pending" | "accepted" | "expired"
+  expiresAt?: string
+  tempPassword?: string // Contraseña temporal para el primer login
+}
+
 export type Billing = {
   tenantId: string
   plan: "basic" | "pro"

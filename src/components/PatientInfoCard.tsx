@@ -32,7 +32,7 @@ export default function PatientInfoCard({
         <Section>
           <Field>
             <Label>Fecha de nacimiento</Label>
-            <Value>{format(new Date(patient.birthDate), 'dd/MM/yyyy')}</Value>
+            <Value>{safeFormatDate(patient.birthDate)}</Value>
           </Field>
           <Field>
             <Label>Sexo</Label>
@@ -46,7 +46,7 @@ export default function PatientInfoCard({
           )}
           <Field>
             <Label>Creado el</Label>
-            <Value>{format(new Date(patient.createdAt), 'dd/MM/yyyy')}</Value>
+            <Value>{safeFormatDate(patient.createdAt)}</Value>
           </Field>
           {patient.allergies && (
             <Field>
@@ -75,6 +75,19 @@ const translateSex = (s: "M" | "F" | "O") => {
     case "M": return "Masculino"
     case "F": return "Femenino"
     case "O": return "Otro"
+  }
+}
+
+const safeFormatDate = (dateString?: string): string => {
+  if (!dateString) return 'No especificado'
+  try {
+    const date = new Date(dateString)
+    if (isNaN(date.getTime())) {
+      return 'Fecha inválida'
+    }
+    return format(date, 'dd/MM/yyyy')
+  } catch {
+    return 'Fecha inválida'
   }
 }
 
