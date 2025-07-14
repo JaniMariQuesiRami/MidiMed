@@ -206,7 +206,7 @@ export default function DashboardCalendar() {
               setSlotStart(view === 'month' ? null : slot.start)
               setOpen(true)
             }}
-            style={{ height: 'calc(100vh - 150px)' }}
+            style={{ height: 'calc(100dvh - 150px)' }}
             selectable
             components={{
               toolbar: () => null,

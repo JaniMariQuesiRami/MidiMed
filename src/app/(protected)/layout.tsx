@@ -5,6 +5,7 @@ import Sidebar from '@/components/Sidebar'
 import BottomTabs from '@/components/BottomTabs'
 import BrandLogo from '@/components/BrandLogo'
 import NotificationBellPopover from '@/components/NotificationBellPopover'
+import MobileUserSettings from '@/components/MobileUserSettings'
 import tw from 'tailwind-styled-components'
 
 export default function ProtectedLayout({ children }: { children: ReactNode }) {
@@ -16,9 +17,10 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
       <ContentWrapper>
         <MobileHeader>
           <BrandLogo />
-          <BellWrapper>
+          <ActionsWrapper>
             <NotificationBellPopover />
-          </BellWrapper>
+            <MobileUserSettings />
+          </ActionsWrapper>
         </MobileHeader>
         {children}
       </ContentWrapper>
@@ -31,7 +33,7 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
 
 // styled components
 const LayoutWrapper = tw.div`
-  min-h-screen flex flex-col md:flex-row bg-background text-foreground
+  min-h-[100dvh] flex flex-col md:flex-row bg-background text-foreground
 `
 
 const SidebarWrapper = tw.div`
@@ -39,14 +41,14 @@ const SidebarWrapper = tw.div`
 `
 
 const ContentWrapper = tw.main`
-  flex-1 p-2 md:p-6 overflow-auto max-h-screen
+  flex-1 p-2 md:p-6 overflow-auto max-h-[100dvh]
 `
 
 const MobileHeader = tw.div`
   md:hidden py-2 px-3 flex items-center gap-4
 `
 
-const BellWrapper = tw.div`ml-auto`
+const ActionsWrapper = tw.div`ml-auto flex items-center gap-2`
 
 const BottomTabsWrapper = tw.div`
   md:hidden fixed bottom-0 left-0 w-full border-t border-border bg-background

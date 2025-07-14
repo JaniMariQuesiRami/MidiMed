@@ -147,7 +147,7 @@ const MobileModal = tw.div`
 `
 
 const ModalContent = tw.div`
-  bg-background rounded-t-2xl w-full max-h-[80vh] flex flex-col
+  bg-background rounded-t-2xl w-full max-h-[80dvh] flex flex-col
 `
 
 const ModalHeader = tw.div`

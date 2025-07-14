@@ -45,7 +45,7 @@ export default function Home() {
   )
 }
 
-const Wrapper = tw.div`min-h-screen flex flex-col`
+const Wrapper = tw.div`min-h-[100dvh] flex flex-col`
 const Header = tw.header`flex items-center justify-between px-6 py-4 mb-16`
 const Main = tw.main`flex flex-col sm:flex-row gap-8 flex-1 items-start px-8`
 const Headline = tw.h1`text-4xl sm:text-5xl font-bold max-w-xl`

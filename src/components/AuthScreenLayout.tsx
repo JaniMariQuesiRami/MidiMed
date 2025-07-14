@@ -46,7 +46,7 @@ export default function AuthScreenLayout({ children }: Props) {
 
 // Styled components
 export const Background = tw.div`
-  relative min-h-screen w-full flex items-center justify-center overflow-hidden
+  relative min-h-[100dvh] w-full flex items-center justify-center overflow-hidden
   bg-gradient-to-tr from-[#0589c2] via-[#3abdd4] to-[#93efff] animate-gradient
 `
 
