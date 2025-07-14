@@ -62,6 +62,7 @@ export default function DashboardCalendar() {
   const [open, setOpen] = useState(false)
   const [slotDate, setSlotDate] = useState<Date | null>(null)
   const [slotStart, setSlotStart] = useState<Date | null>(null)
+  const [slotEnd, setSlotEnd] = useState<Date | null>(null)
   const [selected, setSelected] = useState<{ appt: Appointment; name: string } | null>(null)
 
   const navigate = (step: number) => {
@@ -137,7 +138,7 @@ export default function DashboardCalendar() {
     <>
       {/* Mobile Home Dashboard */}
       <MobileHomeDashboard />
-      
+
       {/* Desktop Calendar View */}
       <DesktopWrapper>
         <Header>
@@ -168,6 +169,7 @@ export default function DashboardCalendar() {
               onClick={() => {
                 setSlotDate(new Date())
                 setSlotStart(null)
+                setSlotEnd(null)
                 setOpen(true)
               }}
             >
@@ -189,44 +191,45 @@ export default function DashboardCalendar() {
         <div className="overflow-x-auto w-full">
           <div className="md:min-w-[700px] md:max-w-auto max-w-[100vw]">
             <ModernCalendar
-            culture="es"
-            localizer={localizer}
-            events={events}
-            defaultView={view}
-            view={view}
-            date={date}
-            onNavigate={setDate}
-            onView={setView}
-            onSelectEvent={(event: object) => {
-              const e = event as CalendarEvent
-              setSelected({ appt: e.resource, name: e.title })
-            }}
-            onSelectSlot={(slot) => {
-              setSlotDate(slot.start)
-              setSlotStart(view === 'month' ? null : slot.start)
-              setOpen(true)
-            }}
-            style={{ height: 'calc(100vh - 150px)' }}
-            selectable
-            components={{
-              toolbar: () => null,
-              event: (props) => {
-                const event = props.event as CalendarEvent;
-                // Only show patient name (no hour) in week view
-                // event.title is "HH:mm - Nombre Paciente" or just "Nombre Paciente"
-                let name = event.title;
-                if (view === 'week' || view === 'day') {
-                  // Remove hour prefix if present
-                  name = name.replace(/^\d{2}:\d{2} - /, '');
+              culture="es"
+              localizer={localizer}
+              events={events}
+              defaultView={view}
+              view={view}
+              date={date}
+              onNavigate={setDate}
+              onView={setView}
+              onSelectEvent={(event: object) => {
+                const e = event as CalendarEvent
+                setSelected({ appt: e.resource, name: e.title })
+              }}
+              onSelectSlot={(slot) => {
+                setSlotDate(slot.start)
+                setSlotStart(view === 'month' ? null : slot.start)
+                setSlotEnd(view === 'month' ? null : slot.end)
+                setOpen(true)
+              }}
+              style={{ height: 'calc(100vh - 150px)' }}
+              selectable
+              components={{
+                toolbar: () => null,
+                event: (props) => {
+                  const event = props.event as CalendarEvent;
+                  // Only show patient name (no hour) in week view
+                  // event.title is "HH:mm - Nombre Paciente" or just "Nombre Paciente"
+                  let name = event.title;
+                  if (view === 'week' || view === 'day') {
+                    // Remove hour prefix if present
+                    name = name.replace(/^\d{2}:\d{2} - /, '');
+                  }
+                  return (
+                    <div className="font-semibold text-white text-sm px-1 truncate" style={{ lineHeight: '1.2' }}>{name}</div>
+                  );
                 }
-                return (
-                  <div className="font-semibold text-white text-sm px-1 truncate" style={{lineHeight:'1.2'}}>{name}</div>
-                );
-              }
-            }}
-          />
+              }}
+            />
+          </div>
         </div>
-      </div>
       </DesktopWrapper>
 
       <CreateAppointmentModal
@@ -235,10 +238,12 @@ export default function DashboardCalendar() {
           setOpen(false)
           setSlotDate(null)
           setSlotStart(null)
+          setSlotEnd(null)
         }}
         onCreated={() => loadEvents()}
         initialDate={slotDate}
         initialStart={slotStart}
+        initialEnd={slotEnd}
         patientId={patientFilter !== 'all' ? patientFilter : undefined}
       />
       <AppointmentDetailsPopup
