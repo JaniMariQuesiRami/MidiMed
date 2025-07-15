@@ -41,7 +41,7 @@ const SidebarWrapper = tw.div`
 `
 
 const ContentWrapper = tw.main`
-  flex-1 p-2 md:p-6 overflow-auto max-h-[100dvh]
+  flex-1 p-2 md:p-6 overflow-auto max-h-[100dvh] pb-20 md:pb-6
 `
 
 const MobileHeader = tw.div`
