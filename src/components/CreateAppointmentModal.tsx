@@ -57,6 +57,7 @@ type Props = {
   onUpdated?: (appt: Appointment) => void
   initialDate?: Date | null
   initialStart?: Date | null
+  initialEnd?: Date | null
 }
 
 export default function CreateAppointmentModal({
@@ -68,6 +69,7 @@ export default function CreateAppointmentModal({
   onUpdated,
   initialDate,
   initialStart,
+  initialEnd,
 }: Props) {
   const { user, tenant } = useContext(UserContext)
   const [patients, setPatients] = useState<Patient[]>([])
@@ -106,7 +108,9 @@ export default function CreateAppointmentModal({
         : ''
     const endTime = appointment
       ? format(new Date(appointment.scheduledEnd), 'HH:mm')
-      : ''
+      : initialEnd
+        ? format(initialEnd, 'HH:mm')
+        : ''
     form.reset({
       patientId: appointment?.patientId ?? patientId ?? '',
       providerId: appointment?.providerId ?? user?.uid ?? '',
@@ -126,7 +130,7 @@ export default function CreateAppointmentModal({
   useEffect(() => {
     if (open) resetForm()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, patientId, appointment, initialDate, initialStart])
+  }, [open, patientId, appointment, initialDate, initialStart, initialEnd])
 
   useEffect(() => {
     form.setValue('patientId', appointment?.patientId ?? patientId ?? '')
