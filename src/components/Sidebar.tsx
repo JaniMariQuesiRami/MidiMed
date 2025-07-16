@@ -18,7 +18,6 @@ import tw from 'tailwind-styled-components'
 import { useContext, useEffect } from 'react'
 import { UserContext } from '@/contexts/UserContext'
 import { listenToNotifications } from '@/db/notifications'
-import { Notification } from '@/types/db'
 
 const navItems = [
   { href: '/dashboard', label: 'Calendario', icon: Calendar },
