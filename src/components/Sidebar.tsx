@@ -15,6 +15,10 @@ import { useState } from 'react'
 import Image from 'next/image'
 import UserSettings from '@/components/UserSettings'
 import tw from 'tailwind-styled-components'
+import { useContext, useEffect } from 'react'
+import { UserContext } from '@/contexts/UserContext'
+import { listenToNotifications } from '@/db/notifications'
+import { Notification } from '@/types/db'
 
 const navItems = [
   { href: '/dashboard', label: 'Calendario', icon: Calendar },
@@ -27,6 +31,24 @@ const navItems = [
 export default function Sidebar() {
   const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(false)
+  const { user, tenant } = useContext(UserContext)
+  const [unreadCount, setUnreadCount] = useState(0)
+
+  useEffect(() => {
+    if (!user || !tenant) return
+
+    const unsub = listenToNotifications(
+      user.uid,
+      tenant.tenantId,
+      { archived: false, limit: 50 },
+      (notifications) => {
+        const unread = notifications.filter((n) => !n.isRead).length
+        setUnreadCount(unread)
+      }
+    )
+
+    return () => unsub()
+  }, [user, tenant])
 
   return (
     <Wrapper $collapsed={collapsed}>
@@ -57,10 +79,17 @@ export default function Sidebar() {
             <NavItem key={href} $active={pathname === href} $collapsed={collapsed}>
               <Link
                 href={href}
-                className={`flex items-center gap-2 w-full ${collapsed ? 'justify-center px-2 py-3' : 'px-4 py-3 '}`}
+                className={`flex items-center gap-2 w-full relative ${collapsed ? 'justify-center px-2 py-3' : 'px-4 py-3 '}`}
               >
-                <Icon size={20} />
-                {!collapsed && <span>{label}</span>}
+                <div className="flex items-center gap-2 w-full">
+                  <Icon size={20} />
+                  {!collapsed && <>
+                    <span className="flex-1">{label}</span>
+                    {href === '/notifications' && unreadCount > 0 && (
+                      <NotificationBadge>{unreadCount > 9 ? '9+' : unreadCount}</NotificationBadge>
+                    )}
+                  </>}
+                </div>
               </Link>
             </NavItem>
           ))}
@@ -103,4 +132,10 @@ const NavList = tw.div`flex flex-col gap-1`
 const NavItem = tw.div<{ $active?: boolean; $collapsed?: boolean }>`
   ${({ $active }) => ($active ? 'bg-primary text-white font-medium' : 'text-muted-foreground hover:bg-muted')}
   rounded-lg transition-colors hover:text-foreground
+`
+
+const NotificationBadge = tw.span`
+  ml-2 h-4 w-4 text-xs font-medium text-white 
+  bg-red-500 rounded-full flex items-center justify-center
+  p-0 m-0 leading-none
 `
