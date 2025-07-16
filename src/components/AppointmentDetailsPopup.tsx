@@ -197,5 +197,5 @@ const PopupCard = tw.div`
   bg-white dark:bg-background rounded-xl p-6 shadow-2xl w-full max-w-md
   border border-border
   animate-fadeIn
-  max-h-[90vh] overflow-y-auto
+  max-h-[90dvh] overflow-y-auto
 `

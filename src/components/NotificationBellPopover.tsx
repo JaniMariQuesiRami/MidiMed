@@ -1,7 +1,7 @@
 'use client'
 import { useContext, useEffect, useState } from 'react'
 import { Bell, X } from 'lucide-react'
-import { getNotifications, markNotificationAsRead } from '@/db/notifications'
+import { listenToNotifications, markNotificationAsRead } from '@/db/notifications'
 import { UserContext } from '@/contexts/UserContext'
 import { toast } from 'sonner'
 import tw from 'tailwind-styled-components'
@@ -9,26 +9,32 @@ import { Notification } from '@/types/db'
 import LoadingSpinner from './LoadingSpinner'
 
 export default function NotificationBellPopover() {
-  const { user } = useContext(UserContext)
+  const { user, tenant } = useContext(UserContext)
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [notifications, setNotifications] = useState([] as Notification[])
 
   useEffect(() => {
-    if (!user) return
-    const load = async () => {
-      setLoading(true)
-      try {
-        const list = await getNotifications(user.uid)
-        setNotifications(list.filter((n) => !n.isRead).slice(0, 5))
-      } catch {
-        toast.error('Error al cargar notificaciones')
-      } finally {
+    if (!user || !tenant) return
+    
+    console.log('🔔 Setting up notification bell listener')
+    setLoading(true)
+    
+    const unsub = listenToNotifications(
+      user.uid,
+      tenant.tenantId,
+      { archived: false, limit: 5 },
+      (notificationList) => {
+        console.log('🔔 Bell received notifications:', notificationList)
+        // Filter only unread notifications for the bell
+        const unreadNotifications = notificationList.filter((n) => !n.isRead)
+        setNotifications(unreadNotifications)
         setLoading(false)
       }
-    }
-    load()
-  }, [user])
+    )
+    
+    return () => unsub()
+  }, [user, tenant])
 
   const markRead = async (id: string) => {
     try {
@@ -39,7 +45,7 @@ export default function NotificationBellPopover() {
     }
   }
 
-  if (!user) return null
+  if (!user || !tenant) return null
 
   const unreadCount = notifications.length
 
@@ -105,12 +111,17 @@ export default function NotificationBellPopover() {
                 </div>
               ) : (
                 notifications.map((n) => (
-                  <NotificationItem key={n.notificationId}>
-                    <div className="flex-1">
-                      <p className="font-medium">{n.title}</p>
-                      {n.body && (
-                        <p className="text-sm text-muted-foreground">{n.body}</p>
+                  <NotificationItem key={n.notificationId} className={`${!n.isRead ? 'bg-primary/10' : 'bg-muted/10'}`}>
+                    <div className="flex items-center gap-3 flex-1">
+                      {!n.isRead && (
+                        <div className="w-3 h-3 bg-primary rounded-full flex-shrink-0"></div>
                       )}
+                      <div className={!n.isRead ? '' : 'ml-6'}>
+                        <p className="font-medium">{n.title}</p>
+                        {n.body && (
+                          <p className="text-sm text-muted-foreground">{n.body}</p>
+                        )}
+                      </div>
                     </div>
                     <button 
                       className="text-sm text-primary font-medium" 
@@ -129,7 +140,7 @@ export default function NotificationBellPopover() {
   )
 }
 
-const DesktopWrapper = tw.div`relative`
+const DesktopWrapper = tw.div`relative p-1 rounded hover:bg-muted transition cursor-pointer`
 const Popover = tw.div`absolute right-0 mt-2 w-64 rounded-md border bg-background shadow-lg z-50`
 const Item = tw.div`flex justify-between items-center px-3 py-2 text-sm border-b last:border-0`
 
@@ -147,7 +158,7 @@ const MobileModal = tw.div`
 `
 
 const ModalContent = tw.div`
-  bg-background rounded-t-2xl w-full max-h-[80vh] flex flex-col
+  bg-background rounded-t-2xl w-full h-[80vh] flex flex-col
 `
 
 const ModalHeader = tw.div`
@@ -159,6 +170,6 @@ const ModalBody = tw.div`
 `
 
 const NotificationItem = tw.div`
-  flex items-start gap-3 p-4 border-b last:border-0
+  flex items-start gap-3 px-4 py-3 border-b last:border-0 rounded-lg mx-2 mb-2 last:mb-0
 `
 

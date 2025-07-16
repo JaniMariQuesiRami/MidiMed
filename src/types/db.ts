@@ -126,6 +126,7 @@ export type Notification = {
   type?: NotificationType
   metadata?: Record<string, unknown>
   isRead: boolean
+  archived: boolean
   createdAt: string
   expiresAt?: string
 }
