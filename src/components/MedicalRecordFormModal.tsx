@@ -153,13 +153,12 @@ export default function MedicalRecordFormModal({
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-h-[100dvh] md:max-h-[90vh] flex flex-col">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>{record ? 'Editar registro' : 'Nuevo registro al historial'}</DialogTitle>
         </DialogHeader>
-        <div className="overflow-y-auto flex-1 min-h-0">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(submit)} className="space-y-3">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(submit)} className="space-y-3">
             <FormField
               control={form.control}
               name="summary"
@@ -281,7 +280,6 @@ export default function MedicalRecordFormModal({
             </Button>
           </form>
         </Form>
-        </div>
       </DialogContent>
     </Dialog>
   )

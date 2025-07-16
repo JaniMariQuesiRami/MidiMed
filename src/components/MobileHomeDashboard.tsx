@@ -86,26 +86,14 @@ export default function MobileHomeDashboard() {
   }
 
   const nextAppointment = getNextAppointment()
-  const totalTodayAppointments = todayAppointments.length;
-  const pendingCount = todayAppointments.filter(apt => apt.status === 'scheduled').length;
-  const completedCount = todayAppointments.filter(apt => apt.status === 'completed').length;
-  const now = new Date();
-  const allCompletedOrPast = todayAppointments.length > 0 && todayAppointments.every(apt => apt.status === 'completed' || new Date(apt.scheduledStart) < now);
+  const totalTodayAppointments = todayAppointments.length
 
   if (loading) {
     return (
       <div className="p-4 flex justify-center">
         <LoadingSpinner className="h-6 w-6" />
       </div>
-    );
-  }
-
-  // Texto para "Hoy tienes..." o "Hoy tuviste..."
-  let appointmentText = '';
-  if (allCompletedOrPast) {
-    appointmentText = `Hoy tuviste ${totalTodayAppointments} ${totalTodayAppointments === 1 ? 'cita' : 'citas'}`;
-  } else {
-    appointmentText = `Hoy tienes ${totalTodayAppointments} ${totalTodayAppointments === 1 ? 'cita' : 'citas'}`;
+    )
   }
 
   return (
@@ -116,8 +104,11 @@ export default function MobileHomeDashboard() {
           <div className="flex-1">
             <Greeting>Hola, {firstName}</Greeting>
             <DateText>{todayStr}</DateText>
-            <AppointmentCount>{appointmentText}</AppointmentCount>
-            {nextAppointment && !allCompletedOrPast && (
+            <AppointmentCount>
+              Hoy tienes <CountNumber>{totalTodayAppointments}</CountNumber> citas
+            </AppointmentCount>
+            
+            {nextAppointment && (
               <NextAppointment>
                 <NextLabel>Tu próxima cita</NextLabel>
                 <NextDetails>
@@ -151,14 +142,12 @@ export default function MobileHomeDashboard() {
             onClick={() => setFilter('pending')}
           >
             Pendientes
-            <CountBadge $active={filter === 'pending'}>{pendingCount}</CountBadge>
           </SegmentButton>
           <SegmentButton 
             $active={filter === 'completed'} 
             onClick={() => setFilter('completed')}
           >
             Completadas
-            <CountBadge $active={filter === 'completed'}>{completedCount}</CountBadge>
           </SegmentButton>
         </SegmentedControl>
 
@@ -295,15 +284,6 @@ export default function MobileHomeDashboard() {
   )
 }
 
-// Badge para contador de citas
-const CountBadge = tw.span<{ $active?: boolean }>`
-  ml-2 px-1 rounded-[4px] border text-xs font-semibold
-  ${({ $active }) =>
-    $active
-      ? 'border-current text-current'
-      : 'border-muted-foreground text-muted-foreground'}
-`
-
 // Styled Components
 const Container = tw.div`
   md:hidden space-y-4 p-4
@@ -327,6 +307,10 @@ const DateText = tw.p`
 
 const AppointmentCount = tw.p`
   text-primary-foreground/90 text-sm mb-3
+`
+
+const CountNumber = tw.span`
+  text-lg font-bold text-white mx-1
 `
 
 const NextAppointment = tw.div`
@@ -367,7 +351,7 @@ const SegmentButton = tw.button<{ $active: boolean }>`
 `
 
 const AppointmentsList = tw.div`
-  space-y-3 min-h-[50dvh]
+  space-y-3
 `
 
 const EmptyState = tw.div`
