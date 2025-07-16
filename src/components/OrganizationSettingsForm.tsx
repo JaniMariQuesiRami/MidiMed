@@ -160,4 +160,6 @@ export default function OrganizationSettingsForm() {
 }
 
 const Wrapper = tw.div`space-y-4 px-2 sm:px-4 pt-4 pb-4`
-const ScrollContainer = tw.div`overflow-y-auto max-h-[calc(100vh-240px)] md:max-h-none pr-1`
+const ScrollContainer = tw.div`
+  md:overflow-y-auto md:max-h-none pr-1
+`

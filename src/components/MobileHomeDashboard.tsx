@@ -97,18 +97,26 @@ export default function MobileHomeDashboard() {
   }
 
   const nextAppointment = getNextAppointment()
-  const totalTodayAppointments = todayAppointments.length
-  const pendingCount = todayAppointments.filter(apt => apt.status === 'scheduled').length
-  const completedCount = todayAppointments.filter(apt => apt.status === 'completed').length
-  const now = new Date()
-  const allCompletedOrPast = todayAppointments.length > 0 && todayAppointments.every(apt => apt.status === 'completed' || new Date(apt.scheduledStart) < now)
+  const totalTodayAppointments = todayAppointments.length;
+  const pendingCount = todayAppointments.filter(apt => apt.status === 'scheduled').length;
+  const completedCount = todayAppointments.filter(apt => apt.status === 'completed').length;
+  const now = new Date();
+  const allCompletedOrPast = todayAppointments.length > 0 && todayAppointments.every(apt => apt.status === 'completed' || new Date(apt.scheduledStart) < now);
 
   if (loading) {
     return (
       <div className="p-4 flex justify-center">
         <LoadingSpinner className="h-6 w-6" />
       </div>
-    )
+    );
+  }
+
+  // Texto para "Hoy tienes..." o "Hoy tuviste..."
+  let appointmentText = '';
+  if (allCompletedOrPast) {
+    appointmentText = `Hoy tuviste ${totalTodayAppointments} ${totalTodayAppointments === 1 ? 'cita' : 'citas'}`;
+  } else {
+    appointmentText = `Hoy tienes ${totalTodayAppointments} ${totalTodayAppointments === 1 ? 'cita' : 'citas'}`;
   }
 
   // Texto para "Hoy tienes..." o "Hoy tuviste..."
@@ -325,7 +333,7 @@ export default function MobileHomeDashboard() {
 
 // Badge para contador de citas
 const CountBadge = tw.span<{ $active?: boolean }>`
-  ml-2 px-2 py-0.5 rounded-md border text-xs font-semibold
+  ml-2 px-1 rounded-[4px] border text-xs font-semibold
   ${({ $active }) =>
     $active
       ? 'border-current text-current'
@@ -395,7 +403,7 @@ const SegmentButton = tw.button<{ $active: boolean }>`
 `
 
 const AppointmentsList = tw.div`
-  space-y-3
+  space-y-3 min-h-[50dvh]
 `
 
 const EmptyState = tw.div`
