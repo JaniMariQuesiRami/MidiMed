@@ -103,58 +103,61 @@ export default function OrganizationSettingsForm() {
   return (
     <Wrapper>
       <h1 className="text-lg font-medium">Ajustes de la clínica</h1>
-      <div className="w-full flex flex-col md:flex-row gap-6">
-        <div className="w-full md:w-1/2 space-y-3">
-          <div>
-            <label className="block text-sm font-medium mb-1">Nombre</label>
-            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre" />
+      <ScrollContainer>
+        <div className="w-full flex flex-col md:flex-row gap-6">
+          <div className="w-full md:w-1/2 space-y-3">
+            <div>
+              <label className="block text-sm font-medium mb-1">Nombre</label>
+              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Correo electrónico</label>
+              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Correo electrónico" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Teléfono</label>
+              <Input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Teléfono" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Dirección</label>
+              <Input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Dirección" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Duración común de cita (minutos)</label>
+              <Input type="number" min={5} max={180} value={appointmentDuration} onChange={e => setAppointmentDuration(Number(e.target.value))} />
+            </div>
+            <Button onClick={save}>Guardar</Button>
           </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Correo electrónico</label>
-            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Correo electrónico" />
+          <div className="w-full md:w-1/2">
+            <label className="block text-sm font-medium mb-1">Horarios de atención</label>
+            <div className="grid grid-cols-1 gap-2">
+              {days.map(({ key, label }) => (
+                <div key={key} className="flex items-center gap-2">
+                  <span className="w-24 text-sm">{label}</span>
+                  <Input
+                    type="time"
+                    value={workingHours[key]?.[0] || ''}
+                    onChange={e => handleWorkingHourChange(key, 0, e.target.value)}
+                    className="w-28"
+                    aria-label={`Hora inicio ${label}`}
+                  />
+                  <span className="text-sm">a</span>
+                  <Input
+                    type="time"
+                    value={workingHours[key]?.[1] || ''}
+                    onChange={e => handleWorkingHourChange(key, 1, e.target.value)}
+                    className="w-28"
+                    aria-label={`Hora fin ${label}`}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Teléfono</label>
-            <Input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Teléfono" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Dirección</label>
-            <Input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Dirección" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Duración común de cita (minutos)</label>
-            <Input type="number" min={5} max={180} value={appointmentDuration} onChange={e => setAppointmentDuration(Number(e.target.value))} />
-          </div>
-          <Button onClick={save}>Guardar</Button>
         </div>
-        <div className="w-full md:w-1/2">
-          <label className="block text-sm font-medium mb-1">Horarios de atención</label>
-          <div className="grid grid-cols-1 gap-2">
-            {days.map(({ key, label }) => (
-              <div key={key} className="flex items-center gap-2">
-                <span className="w-24">{label}</span>
-                <Input
-                  type="time"
-                  value={workingHours[key]?.[0] || ''}
-                  onChange={e => handleWorkingHourChange(key, 0, e.target.value)}
-                  className="w-28"
-                  aria-label={`Hora inicio ${label}`}
-                />
-                <span>a</span>
-                <Input
-                  type="time"
-                  value={workingHours[key]?.[1] || ''}
-                  onChange={e => handleWorkingHourChange(key, 1, e.target.value)}
-                  className="w-28"
-                  aria-label={`Hora fin ${label}`}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      </ScrollContainer>
     </Wrapper>
   )
 }
 
-const Wrapper = tw.div`space-y-4 px-2 sm:px-4 pt-4`
+const Wrapper = tw.div`space-y-4 px-2 sm:px-4 pt-4 pb-4`
+const ScrollContainer = tw.div`overflow-y-auto max-h-[calc(100vh-240px)] md:max-h-none pr-1`

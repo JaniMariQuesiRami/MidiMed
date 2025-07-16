@@ -188,7 +188,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
 
 // Styled components
 const Wrapper = tw.div`
-  flex flex-col items-center justify-center min-h-screen px-4 w-full
+  flex flex-col items-center justify-center min-h-[100dvh] px-4 w-full
 `
 
 const StyledCard = tw(Card)`
