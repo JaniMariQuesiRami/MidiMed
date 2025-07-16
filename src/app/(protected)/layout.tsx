@@ -41,11 +41,14 @@ const SidebarWrapper = tw.div`
 `
 
 const ContentWrapper = tw.main`
-  flex-1 p-2 md:p-6 overflow-auto max-h-[100dvh] pb-20 md:pb-6
+  flex-1 p-2 md:p-6 overflow-auto pb-20 md:pb-6
+  pt-[56px]
 `
 
 const MobileHeader = tw.div`
   md:hidden py-2 px-3 flex items-center gap-4
+  fixed top-0 left-0 right-0 z-20
+  bg-gradient-to-b from-background/100 to-background/50
 `
 
 const ActionsWrapper = tw.div`ml-auto flex items-center gap-2`
