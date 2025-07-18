@@ -112,11 +112,11 @@ export default function MobileHomeDashboard() {
   }
 
   // Texto para "Hoy tienes..." o "Hoy tuviste..."
-  let appointmentText = ''
+  let appointmentText = '';
   if (allCompletedOrPast) {
-    appointmentText = `Hoy tuviste ${totalTodayAppointments} ${totalTodayAppointments === 1 ? 'cita' : 'citas'}`
+    appointmentText = `Hoy tuviste ${totalTodayAppointments} ${totalTodayAppointments === 1 ? 'cita' : 'citas'}`;
   } else {
-    appointmentText = `Hoy tienes ${totalTodayAppointments} ${totalTodayAppointments === 1 ? 'cita' : 'citas'}`
+    appointmentText = `Hoy tienes ${totalTodayAppointments} ${totalTodayAppointments === 1 ? 'cita' : 'citas'}`;
   }
 
   return (
