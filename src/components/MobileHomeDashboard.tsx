@@ -13,6 +13,7 @@ import LoadingSpinner from './LoadingSpinner'
 import MedicalRecordFormModal from './MedicalRecordFormModal'
 import AppointmentDetailsPopup from './AppointmentDetailsPopup'
 import CreateAppointmentModal from './CreateAppointmentModal'
+import PatientSummaryModal from './PatientSummaryModal'
 
 export default function MobileHomeDashboard() {
   const { user, tenant } = useContext(UserContext)
@@ -25,6 +26,11 @@ export default function MobileHomeDashboard() {
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null)
   const [viewingRecord, setViewingRecord] = useState<MedicalRecord | null>(null)
   const [openCreate, setOpenCreate] = useState(false)
+  const [summaryOpen, setSummaryOpen] = useState(false)
+  const [selectedPatientSummary, setSelectedPatientSummary] = useState<{
+    summary?: string
+    patientName?: string
+  } | null>(null)
 
   const today = useMemo(() => new Date(), [])
   const todayStr = format(today, 'EEEE d \'de\' MMMM', { locale: es })
@@ -60,6 +66,11 @@ export default function MobileHomeDashboard() {
     return patient ? `${patient.firstName} ${patient.lastName}` : 'Paciente no encontrado'
   }
 
+  const getPatientSummary = (patientId: string) => {
+    const patient = patients.find(p => p.patientId === patientId)
+    return patient?.summary || undefined
+  }
+
   const getNextAppointment = () => {
     const now = new Date()
     const upcomingAppointments = todayAppointments
@@ -87,6 +98,10 @@ export default function MobileHomeDashboard() {
 
   const nextAppointment = getNextAppointment()
   const totalTodayAppointments = todayAppointments.length
+  const pendingCount = todayAppointments.filter(apt => apt.status === 'scheduled').length
+  const completedCount = todayAppointments.filter(apt => apt.status === 'completed').length
+  const now = new Date()
+  const allCompletedOrPast = todayAppointments.length > 0 && todayAppointments.every(apt => apt.status === 'completed' || new Date(apt.scheduledStart) < now)
 
   if (loading) {
     return (
@@ -94,6 +109,14 @@ export default function MobileHomeDashboard() {
         <LoadingSpinner className="h-6 w-6" />
       </div>
     )
+  }
+
+  // Texto para "Hoy tienes..." o "Hoy tuviste..."
+  let appointmentText = ''
+  if (allCompletedOrPast) {
+    appointmentText = `Hoy tuviste ${totalTodayAppointments} ${totalTodayAppointments === 1 ? 'cita' : 'citas'}`
+  } else {
+    appointmentText = `Hoy tienes ${totalTodayAppointments} ${totalTodayAppointments === 1 ? 'cita' : 'citas'}`
   }
 
   return (
@@ -104,11 +127,8 @@ export default function MobileHomeDashboard() {
           <div className="flex-1">
             <Greeting>Hola, {firstName}</Greeting>
             <DateText>{todayStr}</DateText>
-            <AppointmentCount>
-              Hoy tienes <CountNumber>{totalTodayAppointments}</CountNumber> citas
-            </AppointmentCount>
-            
-            {nextAppointment && (
+            <AppointmentCount>{appointmentText}</AppointmentCount>
+            {nextAppointment && !allCompletedOrPast && (
               <NextAppointment>
                 <NextLabel>Tu próxima cita</NextLabel>
                 <NextDetails>
@@ -142,12 +162,14 @@ export default function MobileHomeDashboard() {
             onClick={() => setFilter('pending')}
           >
             Pendientes
+            <CountBadge $active={filter === 'pending'}>{pendingCount}</CountBadge>
           </SegmentButton>
           <SegmentButton 
             $active={filter === 'completed'} 
             onClick={() => setFilter('completed')}
           >
             Completadas
+            <CountBadge $active={filter === 'completed'}>{completedCount}</CountBadge>
           </SegmentButton>
         </SegmentedControl>
 
@@ -259,8 +281,25 @@ export default function MobileHomeDashboard() {
               toast.error('Error al cargar el registro médico')
             }
           }}
+          onViewPatientSummary={(patientId) => {
+            const summary = getPatientSummary(patientId)
+            const patientName = getPatientName(patientId)
+            setSelectedPatientSummary({ summary, patientName })
+            setSummaryOpen(true)
+          }}
         />
       )}
+
+      {/* Modal de AI Insight */}
+      <PatientSummaryModal
+        open={summaryOpen}
+        onClose={() => {
+          setSummaryOpen(false)
+          setSelectedPatientSummary(null)
+        }}
+        patientSummary={selectedPatientSummary?.summary}
+        patientName={selectedPatientSummary?.patientName}
+      />
 
       {/* Modal de creación de cita */}
       <CreateAppointmentModal
@@ -283,6 +322,15 @@ export default function MobileHomeDashboard() {
     </Container>
   )
 }
+
+// Badge para contador de citas
+const CountBadge = tw.span<{ $active?: boolean }>`
+  ml-2 px-2 py-0.5 rounded-md border text-xs font-semibold
+  ${({ $active }) =>
+    $active
+      ? 'border-current text-current'
+      : 'border-muted-foreground text-muted-foreground'}
+`
 
 // Styled Components
 const Container = tw.div`
@@ -307,10 +355,6 @@ const DateText = tw.p`
 
 const AppointmentCount = tw.p`
   text-primary-foreground/90 text-sm mb-3
-`
-
-const CountNumber = tw.span`
-  text-lg font-bold text-white mx-1
 `
 
 const NextAppointment = tw.div`

@@ -7,7 +7,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { updateAppointment } from '@/db/appointments'
 import { toast } from 'sonner'
-import { CalendarDays, Clock, FileText, User, X, AlertCircle, CheckCircle, Calendar } from 'lucide-react'
+import { CalendarDays, Clock, FileText, User, X, AlertCircle, CheckCircle, Calendar, Sparkles } from 'lucide-react'
 import CreateAppointmentModal from '@/components/CreateAppointmentModal'
 
 
@@ -17,12 +17,14 @@ export default function AppointmentDetailsPopup({
   onClose,
   onUpdated,
   onViewRecord,
+  onViewPatientSummary,
 }: {
   appointment: Appointment | null
   patientName?: string
   onClose: () => void
   onUpdated?: (appt: Appointment) => void
   onViewRecord?: (recordId: string) => void
+  onViewPatientSummary?: (patientId: string) => void
 }) {
   const [editOpen, setEditOpen] = useState(false)
   const [cancelLoading, setCancelLoading] = useState(false)
@@ -143,6 +145,17 @@ export default function AppointmentDetailsPopup({
               }}
             >
               Ver perfil del paciente
+            </Button>
+          )}
+          {patientName && onViewPatientSummary && (
+            <Button 
+              size="sm" 
+              variant="outline"
+              className="w-full sm:w-auto flex items-center gap-2"
+              onClick={() => onViewPatientSummary(appointment.patientId)}
+            >
+              <Sparkles className="w-4 h-4" />
+              AI Insight
             </Button>
           )}
           {appointment.status === 'completed' && appointment.medicalRecordId && onViewRecord && (
