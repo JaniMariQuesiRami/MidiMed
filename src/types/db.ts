@@ -62,6 +62,8 @@ export type Patient = {
   allergies?: string
   /** Notas adicionales u observaciones */
   notes?: string
+  /** AI-generated summary of patient's current state and medical history */
+  summary?: string;
   createdBy: string
   createdAt: string
   /** Última actualización si existe */

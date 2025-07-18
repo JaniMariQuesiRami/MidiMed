@@ -13,6 +13,7 @@ import LoadingSpinner from './LoadingSpinner'
 import MedicalRecordFormModal from './MedicalRecordFormModal'
 import AppointmentDetailsPopup from './AppointmentDetailsPopup'
 import CreateAppointmentModal from './CreateAppointmentModal'
+import PatientSummaryModal from './PatientSummaryModal'
 
 export default function MobileHomeDashboard() {
   const { user, tenant } = useContext(UserContext)
@@ -25,6 +26,11 @@ export default function MobileHomeDashboard() {
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null)
   const [viewingRecord, setViewingRecord] = useState<MedicalRecord | null>(null)
   const [openCreate, setOpenCreate] = useState(false)
+  const [summaryOpen, setSummaryOpen] = useState(false)
+  const [selectedPatientSummary, setSelectedPatientSummary] = useState<{
+    summary?: string
+    patientName?: string
+  } | null>(null)
 
   const today = useMemo(() => new Date(), [])
   const todayStr = format(today, 'EEEE d \'de\' MMMM', { locale: es })
@@ -58,6 +64,11 @@ export default function MobileHomeDashboard() {
   const getPatientName = (patientId: string) => {
     const patient = patients.find(p => p.patientId === patientId)
     return patient ? `${patient.firstName} ${patient.lastName}` : 'Paciente no encontrado'
+  }
+
+  const getPatientSummary = (patientId: string) => {
+    const patient = patients.find(p => p.patientId === patientId)
+    return patient?.summary || undefined
   }
 
   const getNextAppointment = () => {
@@ -270,8 +281,25 @@ export default function MobileHomeDashboard() {
               toast.error('Error al cargar el registro médico')
             }
           }}
+          onViewPatientSummary={(patientId) => {
+            const summary = getPatientSummary(patientId)
+            const patientName = getPatientName(patientId)
+            setSelectedPatientSummary({ summary, patientName })
+            setSummaryOpen(true)
+          }}
         />
       )}
+
+      {/* Modal de AI Insight */}
+      <PatientSummaryModal
+        open={summaryOpen}
+        onClose={() => {
+          setSummaryOpen(false)
+          setSelectedPatientSummary(null)
+        }}
+        patientSummary={selectedPatientSummary?.summary}
+        patientName={selectedPatientSummary?.patientName}
+      />
 
       {/* Modal de creación de cita */}
       <CreateAppointmentModal
