@@ -60,11 +60,17 @@ export default function PatientInfoCard({
               <Value>{patient.notes}</Value>
             </Field>
           )}
+          {patient.summary && (
+            <Field>
+              <Label>Resumen</Label>
+              <Value>{patient.summary}</Value>
+            </Field>
+          )}
         </Section>
       </Content>
 
       <Button size="sm" onClick={onEdit} className="w-full mt-auto flex items-center gap-1">
-        <Pencil size={14} /> Editar
+      <Pencil size={14} /> Editar
       </Button>
     </CardContainer>
   )
