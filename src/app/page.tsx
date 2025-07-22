@@ -1,7 +1,10 @@
+"use client"
 import Link from 'next/link'
 import tw from 'tailwind-styled-components'
 import BrandLogo from '@/components/BrandLogo'
 import { Button } from '@/components/ui/button'
+import { Moon, Sun } from 'lucide-react'
+import { useTheme } from '@/contexts/ThemeContext'
 import LandingCarousel from '@/components/LandingCarousel'
 import Particles from '@/components/Particles'
 import { Copyright } from 'lucide-react'
@@ -9,6 +12,7 @@ import Image from 'next/image'
 import './shine.css'
 
 export default function Home() {
+  const { theme, toggleTheme } = useTheme()
   return (
     <Wrapper>
       {/* Particles Background */}
@@ -30,7 +34,11 @@ export default function Home() {
       
       <Header>
         <BrandLogo />
-        <nav className="flex gap-2">
+        <div className="flex items-center gap-2">
+          <ThemeToggle onClick={toggleTheme} aria-label="Toggle theme">
+            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+          </ThemeToggle>
+          <nav className="flex gap-2">
           <Button
             asChild
             variant="secondary"
@@ -41,7 +49,8 @@ export default function Home() {
           <Button asChild variant="outline">
             <Link href="/login">Log In</Link>
           </Button>
-        </nav>
+          </nav>
+        </div>
       </Header>
       <Main>
         <div className="flex flex-col gap-8 flex-1">
@@ -73,3 +82,4 @@ const Screenshot = tw.div`
   rounded-xl border-primary p-4 h-auto bg-transparent
 `
 const Footer = tw.footer`flex justify-end px-6 py-4 relative z-10`
+const ThemeToggle = tw.button`p-1 rounded hover:bg-muted`

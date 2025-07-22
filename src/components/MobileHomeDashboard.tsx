@@ -370,7 +370,7 @@ const NextDetails = tw.p`
 `
 
 const CalendarIconWrapper = tw.div`
-  w-12 h-12 bg-white/20 rounded-full flex items-center justify-center
+  w-12 h-12 bg-white/20 dark:bg-background/20 rounded-full flex items-center justify-center
 `
 
 const Section = tw.div`

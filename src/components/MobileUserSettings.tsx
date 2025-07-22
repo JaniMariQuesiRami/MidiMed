@@ -2,6 +2,8 @@
 
 import { useContext, useEffect, useRef, useState } from 'react'
 import { User as UserIcon, X } from 'lucide-react'
+import { Switch } from '@/components/ui/switch'
+import { useTheme } from '@/contexts/ThemeContext'
 import { UserContext } from '@/contexts/UserContext'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -16,6 +18,7 @@ export default function MobileUserSettings() {
   const [open, setOpen] = useState(false)
   const modalRef = useRef<HTMLDivElement>(null)
   const [displayName, setDisplayName] = useState('')
+  const { theme, toggleTheme } = useTheme()
 
   useEffect(() => {
     if (user) setDisplayName(user.displayName || '')
@@ -70,6 +73,10 @@ export default function MobileUserSettings() {
                 onChange={(e) => setDisplayName(e.target.value)}
                 placeholder="Nombre"
               />
+              <div className="flex items-center justify-between">
+                <span>Modo oscuro</span>
+                <Switch checked={theme === 'dark'} onCheckedChange={toggleTheme} />
+              </div>
               <Button className="w-full" onClick={save}>
                 Guardar
               </Button>

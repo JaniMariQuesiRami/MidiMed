@@ -3,6 +3,8 @@
 import { useContext, useEffect, useRef, useState } from 'react'
 import { UserContext } from '@/contexts/UserContext'
 import { User as UserIcon, X } from 'lucide-react'
+import { Switch } from '@/components/ui/switch'
+import { useTheme } from '@/contexts/ThemeContext'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { auth, db } from '@/lib/firebase'
@@ -12,6 +14,7 @@ import tw from 'tailwind-styled-components'
 
 export default function UserSettings({ collapsed }: { collapsed: boolean }) {
   const { user, tenant, logout } = useContext(UserContext)
+  const { theme, toggleTheme } = useTheme()
   const [open, setOpen] = useState(false)
   const modalRef = useRef<HTMLDivElement>(null)
   const [displayName, setDisplayName] = useState('')
@@ -77,6 +80,10 @@ export default function UserSettings({ collapsed }: { collapsed: boolean }) {
                 onChange={(e) => setDisplayName(e.target.value)}
                 placeholder="Nombre"
               />
+              <div className="flex items-center justify-between">
+                <span>Modo oscuro</span>
+                <Switch checked={theme === 'dark'} onCheckedChange={toggleTheme} />
+              </div>
               <Button className="w-full" onClick={save}>Guardar</Button>
               <DangerButton onClick={logout}>Logout</DangerButton>
             </div>

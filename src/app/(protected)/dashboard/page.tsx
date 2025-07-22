@@ -257,9 +257,9 @@ export default function DashboardCalendar() {
 }
 
 // Styled components
-const ModernCalendar = tw(Calendar)`bg-white rounded-2xl shadow-sm p-2`;
+const ModernCalendar = tw(Calendar)`bg-white dark:bg-background rounded-2xl shadow-sm p-2`;
 const DesktopWrapper = tw.div`hidden md:flex md:flex-col gap-4 px-2 sm:px-4 pt-4`
-const Header = tw.div`flex flex-col sm:flex-row sm:items-center sm:justify-between sticky top-0 z-10 bg-white px-2 sm:px-4 py-2 gap-2`
+const Header = tw.div`flex flex-col sm:flex-row sm:items-center sm:justify-between sticky top-0 z-10 bg-white dark:bg-background px-2 sm:px-4 py-2 gap-2`
 const DateTitle = tw.h1`text-lg font-semibold w-full sm:w-auto`
 const ViewSwitcher = tw.div`flex gap-2 sm:flex`
 const SwitchButton = tw.button<{ $active: boolean }>`
