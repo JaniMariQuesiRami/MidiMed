@@ -3,6 +3,7 @@ import tw from 'tailwind-styled-components'
 import BrandLogo from '@/components/BrandLogo'
 import { Button } from '@/components/ui/button'
 import LandingCarousel from '@/components/LandingCarousel'
+import Particles from '@/components/Particles'
 import { Copyright } from 'lucide-react'
 import Image from 'next/image'
 import './shine.css'
@@ -10,6 +11,23 @@ import './shine.css'
 export default function Home() {
   return (
     <Wrapper>
+      {/* Particles Background */}
+      <ParticlesContainer>
+        <Particles
+          particleColors={['#3abdd4', '#5cc8db', '#7dd3e2', '#71cbe2ff']}
+          particleCount={2000}
+          particleSpread={10}
+          speed={0.05}
+          particleBaseSize={80}
+          moveParticlesOnHover={true}
+          particleHoverFactor={0.5}
+          alphaParticles={true}
+          disableRotation={false}
+          sizeRandomness={0.8}
+          cameraDistance={25}
+        />
+      </ParticlesContainer>
+      
       <Header>
         <BrandLogo />
         <nav className="flex gap-2">
@@ -45,12 +63,13 @@ export default function Home() {
   )
 }
 
-const Wrapper = tw.div`min-h-[100dvh] flex flex-col`
-const Header = tw.header`flex items-center justify-between px-6 py-4 mb-16`
-const Main = tw.main`flex flex-col sm:flex-row gap-8 flex-1 items-start px-8`
+const Wrapper = tw.div`min-h-[100dvh] flex flex-col relative`
+const ParticlesContainer = tw.div`absolute inset-0 w-full h-full pointer-events-none z-0`
+const Header = tw.header`flex items-center justify-between px-6 py-4 mb-16 relative z-10`
+const Main = tw.main`flex flex-col sm:flex-row gap-8 flex-1 items-start px-8 relative z-10`
 const Headline = tw.h1`text-4xl sm:text-5xl font-bold max-w-xl`
 const Screenshot = tw.div`
   hidden sm:flex items-center justify-center flex-1
   rounded-xl border-primary p-4 h-auto bg-transparent
 `
-const Footer = tw.footer`flex justify-end px-6 py-4`
+const Footer = tw.footer`flex justify-end px-6 py-4 relative z-10`

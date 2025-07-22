@@ -105,7 +105,7 @@ export default function MobileHomeDashboard() {
 
   if (loading) {
     return (
-      <div className="p-4 flex justify-center">
+      <div className="p-4 flex justify-center md:hidden">
         <LoadingSpinner className="h-6 w-6" />
       </div>
     );
