@@ -454,7 +454,7 @@ export default function ReportsDashboard() {
             ].map((period) => (
               <button
                 key={period.key}
-                className={`px-2 py-1 rounded text-sm ${view === period.key ? 'bg-primary text-white' : 'bg-muted'}`}
+                className={`px-2 py-1 rounded text-sm ${view === period.key ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'}`}
                 onClick={() => setView(period.key as 'day' | 'week' | 'month')}
               >
                 {period.label}
@@ -525,7 +525,7 @@ export default function ReportsDashboard() {
           <h2 className="font-medium mb-2">Pacientes frecuentes</h2>
           <table className="min-w-[400px] w-full text-sm">
             <thead>
-              <tr className="bg-muted">
+              <tr className="bg-muted dark:bg-background">
                 <th className="p-2 text-left">Nombre</th>
                 <th className="p-2 text-left">Citas</th>
                 <th className="p-2 text-left">Última visita</th>
@@ -559,4 +559,4 @@ export default function ReportsDashboard() {
 
 const Wrapper = tw.div`space-y-4 max-h-full overflow-auto`
 const KpiGrid = tw.div`grid grid-cols-2 md:grid-cols-4 gap-3`
-const KpiCard = tw.div`border rounded p-3 bg-muted flex flex-col`
+const KpiCard = tw.div`border rounded p-3 bg-white dark:bg-background flex flex-col`

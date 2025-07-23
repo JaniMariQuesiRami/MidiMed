@@ -267,7 +267,7 @@ const SwitchButton = tw.button<{ $active: boolean }>`
   ${({ $active }) =>
     $active
       ? 'bg-primary text-white'
-      : 'bg-secondary text-secondary-dark'}
+      : 'bg-muted text-muted-foreground'}
   hover:opacity-80
 `
 
