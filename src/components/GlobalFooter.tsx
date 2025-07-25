@@ -14,6 +14,16 @@ export default function GlobalFooter() {
   // Páginas donde el texto debe ser blanco y el logo normal en mobile
   const forceWhitePages = ['/pricing', '/contactanos', '/login', '/signup']
   const forceWhiteText = forceWhitePages.some((p) => pathname?.startsWith(p)) || pathname === '/'
+  
+  // Detectar si estamos en rutas protegidas (dashboard, patients, etc.)
+  const isProtectedRoute = pathname?.startsWith('/dashboard') || 
+                          pathname?.startsWith('/patients') || 
+                          pathname?.startsWith('/reports') || 
+                          pathname?.startsWith('/notifications') || 
+                          pathname?.startsWith('/settings')
+
+  // No mostrar en mobile si estamos en rutas protegidas (para no chocar con BottomTabs)
+  const shouldHide = isMobile && isProtectedRoute
 
   useEffect(() => {
     const checkIfMobile = () => {
@@ -25,6 +35,9 @@ export default function GlobalFooter() {
     
     return () => window.removeEventListener('resize', checkIfMobile)
   }, [])
+
+  // No renderizar si debe estar oculto
+  if (shouldHide) return null
 
   return (
     <Footer>
