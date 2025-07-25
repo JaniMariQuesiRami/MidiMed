@@ -24,5 +24,5 @@ export default function SettingsPage() {
 
 const Wrapper = tw.div`space-y-4 px-2 sm:px-4 pt-4 pb-4`
 const Tabs = tw.div`flex gap-4 border-b`
-const Tab = tw.button<{ $active?: boolean }>`pb-2 text-sm font-medium transition-colors
+const Tab = tw.button<{ $active?: boolean }>`pb-2 text-sm font-medium transition-colors cursor-pointer
   ${({ $active }) => ($active ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground hover:text-foreground')}`

@@ -68,8 +68,6 @@ export default function AuthForm({ mode }: AuthFormProps) {
           const userRef = doc(db, 'users', user.uid)
           await updateDoc(userRef, { lastLoginAt: new Date().toISOString() })
         }
-
-        toast.success('Inicio de sesión exitoso')
       }
     } catch (err: unknown) {
       toast.error('Error al autenticar')

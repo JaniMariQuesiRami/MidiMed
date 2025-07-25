@@ -24,7 +24,7 @@ export default function PatientSummaryModal({
             <Sparkles className="w-5 h-5 text-primary" />
             <span className="font-semibold text-lg">AI Insight - {patientName}</span>
           </div>
-          <button onClick={onClose} className="rounded-full p-1 hover:bg-muted text-muted-foreground focus:outline-none">
+          <button onClick={onClose} className="rounded-full p-1 hover:bg-muted text-muted-foreground focus:outline-none cursor-pointer">
             <X size={18} />
           </button>
         </div>

@@ -99,7 +99,7 @@ const safeFormatDate = (dateString?: string): string => {
 
 
 const CardContainer = tw.div`
-  flex flex-col border rounded-md bg-white p-4 shadow-sm w-full lg:w-64 h-full min-h-[700px]
+  flex flex-col border rounded-md bg-white dark:bg-background p-4 shadow-sm w-full lg:w-64 h-full min-h-[700px]
 `
 
 const Content = tw.div`flex flex-col gap-y-4`

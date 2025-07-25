@@ -34,8 +34,8 @@ export default function PatientRecordsTable({ records, appointments, onEdit, onD
                 <TableCell>{r.summary}</TableCell>
                 <TableCell>{appt ? format(new Date(appt.scheduledStart), 'dd/MM/yyyy HH:mm') : '-'}</TableCell>
                 <TableCell className="flex gap-2">
-                  <button onClick={() => onEdit(r)}><Pencil size={16} /></button>
-                  <button onClick={() => onDelete(r)}><Trash size={16} /></button>
+                  <button onClick={() => onEdit(r)} className="cursor-pointer"><Pencil size={16} /></button>
+                  <button onClick={() => onDelete(r)} className="cursor-pointer"><Trash size={16} /></button>
                 </TableCell>
               </TableRow>
             )

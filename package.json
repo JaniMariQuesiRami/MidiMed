@@ -28,6 +28,7 @@
     "html2pdf.js": "^0.10.3",
     "lucide-react": "^0.517.0",
     "next": "15.3.4",
+    "ogl": "^1.0.11",
     "react": "^19.0.0",
     "react-big-calendar": "^1.19.4",
     "react-chartjs-2": "^5.2.0",

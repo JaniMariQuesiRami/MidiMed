@@ -66,7 +66,7 @@ export default function PatientsPage() {
           className="max-w-sm"
         />
         <button
-          className="bg-primary text-white px-3 py-1 rounded flex items-center gap-1"
+          className="bg-primary text-white px-3 py-1 rounded flex items-center gap-1 cursor-pointer"
           onClick={() => setOpen(true)}
         >
           Nuevo <Plus size={16} />
@@ -126,14 +126,14 @@ export default function PatientsPage() {
               <button
                 disabled={page === 0}
                 onClick={() => setPage((p) => p - 1)}
-                className="text-primary hover:underline disabled:opacity-50"
+                className="text-primary hover:underline disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
               >
                 Anterior
               </button>
               <button
                 disabled={page >= totalPages - 1}
                 onClick={() => setPage((p) => p + 1)}
-                className="text-primary hover:underline disabled:opacity-50"
+                className="text-primary hover:underline disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
               >
                 Siguiente
               </button>
@@ -152,4 +152,6 @@ export default function PatientsPage() {
 }
 
 const Wrapper = tw.div`flex flex-col gap-4 px-2 sm:px-4 pt-8`
-const Header = tw.div`flex justify-between items-center`
+const Header = tw.div`
+  flex flex-row gap-2 justify-between items-center
+`

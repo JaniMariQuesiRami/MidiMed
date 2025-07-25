@@ -80,7 +80,7 @@ export default function NotificationBellPopover() {
               notifications.map((n) => (
                 <Item key={n.notificationId}>
                   <span>{n.title}</span>
-                  <button className="text-xs text-primary" onClick={() => markRead(n.notificationId)}>
+                  <button className="text-xs text-primary cursor-pointer" onClick={() => markRead(n.notificationId)}>
                     Marcar leída
                   </button>
                 </Item>
@@ -96,7 +96,7 @@ export default function NotificationBellPopover() {
           <ModalContent onClick={(e: React.MouseEvent) => e.stopPropagation()}>
             <ModalHeader>
               <h3 className="text-lg font-semibold">Notificaciones</h3>
-              <button onClick={() => setOpen(false)}>
+              <button onClick={() => setOpen(false)} className="cursor-pointer">
                 <X size={20} />
               </button>
             </ModalHeader>
@@ -124,7 +124,7 @@ export default function NotificationBellPopover() {
                       </div>
                     </div>
                     <button 
-                      className="text-sm text-primary font-medium" 
+                      className="text-sm text-primary font-medium cursor-pointer" 
                       onClick={() => markRead(n.notificationId)}
                     >
                       Marcar leída
@@ -145,7 +145,7 @@ const Popover = tw.div`absolute right-0 mt-2 w-64 rounded-md border bg-backgroun
 const Item = tw.div`flex justify-between items-center px-3 py-2 text-sm border-b last:border-0`
 
 const BellButton = tw.button`
-  relative p-1 rounded hover:bg-muted transition md:hidden
+  relative p-1 rounded hover:bg-muted transition md:hidden cursor-pointer
 `
 
 const Badge = tw.span`

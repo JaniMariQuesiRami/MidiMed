@@ -151,7 +151,7 @@ export default function DashboardCalendar() {
               <ChevronRight size={20} />
             </IconButton>
             <button
-              className="ml-2 px-3 py-1 rounded bg-primary text-white font-medium text-sm hover:bg-primary/90 transition"
+              className="ml-2 px-3 py-1 rounded bg-primary text-white font-medium text-sm hover:bg-primary/90 transition cursor-pointer"
               onClick={() => setDate(new Date())}
               type="button"
             >
@@ -165,7 +165,7 @@ export default function DashboardCalendar() {
               onChange={(v) => setPatientFilter(v || 'all')}
             />
             <button
-              className="bg-primary text-white px-3 py-1 rounded flex items-center gap-1"
+              className="bg-primary text-white px-3 py-1 rounded flex items-center gap-1 cursor-pointer"
               onClick={() => {
                 setSlotDate(new Date())
                 setSlotStart(null)
@@ -211,6 +211,24 @@ export default function DashboardCalendar() {
               }}
               style={{ height: 'calc(100vh - 150px)' }}
               selectable
+              messages={{
+                showMore: (total) => `+${total} más`,
+                previous: 'Anterior',
+                next: 'Siguiente',
+                today: 'Hoy',
+                month: 'Mes',
+                week: 'Semana',
+                day: 'Día',
+                agenda: 'Agenda',
+                date: 'Fecha',
+                time: 'Hora',
+                event: 'Evento',
+                allDay: 'Todo el día',
+                work_week: 'Semana laboral',
+                yesterday: 'Ayer',
+                tomorrow: 'Mañana',
+                noEventsInRange: 'No hay eventos en este rango de fechas.'
+              }}
               components={{
                 toolbar: () => null,
                 event: (props) => {
@@ -257,18 +275,18 @@ export default function DashboardCalendar() {
 }
 
 // Styled components
-const ModernCalendar = tw(Calendar)`bg-white rounded-2xl shadow-sm p-2`;
+const ModernCalendar = tw(Calendar)`bg-white dark:bg-background rounded-2xl shadow-sm p-2`;
 const DesktopWrapper = tw.div`hidden md:flex md:flex-col gap-4 px-2 sm:px-4 pt-4`
-const Header = tw.div`flex flex-col sm:flex-row sm:items-center sm:justify-between sticky top-0 z-10 bg-white px-2 sm:px-4 py-2 gap-2`
+const Header = tw.div`flex flex-col sm:flex-row sm:items-center sm:justify-between sticky top-0 z-10 bg-white dark:bg-background px-2 sm:px-4 py-2 gap-2`
 const DateTitle = tw.h1`text-lg font-semibold w-full sm:w-auto`
 const ViewSwitcher = tw.div`flex gap-2 sm:flex`
 const SwitchButton = tw.button<{ $active: boolean }>`
-  px-3 py-1 rounded hidden sm:block
+  px-3 py-1 rounded hidden sm:block cursor-pointer
   ${({ $active }) =>
     $active
       ? 'bg-primary text-white'
-      : 'bg-secondary text-secondary-dark'}
+      : 'bg-muted text-muted-foreground'}
   hover:opacity-80
 `
 
-const IconButton = tw.button`p-1 rounded hover:bg-muted text-muted-foreground`
+const IconButton = tw.button`p-1 rounded hover:bg-muted text-muted-foreground cursor-pointer`

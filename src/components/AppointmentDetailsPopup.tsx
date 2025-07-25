@@ -85,7 +85,7 @@ export default function AppointmentDetailsPopup({
             <CalendarDays className="text-primary w-5 h-5" />
             <span className="font-semibold text-lg">Detalle de cita</span>
           </div>
-          <button onClick={onClose} className="rounded-full p-1 hover:bg-muted text-muted-foreground focus:outline-none">
+          <button onClick={onClose} className="rounded-full p-1 hover:bg-muted text-muted-foreground focus:outline-none cursor-pointer">
             <X size={18} />
           </button>
         </div>
