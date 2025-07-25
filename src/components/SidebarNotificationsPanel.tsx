@@ -186,7 +186,7 @@ export default function SidebarNotificationsPanel({
 }
 
 const BellButton = tw.button<{ $collapsed: boolean }>`
-  w-full flex items-center gap-2 relative text-muted-foreground hover:bg-muted rounded-lg transition-colors
+  w-full flex items-center gap-2 relative text-muted-foreground hover:bg-muted rounded-lg transition-colors cursor-pointer
   ${({ $collapsed }) => ($collapsed ? 'justify-center p-3' : 'px-4 py-3')}
 `
 
@@ -197,7 +197,7 @@ const Badge = tw.span`
 const PanelWrapper = tw.div`flex flex-col h-full`
 const Header = tw.div`p-4 border-b space-y-2`
 const Tabs = tw.div`flex gap-4 border-b pb-2`
-const Tab = tw.button<{ $active?: boolean }>`text-sm font-medium transition-colors pb-1
+const Tab = tw.button<{ $active?: boolean }>`text-sm font-medium transition-colors pb-1 cursor-pointer
   ${({ $active }) => ($active ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground hover:text-foreground')}`
 
 const List = tw.div`flex-1 overflow-y-auto`

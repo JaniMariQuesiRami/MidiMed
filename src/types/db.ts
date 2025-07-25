@@ -182,3 +182,13 @@ export type OrganizationSettingsInput = Partial<
   Pick<Tenant, "name" | "email" | "phone" | "address" | "logoUrl" | "settings">
 >
 
+export type Lead = {
+  leadId: string
+  name: string
+  email: string
+  message?: string
+  createdAt: unknown
+  status: 'new' | 'contacted' | 'converted' | 'closed'
+  source: 'contact-form' | 'other'
+}
+

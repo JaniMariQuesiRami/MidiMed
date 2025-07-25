@@ -80,7 +80,7 @@ export default function Sidebar() {
                 href={href}
                 className={`flex items-center gap-2 w-full relative ${collapsed ? 'justify-center px-2 py-3' : 'px-4 py-3 '}`}
               >
-                <div className="flex items-center gap-2 w-full">
+                <div className="flex items-center gap-2 w-full justify-center">
                   <Icon size={20} />
                   {!collapsed && <>
                     <span className="flex-1">{label}</span>
@@ -116,13 +116,13 @@ const Logo = tw(Image)`shrink-0`
 const CollapsedLogoWrapper = tw.div`flex justify-center p-2`
 
 const ToggleButton = tw.button`
-  p-1 rounded hover:bg-muted text-muted-foreground
+  p-1 rounded hover:bg-muted text-muted-foreground cursor-pointer
 `
 
 const ToggleFloating = tw.button`
   absolute right-[-26.5px] top-8 -translate-y-1/2
   bg-sidebar border-r border-b border-t border-border rounded-r-md
-  p-1 hover:bg-muted text-muted-foreground
+  p-1 hover:bg-muted text-muted-foreground cursor-pointer
   transition-all
 `
 

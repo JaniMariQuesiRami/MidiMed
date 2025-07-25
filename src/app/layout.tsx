@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { UserProvider } from '@/contexts/UserContext'
+import { ThemeProvider } from '@/contexts/ThemeContext'
 import { Toaster } from "sonner";
+import GlobalFooter from '@/components/GlobalFooter'
 
 const sourceSansPro = localFont({
   variable: "--font-source-sans-pro",
@@ -80,13 +82,14 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
       </head>
-      <body
-        className={`${sourceSansPro.variable} font-sans antialiased`}
-      >
-        <UserProvider>
-          {children}
-          <Toaster richColors position="top-right" />
-        </UserProvider>
+      <body className={`${sourceSansPro.variable} font-sans antialiased`}>
+        <ThemeProvider>
+          <UserProvider>
+            {children}
+            <GlobalFooter />
+            <Toaster richColors position="top-right" />
+          </UserProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

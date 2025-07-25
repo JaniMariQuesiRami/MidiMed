@@ -1,75 +1,67 @@
-import Link from 'next/link'
+"use client"
 import tw from 'tailwind-styled-components'
-import BrandLogo from '@/components/BrandLogo'
-import { Button } from '@/components/ui/button'
+import SharedHeader from '@/components/SharedHeader'
+import { useTheme } from '@/contexts/ThemeContext'
 import LandingCarousel from '@/components/LandingCarousel'
-import Particles from '@/components/Particles'
-import { Copyright } from 'lucide-react'
+import Iridescence from '@/components/Iridescence'
+import { Button } from '@/components/ui/button'
+import Link from 'next/link'
 import Image from 'next/image'
 import './shine.css'
 
 export default function Home() {
+  const { theme } = useTheme()
   return (
     <Wrapper>
-      {/* Particles Background */}
-      <ParticlesContainer>
-        <Particles
-          particleColors={['#3abdd4', '#5cc8db', '#7dd3e2', '#71cbe2ff']}
-          particleCount={2000}
-          particleSpread={10}
-          speed={0.05}
-          particleBaseSize={80}
-          moveParticlesOnHover={true}
-          particleHoverFactor={0.5}
-          alphaParticles={true}
-          disableRotation={false}
-          sizeRandomness={0.8}
-          cameraDistance={25}
+      {/* Iridescence Background */}
+      <BackgroundContainer>
+        <Iridescence
+          speed={0.3}
+          amplitude={0.08}
+          mouseReact={true}
         />
-      </ParticlesContainer>
+      </BackgroundContainer>
       
-      <Header>
-        <BrandLogo />
-        <nav className="flex gap-2">
-          <Button
-            asChild
-            variant="secondary"
-            className="bg-primary text-white hover:bg-primary/50 relative overflow-hidden shine-btn"
-          >
-            <Link href="/signup">Crear cuenta</Link>
-          </Button>
-          <Button asChild variant="outline">
-            <Link href="/login">Log In</Link>
-          </Button>
-        </nav>
-      </Header>
+      <SharedHeader currentPage="landing" />
+      
       <Main>
-        <div className="flex flex-col gap-8 flex-1">
+        <div className="flex flex-col gap-4 flex-1">
           <Headline>
             Gestiona fácilmente tus pacientes, citas y expedientes médicos.
           </Headline>
+          <CTASection>
+            <Button
+              asChild
+              size="lg"
+              className="bg-white text-primary hover:bg-white/90 font-semibold px-8 py-3 text-lg shadow-lg"
+            >
+              <Link href="/signup">
+                Empieza gratis!
+              </Link>
+            </Button>
+          </CTASection>
           <LandingCarousel />
         </div>
         <Screenshot>
-          <Image src="/phoneScreenshot.svg" alt="Captura de pantalla de la app" width={400} height={800} className="rounded-lg max-h-150" />
+          <Image 
+            src={theme === 'dark' ? "/mobileDark.svg" : "/mobileLight.svg"} 
+            alt="Captura de pantalla de la app" 
+            width={400} 
+            height={800} 
+            className="rounded-lg max-h-150" 
+          />
         </Screenshot>
       </Main>
-      <Footer>
-        <span className="flex items-center gap-1 text-sm text-muted-foreground">
-          <Copyright className="w-4 h-4" /> MIDI 2025
-        </span>
-      </Footer>
     </Wrapper>
   )
 }
 
 const Wrapper = tw.div`min-h-[100dvh] flex flex-col relative`
-const ParticlesContainer = tw.div`absolute inset-0 w-full h-full pointer-events-none z-0`
-const Header = tw.header`flex items-center justify-between px-6 py-4 mb-16 relative z-10`
+const BackgroundContainer = tw.div`absolute inset-0 w-full h-full pointer-events-none z-0`
 const Main = tw.main`flex flex-col sm:flex-row gap-8 flex-1 items-start px-8 relative z-10`
-const Headline = tw.h1`text-4xl sm:text-5xl font-bold max-w-xl`
+const Headline = tw.h1`text-4xl sm:text-5xl font-bold max-w-xl text-white`
+const CTASection = tw.div`flex justify-start`
 const Screenshot = tw.div`
   hidden sm:flex items-center justify-center flex-1
   rounded-xl border-primary p-4 h-auto bg-transparent
 `
-const Footer = tw.footer`flex justify-end px-6 py-4 relative z-10`
