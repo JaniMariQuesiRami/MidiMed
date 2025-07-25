@@ -39,7 +39,7 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
 
 // styled components
 const LayoutWrapper = tw.div`
-  min-h-[100dvh] flex flex-col md:flex-row bg-background text-foreground
+  min-h-[100dvh] flex flex-col md:flex-row bg-background text-foreground pt-5
 `
 
 const SidebarWrapper = tw.div`
@@ -54,7 +54,7 @@ const ContentWrapper = tw.main`
 const MobileHeader = tw.div`
   md:hidden py-2 px-3 flex items-center gap-4
   fixed top-0 left-0 right-0 z-20
-  bg-gradient-to-b from-background/100 to-background/50
+  bg-gradient-to-b from-background/100 to-background/50 pt-10
 `
 
 const ActionsWrapper = tw.div`ml-auto flex items-center gap-2`
@@ -62,4 +62,4 @@ const ActionsWrapper = tw.div`ml-auto flex items-center gap-2`
 const BottomTabsWrapper = tw.div`
   md:hidden fixed bottom-0 left-0 w-full border-t border-border bg-background
 `
-const ThemeToggle = tw.button`p-1 rounded hover:bg-muted`
+const ThemeToggle = tw.button`p-1 rounded hover:bg-muted cursor-pointer`

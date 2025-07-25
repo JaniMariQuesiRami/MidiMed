@@ -151,7 +151,7 @@ export default function DashboardCalendar() {
               <ChevronRight size={20} />
             </IconButton>
             <button
-              className="ml-2 px-3 py-1 rounded bg-primary text-white font-medium text-sm hover:bg-primary/90 transition"
+              className="ml-2 px-3 py-1 rounded bg-primary text-white font-medium text-sm hover:bg-primary/90 transition cursor-pointer"
               onClick={() => setDate(new Date())}
               type="button"
             >
@@ -165,7 +165,7 @@ export default function DashboardCalendar() {
               onChange={(v) => setPatientFilter(v || 'all')}
             />
             <button
-              className="bg-primary text-white px-3 py-1 rounded flex items-center gap-1"
+              className="bg-primary text-white px-3 py-1 rounded flex items-center gap-1 cursor-pointer"
               onClick={() => {
                 setSlotDate(new Date())
                 setSlotStart(null)
@@ -211,6 +211,24 @@ export default function DashboardCalendar() {
               }}
               style={{ height: 'calc(100vh - 150px)' }}
               selectable
+              messages={{
+                showMore: (total) => `+${total} más`,
+                previous: 'Anterior',
+                next: 'Siguiente',
+                today: 'Hoy',
+                month: 'Mes',
+                week: 'Semana',
+                day: 'Día',
+                agenda: 'Agenda',
+                date: 'Fecha',
+                time: 'Hora',
+                event: 'Evento',
+                allDay: 'Todo el día',
+                work_week: 'Semana laboral',
+                yesterday: 'Ayer',
+                tomorrow: 'Mañana',
+                noEventsInRange: 'No hay eventos en este rango de fechas.'
+              }}
               components={{
                 toolbar: () => null,
                 event: (props) => {
@@ -263,7 +281,7 @@ const Header = tw.div`flex flex-col sm:flex-row sm:items-center sm:justify-betwe
 const DateTitle = tw.h1`text-lg font-semibold w-full sm:w-auto`
 const ViewSwitcher = tw.div`flex gap-2 sm:flex`
 const SwitchButton = tw.button<{ $active: boolean }>`
-  px-3 py-1 rounded hidden sm:block
+  px-3 py-1 rounded hidden sm:block cursor-pointer
   ${({ $active }) =>
     $active
       ? 'bg-primary text-white'
@@ -271,4 +289,4 @@ const SwitchButton = tw.button<{ $active: boolean }>`
   hover:opacity-80
 `
 
-const IconButton = tw.button`p-1 rounded hover:bg-muted text-muted-foreground`
+const IconButton = tw.button`p-1 rounded hover:bg-muted text-muted-foreground cursor-pointer`

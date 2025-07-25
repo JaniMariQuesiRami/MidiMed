@@ -454,7 +454,7 @@ export default function ReportsDashboard() {
             ].map((period) => (
               <button
                 key={period.key}
-                className={`px-2 py-1 rounded text-sm ${view === period.key ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'}`}
+                className={`px-2 py-1 rounded text-sm cursor-pointer ${view === period.key ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'}`}
                 onClick={() => setView(period.key as 'day' | 'week' | 'month')}
               >
                 {period.label}
@@ -462,7 +462,7 @@ export default function ReportsDashboard() {
             ))}
           </div>
         </div>
-        <div className="h-64">
+        <div className="h-60 max-h-60">
           <Bar
             data={{
               labels: trends.labels,

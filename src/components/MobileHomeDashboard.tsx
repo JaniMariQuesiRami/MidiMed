@@ -34,7 +34,11 @@ export default function MobileHomeDashboard() {
 
   const today = useMemo(() => new Date(), [])
   const todayStr = format(today, 'EEEE d \'de\' MMMM', { locale: es })
-  const firstName = user?.displayName?.split(' ')[0] || 'Doctor'
+  
+  // Reactivo al cambio del usuario
+  const firstName = useMemo(() => {
+    return user?.displayName?.split(' ')[0] || 'Doctor'
+  }, [user?.displayName])
 
   useEffect(() => {
     if (!tenant) return
@@ -111,12 +115,15 @@ export default function MobileHomeDashboard() {
     );
   }
 
-  // Texto para "Hoy tienes..." o "Hoy tuviste..."
+  // Texto para "Hoy tienes..." o "Hoy tuviste..." y saludo
   let appointmentText = '';
-  if (allCompletedOrPast) {
+  let greetingText = '';
+  if (!allCompletedOrPast) {
     appointmentText = `Hoy tuviste ${totalTodayAppointments} ${totalTodayAppointments === 1 ? 'cita' : 'citas'}`;
+    greetingText = `¡Buen trabajo, ${firstName}!`;
   } else {
     appointmentText = `Hoy tienes ${totalTodayAppointments} ${totalTodayAppointments === 1 ? 'cita' : 'citas'}`;
+    greetingText = `Hola, ${firstName}`;
   }
 
   return (
@@ -125,7 +132,7 @@ export default function MobileHomeDashboard() {
       <HeaderCard>
         <CardContent>
           <div className="flex-1">
-            <Greeting>Hola, {firstName}</Greeting>
+            <Greeting>{greetingText}</Greeting>
             <DateText>{todayStr}</DateText>
             <AppointmentCount>{appointmentText}</AppointmentCount>
             {nextAppointment && !allCompletedOrPast && (
@@ -148,7 +155,7 @@ export default function MobileHomeDashboard() {
         <SectionTitle className="flex items-center justify-between">
           <span>Citas de hoy</span>
           <button
-            className="flex items-center gap-1 text-primary font-medium text-sm hover:underline px-2 rounded transition"
+            className="flex items-center gap-1 text-primary font-medium text-sm hover:underline px-2 rounded transition cursor-pointer"
             onClick={() => setOpenCreate(true)}
             type="button"
           >
@@ -194,7 +201,7 @@ export default function MobileHomeDashboard() {
                 <ActionButtons>
                   <InfoButton onClick={() => setSelectedAppointment(appointment)}>
                     <Info size={16} />
-                    Ver información
+                   Información
                   </InfoButton>
                   {appointment.status === 'scheduled' && (
                     <CompleteButton onClick={() => markAsCompleted(appointment.appointmentId)}>
@@ -346,7 +353,7 @@ const CardContent = tw.div`
 `
 
 const Greeting = tw.h2`
-  text-xl font-bold mb-1
+  text-xl font-bold mb-1 text-primary-foreground/90
 `
 
 const DateText = tw.p`
@@ -386,7 +393,7 @@ const SegmentedControl = tw.div`
 `
 
 const SegmentButton = tw.button<{ $active: boolean }>`
-  flex-1 py-2 px-4 rounded-md font-medium text-sm transition-all
+  flex-1 py-2 px-4 rounded-md font-medium text-sm transition-all cursor-pointer
   ${({ $active }) => 
     $active 
       ? 'bg-primary text-primary-foreground shadow-sm' 
@@ -423,11 +430,11 @@ const ActionButtons = tw.div`
 `
 
 const InfoButton = tw.button`
-  flex items-center gap-2 bg-blue-50 text-blue-700 px-3 py-2 rounded-lg text-sm font-medium
-  hover:bg-blue-100 transition-colors border border-blue-200
+  flex items-center gap-2 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 px-3 py-2 rounded-lg text-sm font-medium cursor-pointer
+  hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors border border-blue-200 dark:border-blue-700
 `
 
 const CompleteButton = tw.button`
-  flex items-center gap-2 bg-green-50 text-green-700 px-3 py-2 rounded-lg text-sm font-medium
-  hover:bg-green-100 transition-colors border border-green-200
+  flex items-center gap-2 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 px-3 py-2 rounded-lg text-sm font-medium cursor-pointer
+  hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors border border-green-200 dark:border-green-700
 `
