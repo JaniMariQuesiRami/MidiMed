@@ -4,6 +4,7 @@ import "./globals.css";
 import { UserProvider } from '@/contexts/UserContext'
 import { ThemeProvider } from '@/contexts/ThemeContext'
 import { Toaster } from "sonner";
+import GlobalFooter from '@/components/GlobalFooter'
 
 const sourceSansPro = localFont({
   variable: "--font-source-sans-pro",
@@ -85,6 +86,7 @@ export default function RootLayout({
         <ThemeProvider>
           <UserProvider>
             {children}
+            <GlobalFooter />
             <Toaster richColors position="top-right" />
           </UserProvider>
         </ThemeProvider>
