@@ -46,8 +46,9 @@ export default function PatientAppointmentsTable({ title, appointments, records,
                     <button onClick={() => onComplete(a)} className="text-primary hover:underline cursor-pointer">Completar</button>
                   )}
                   {a.status === 'completed' && a.medicalRecordId && (
-                                        <button onClick={() => {
-                      onViewRecord(a.patientId, a.appointmentId)
+                    <button onClick={() => {
+                      const record = records.find(r => r.recordId === a.medicalRecordId)
+                      if (record) onViewRecord(record)
                     }} className="text-muted-foreground hover:underline cursor-pointer">Ver registro</button>
                   )}
                 </TableCell>

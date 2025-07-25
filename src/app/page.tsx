@@ -1,9 +1,6 @@
 "use client"
-import Link from 'next/link'
 import tw from 'tailwind-styled-components'
 import SharedHeader from '@/components/SharedHeader'
-import { Button } from '@/components/ui/button'
-import { Moon, Sun } from 'lucide-react'
 import { useTheme } from '@/contexts/ThemeContext'
 import LandingCarousel from '@/components/LandingCarousel'
 import Iridescence from '@/components/Iridescence'
@@ -12,13 +9,12 @@ import Image from 'next/image'
 import './shine.css'
 
 export default function Home() {
-  const { theme, toggleTheme } = useTheme()
+  const { theme } = useTheme()
   return (
     <Wrapper>
       {/* Iridescence Background */}
       <BackgroundContainer>
         <Iridescence
-          color={[0.23, 0.74, 0.83]}
           speed={0.3}
           amplitude={0.08}
           mouseReact={true}
@@ -55,7 +51,6 @@ export default function Home() {
 
 const Wrapper = tw.div`min-h-[100dvh] flex flex-col relative`
 const BackgroundContainer = tw.div`absolute inset-0 w-full h-full pointer-events-none z-0`
-const ThemeToggleWrapper = tw.div`absolute top-4 right-4 z-20`
 const Main = tw.main`flex flex-col sm:flex-row gap-8 flex-1 items-start px-8 relative z-10`
 const Headline = tw.h1`text-4xl sm:text-5xl font-bold max-w-xl text-white`
 const Screenshot = tw.div`
@@ -63,4 +58,3 @@ const Screenshot = tw.div`
   rounded-xl border-primary p-4 h-auto bg-transparent
 `
 const Footer = tw.footer`flex justify-end px-6 py-4 relative z-10`
-const ThemeToggle = tw.button`p-1 rounded hover:bg-muted cursor-pointer`
