@@ -40,7 +40,7 @@ export const metadata: Metadata = {
       "MidiMed - Gestiona fácilmente tus pacientes, citas y expedientes médicos",
     description:
       "Gestiona fácilmente tus pacientes, citas y expedientes médicos.",
-    url: "https://midimed.app",
+    url: "https://midimed.tech",
     siteName: "MidiMed",
     images: [
       {

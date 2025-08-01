@@ -34,7 +34,13 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [tenant, setTenant] = useState<Tenant | null>(null)
   const [loading, setLoading] = useState(true)
+  const [mounted, setMounted] = useState(false)
   const router = useRouter()
+
+  // Evitar hydration mismatch
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -42,6 +48,18 @@ export function UserProvider({ children }: { children: ReactNode }) {
         setUser(null)
         setTenant(null)
         setLoading(false)
+        
+        // Solo ejecutar redirecciones del lado del cliente
+        if (mounted && typeof window !== 'undefined') {
+          // Redirigir al login cuando no hay usuario autenticado
+          // Excluir ciertas rutas públicas para evitar loops infinitos
+          const publicRoutes = ['/', '/login', '/signup', '/finishSignIn', '/contact', '/pricing']
+          const currentPath = window.location.pathname
+          
+          if (!publicRoutes.includes(currentPath)) {
+            router.push('/login')
+          }
+        }
         return
       }
 
@@ -55,23 +73,39 @@ export function UserProvider({ children }: { children: ReactNode }) {
         console.error('Error cargando datos del usuario:', err)
         setUser(null)
         setTenant(null)
+        
+        // Solo ejecutar redirecciones del lado del cliente
+        if (mounted && typeof window !== 'undefined') {
+          // Si hay error cargando datos del usuario, también redirigir
+          const publicRoutes = ['/', '/login', '/signup', '/finishSignIn', '/contact', '/pricing']
+          const currentPath = window.location.pathname
+          
+          if (!publicRoutes.includes(currentPath)) {
+            router.push('/login')
+          }
+        }
       } finally {
         setLoading(false)
       }
     })
 
     return () => unsubscribe()
-  }, [])
+  }, [router, mounted])
 
   const pathname = usePathname()
 
+  // Manejar redirecciones automáticas cuando el usuario está autenticado
   useEffect(() => {
-    if (loading) return
-    if (!user || !tenant) return
-    if (pathname === '/' || pathname === '/login' || pathname === '/signup') {
-      router.push('/dashboard')
+    if (!mounted || loading) return
+    
+    // Si el usuario está autenticado y está en páginas públicas, redirigir al dashboard
+    if (user && tenant) {
+      const publicRoutes = ['/', '/login', '/signup', '/finishSignIn']
+      if (publicRoutes.includes(pathname)) {
+        router.push('/dashboard')
+      }
     }
-  }, [loading, user, tenant, pathname, router])
+  }, [loading, user, tenant, pathname, router, mounted])
 
   const logout = async () => {
     await signOut(auth)
