@@ -7,10 +7,16 @@ import Iridescence from '@/components/Iridescence'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useEffect } from 'react'
+import { saveUtmCampaignFromUrl } from '@/db/utmCampaigns'
 import './shine.css'
 
 export default function Home() {
   const { theme } = useTheme()
+
+  useEffect(() => {
+    saveUtmCampaignFromUrl()
+  }, [])
   return (
     <Wrapper>
       {/* Iridescence Background */}
