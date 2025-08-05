@@ -15,6 +15,7 @@ import {
 import { auth, db } from '@/lib/firebase'
 import { User, Tenant } from '@/types/db'
 import { useRouter, usePathname } from 'next/navigation'
+import { identifyUser } from '@/utils/identifyUser'
 
 type UserContextType = {
   user: User | null
@@ -69,6 +70,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
         const tenantData = await waitForDoc<Tenant>(doc(db, 'tenants', userData.tenantId))
         setTenant(tenantData)
+        identifyUser(userData.uid, tenantData.tenantId)
       } catch (err) {
         console.error('Error cargando datos del usuario:', err)
         setUser(null)

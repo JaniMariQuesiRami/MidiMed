@@ -14,6 +14,7 @@ import { Mail, Key } from 'lucide-react'
 import { signUp } from '@/db/db'
 import tw from 'tailwind-styled-components'
 import Link from 'next/link'
+import { trackEvent } from '@/utils/trackEvent'
 
 type AuthFormProps = {
   mode: 'login' | 'signup'
@@ -97,10 +98,21 @@ export default function AuthForm({ mode }: AuthFormProps) {
   const handleAuth = async () => {
     setLoading(true)
     try {
-      if (mode === 'signup') {
-        await signUp({ email, password, displayName, tenantName, phone, address })
-        toast.success('Cuenta creada exitosamente')
-      }
+        if (mode === 'signup') {
+          const result = await signUp({
+            email,
+            password,
+            displayName,
+            tenantName,
+            phone,
+            address,
+          })
+          trackEvent('Created Account', {
+            userId: result.user.uid,
+            tenantId: result.tenantId,
+          })
+          toast.success('Cuenta creada exitosamente')
+        }
     } catch (err: unknown) {
       toast.error('Error al autenticar')
       console.error(err)
