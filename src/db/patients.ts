@@ -84,6 +84,22 @@ export async function deletePatient(id: string): Promise<void> {
   }
 }
 
+export async function uploadPatientPhoto(patientId: string, file: File): Promise<string> {
+  try {
+    const storageRef = ref(storage, `patients/${patientId}/photo`)
+    await uploadBytes(storageRef, file)
+    const url = await getDownloadURL(storageRef)
+    await updateDoc(doc(db, 'patients', patientId), {
+      photoUrl: url,
+      updatedAt: new Date().toISOString(),
+    })
+    return url
+  } catch (err) {
+    console.error('Error in uploadPatientPhoto:', err)
+    throw err
+  }
+}
+
 export async function getMedicalRecords(
   patientId: string,
   tenantId?: string,

@@ -17,6 +17,7 @@ import EditPatientModal from '@/components/EditPatientModal'
 import PatientInfoCard from '@/components/PatientInfoCard'
 import PatientAppointmentsTable from '@/components/PatientAppointmentsTable'
 import PatientRecordsTable from '@/components/PatientRecordsTable'
+import PatientFilesTable from '@/components/PatientFilesTable'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 
@@ -139,8 +140,16 @@ export default function PatientDetailsPage() {
               }}
             />
           </Section>
+          <Section>
+            <h2 className="font-medium text-lg mb-2">Archivos del paciente</h2>
+            <PatientFilesTable patientId={patient.patientId} />
+          </Section>
         </div>
-        <PatientInfoCard patient={patient} onEdit={() => setOpenEdit(true)} />
+        <PatientInfoCard
+          patient={patient}
+          onEdit={() => setOpenEdit(true)}
+          onPhotoChange={(url) => setPatient((prev) => (prev ? { ...prev, photoUrl: url } : prev))}
+        />
       </div>
       <CreateAppointmentModal
         open={openAppt}

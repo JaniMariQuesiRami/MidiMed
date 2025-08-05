@@ -1,25 +1,82 @@
 'use client'
 
+import { useRef, useState } from 'react'
 import tw from 'tailwind-styled-components'
 import { Button } from '@/components/ui/button'
 import { Pencil, User2 } from 'lucide-react'
 import type { Patient } from '@/types/db'
 import { format } from 'date-fns'
+import Image from 'next/image'
+import { uploadPatientPhoto } from '@/db/patients'
+import { toast } from 'sonner'
+import LoadingSpinner from '@/components/LoadingSpinner'
 
 export default function PatientInfoCard({
   patient,
   onEdit,
+  onPhotoChange,
 }: {
   patient: Patient
   onEdit: () => void
+  onPhotoChange: (url: string) => void
 }) {
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [uploading, setUploading] = useState(false)
+
+  const handleFiles = async (files: FileList | null) => {
+    if (!files || !files[0]) return
+    try {
+      setUploading(true)
+      const url = await uploadPatientPhoto(patient.patientId, files[0])
+      onPhotoChange(url)
+      toast.success('Foto actualizada')
+    } catch {
+      toast.error('Error al subir foto')
+    } finally {
+      setUploading(false)
+      if (inputRef.current) inputRef.current.value = ''
+    }
+  }
+
+  const onDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    handleFiles(e.dataTransfer.files)
+  }
+
   return (
     <CardContainer>
       <Content>
         <Header>
-          <Avatar>
-            <User2 className="w-5 h-5 text-muted-foreground" />
+          <Avatar
+            onDragOver={(e: React.DragEvent<HTMLDivElement>) => e.preventDefault()}
+            onDrop={onDrop}
+            onClick={() => inputRef.current?.click()}
+            className="relative cursor-pointer"
+          >
+            {patient.photoUrl ? (
+              <Image
+                src={patient.photoUrl}
+                alt={`${patient.firstName} ${patient.lastName}`}
+                width={40}
+                height={40}
+                className="rounded-full object-cover"
+              />
+            ) : (
+              <User2 className="w-5 h-5 text-muted-foreground" />
+            )}
+            {uploading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-background/70 rounded-full">
+                <LoadingSpinner />
+              </div>
+            )}
           </Avatar>
+          <input
+            ref={inputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => handleFiles(e.target.files)}
+          />
           <div>
             <Name>{patient.firstName} {patient.lastName}</Name>
             {patient.email && <Detail>{patient.email}</Detail>}

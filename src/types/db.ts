@@ -58,6 +58,8 @@ export type Patient = {
   email?: string
   phone?: string
   address?: string
+  /** URL de la foto del paciente */
+  photoUrl?: string
   /** Alergias registradas */
   allergies?: string
   /** Notas adicionales u observaciones */
@@ -99,6 +101,17 @@ export type MedicalRecord = {
   createdBy: string
   attachments?: MedicalRecordAttachment[]
   appointmentId?: string
+}
+
+export type PatientFile = {
+  tenantId: string
+  fileId: string
+  patientId: string
+  name: string
+  url: string
+  storagePath: string
+  uploadedAt: string
+  uploadedBy: string
 }
 
 export type AppointmentStatus = "scheduled" | "completed" | "cancelled"
