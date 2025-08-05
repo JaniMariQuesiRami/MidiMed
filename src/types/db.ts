@@ -1,3 +1,4 @@
+import type { Timestamp } from 'firebase/firestore'
 
 
 export type TenantSettings = {
@@ -203,5 +204,17 @@ export type Lead = {
   createdAt: unknown
   status: 'new' | 'contacted' | 'converted' | 'closed'
   source: 'contact-form' | 'other'
+}
+
+export type UtmCampaign = {
+  utm_source?: string
+  utm_medium?: string
+  utm_campaign?: string
+  utm_term?: string
+  utm_content?: string
+  fullUrl: string
+  createdAt: Timestamp
+  userAgent?: string
+  referer?: string
 }
 

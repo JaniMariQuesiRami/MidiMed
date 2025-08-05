@@ -10,6 +10,7 @@ import Image from 'next/image'
 import { useEffect } from 'react'
 import { useUser } from '@/contexts/UserContext'
 import { trackEvent } from '@/utils/trackEvent'
+import { saveUtmCampaignFromUrl } from '@/db/utmCampaigns'
 import './shine.css'
 
 export default function Home() {
@@ -22,6 +23,10 @@ export default function Home() {
       tenantId: tenant?.tenantId,
     })
   }, [user?.uid, tenant?.tenantId])
+
+  useEffect(() => {
+    saveUtmCampaignFromUrl()
+  }, [])
   return (
     <Wrapper>
       {/* Iridescence Background */}
