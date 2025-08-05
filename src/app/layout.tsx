@@ -5,6 +5,7 @@ import { UserProvider } from '@/contexts/UserContext'
 import { ThemeProvider } from '@/contexts/ThemeContext'
 import { Toaster } from "sonner";
 import GlobalFooter from '@/components/GlobalFooter'
+import PostHogInit from '@/components/PostHogInit'
 
 const sourceSansPro = localFont({
   variable: "--font-source-sans-pro",
@@ -85,6 +86,7 @@ export default function RootLayout({
       <body className={`${sourceSansPro.variable} font-sans antialiased`}>
         <ThemeProvider>
           <UserProvider>
+            <PostHogInit />
             {children}
             <GlobalFooter />
             <Toaster richColors position="top-right" />

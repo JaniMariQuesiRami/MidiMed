@@ -7,10 +7,26 @@ import Iridescence from '@/components/Iridescence'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useEffect } from 'react'
+import { useUser } from '@/contexts/UserContext'
+import { trackEvent } from '@/utils/trackEvent'
+import { saveUtmCampaignFromUrl } from '@/db/utmCampaigns'
 import './shine.css'
 
 export default function Home() {
   const { theme } = useTheme()
+  const { user, tenant } = useUser()
+
+  useEffect(() => {
+    trackEvent('Visited Landing Page', {
+      userId: user?.uid,
+      tenantId: tenant?.tenantId,
+    })
+  }, [user?.uid, tenant?.tenantId])
+
+  useEffect(() => {
+    saveUtmCampaignFromUrl()
+  }, [])
   return (
     <Wrapper>
       {/* Iridescence Background */}

@@ -13,6 +13,7 @@ import {
 import { UserContext } from '@/contexts/UserContext'
 import type { Patient, Appointment, User } from '@/types/db'
 import { toast } from 'sonner'
+import { trackEvent } from '@/utils/trackEvent'
 import {
   Form,
   FormField,
@@ -319,6 +320,11 @@ export default function CreateAppointmentModal({
           medicalRecordId: null,
           tenantId: tenant.tenantId,
           createdBy: user.uid,
+        })
+        trackEvent('Created Appointment', {
+          userId: user.uid,
+          tenantId: tenant.tenantId,
+          appointmentId,
         })
         const newAppt: Appointment = {
           appointmentId,

@@ -14,6 +14,7 @@ import { Mail, Key } from 'lucide-react'
 import { signUp } from '@/db/db'
 import tw from 'tailwind-styled-components'
 import Link from 'next/link'
+import { trackEvent } from '@/utils/trackEvent'
 
 type AuthFormProps = {
   mode: 'login' | 'signup'
@@ -57,26 +58,24 @@ export default function AuthForm({ mode }: AuthFormProps) {
       try {
         await signInWithEmailAndPassword(auth, email, password)
       } catch (loginError) {
-        // Si falla, intentar login con invitación
-        if (
-          typeof loginError === 'object' &&
-          loginError !== null &&
-          'code' in loginError &&
-          (loginError.code === 'auth/user-not-found' ||
-            loginError.code === 'auth/wrong-password' ||
-            loginError.code === 'auth/invalid-credential')
-        ) {
-          const { loginWithInvitation } = await import('@/db/users')
-          try {
+        if (typeof loginError === 'object' && loginError !== null && 'code' in loginError) {
+          if (loginError.code === 'auth/user-not-found') {
+            const { loginWithInvitation } = await import('@/db/users')
             await loginWithInvitation(email, password)
             toast.success('¡Bienvenido! Tu cuenta ha sido activada.')
             return
-          } catch {
-            throw loginError // Mostrar error original si ambos fallan
           }
-        } else {
-          throw loginError
+
+          if (
+            loginError.code === 'auth/wrong-password' ||
+            loginError.code === 'auth/invalid-credential'
+          ) {
+            toast.error('Correo o contraseña incorrectos')
+            return
+          }
         }
+
+        throw loginError
       }
 
       // Si login normal fue exitoso, actualizar lastLoginAt
@@ -84,7 +83,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
       if (user) {
         const { doc, updateDoc } = await import('firebase/firestore')
         const { db } = await import('@/lib/firebase')
-        
+
         const userRef = doc(db, 'users', user.uid)
         await updateDoc(userRef, { lastLoginAt: new Date().toISOString() })
       }
@@ -99,10 +98,21 @@ export default function AuthForm({ mode }: AuthFormProps) {
   const handleAuth = async () => {
     setLoading(true)
     try {
-      if (mode === 'signup') {
-        await signUp({ email, password, displayName, tenantName, phone, address })
-        toast.success('Cuenta creada exitosamente')
-      }
+        if (mode === 'signup') {
+          const result = await signUp({
+            email,
+            password,
+            displayName,
+            tenantName,
+            phone,
+            address,
+          })
+          trackEvent('Created Account', {
+            userId: result.user.uid,
+            tenantId: result.tenantId,
+          })
+          toast.success('Cuenta creada exitosamente')
+        }
     } catch (err: unknown) {
       toast.error('Error al autenticar')
       console.error(err)

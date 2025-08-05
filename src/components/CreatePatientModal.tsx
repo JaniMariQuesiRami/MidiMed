@@ -6,6 +6,7 @@ import { useContext } from "react"
 import { UserContext } from "@/contexts/UserContext"
 import { toast } from "sonner"
 import type { Patient } from "@/types/db"
+import { trackEvent } from '@/utils/trackEvent'
 
 export default function CreatePatientModal({
   open,
@@ -23,24 +24,29 @@ export default function CreatePatientModal({
       if (!user || !tenant) throw new Error("No user")
       const [firstName, ...rest] = values.name.trim().split(" ")
       const lastName = rest.join(" ")
-      const patientId = await createPatient({
-        firstName,
-        lastName,
-        birthDate: values.birthDate,
-        sex: values.sex,
-        allergies: values.allergies,
-        notes: values.notes,
-        ...(values.email ? { email: values.email } : {}),
-        ...(values.phone ? { phone: values.phone } : {}),
-        ...(values.address ? { address: values.address } : {}),
-        tenantId: tenant.tenantId,
-        createdBy: user.uid,
-      })
-      onCreated?.({
-        tenantId: tenant.tenantId,
-        patientId,
-        firstName,
-        lastName,
+        const patientId = await createPatient({
+          firstName,
+          lastName,
+          birthDate: values.birthDate,
+          sex: values.sex,
+          allergies: values.allergies,
+          notes: values.notes,
+          ...(values.email ? { email: values.email } : {}),
+          ...(values.phone ? { phone: values.phone } : {}),
+          ...(values.address ? { address: values.address } : {}),
+          tenantId: tenant.tenantId,
+          createdBy: user.uid,
+        })
+        trackEvent('Created Patient', {
+          userId: user.uid,
+          tenantId: tenant.tenantId,
+          patientId,
+        })
+        onCreated?.({
+          tenantId: tenant.tenantId,
+          patientId,
+          firstName,
+          lastName,
         birthDate: values.birthDate,
         sex: values.sex,
         allergies: values.allergies,
