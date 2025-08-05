@@ -8,15 +8,17 @@ import {
   deleteMedicalRecord,
 } from '@/db/patients'
 import { getAppointmentsInRange, deleteAppointment } from '@/db/appointments'
-import type { Patient, MedicalRecord, Appointment, AppointmentStatus } from '@/types/db'
+import type { Patient, MedicalRecord, Appointment, AppointmentStatus, PatientFile } from '@/types/db'
 import CreateAppointmentModal from '@/components/CreateAppointmentModal'
 import MedicalRecordFormModal from '@/components/MedicalRecordFormModal'
+import UploadFileModal from '@/components/UploadFileModal'
 import tw from 'tailwind-styled-components'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import EditPatientModal from '@/components/EditPatientModal'
 import PatientInfoCard from '@/components/PatientInfoCard'
 import PatientAppointmentsTable from '@/components/PatientAppointmentsTable'
 import PatientRecordsTable from '@/components/PatientRecordsTable'
+import PatientFilesTable from '@/components/PatientFilesTable'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 
@@ -26,11 +28,13 @@ export default function PatientDetailsPage() {
   const [patient, setPatient] = useState<Patient | null>(null)
   const [records, setRecords] = useState<MedicalRecord[]>([])
   const [appointments, setAppointments] = useState<Appointment[]>([])
+  const [files, setFiles] = useState<PatientFile[]>([])
   const [openAppt, setOpenAppt] = useState(false)
   const [editingAppt, setEditingAppt] = useState<Appointment | null>(null)
   const [openRecord, setOpenRecord] = useState(false)
   const [editingRecord, setEditingRecord] = useState<MedicalRecord | null>(null)
   const [openEdit, setOpenEdit] = useState(false)
+  const [openUpload, setOpenUpload] = useState(false)
   const [completingAppt, setCompletingAppt] = useState<Appointment | null>(null)
 
   const translateStatus = (status: AppointmentStatus) => {
@@ -139,8 +143,25 @@ export default function PatientDetailsPage() {
               }}
             />
           </Section>
+          <Section>
+            <div className="flex justify-between items-center mb-2">
+              <h2 className="font-medium text-lg">Archivos del paciente</h2>
+              <Button size="sm" onClick={() => setOpenUpload(true)} className="flex items-center gap-1">
+                Nuevo archivo <Plus size={14} />
+              </Button>
+            </div>
+            <PatientFilesTable 
+              patientId={patient.patientId} 
+              files={files}
+              onFilesChange={setFiles}
+            />
+          </Section>
         </div>
-        <PatientInfoCard patient={patient} onEdit={() => setOpenEdit(true)} />
+        <PatientInfoCard
+          patient={patient}
+          onEdit={() => setOpenEdit(true)}
+          onPhotoChange={(url) => setPatient((prev) => (prev ? { ...prev, photoUrl: url } : prev))}
+        />
       </div>
       <CreateAppointmentModal
         open={openAppt}
@@ -189,6 +210,12 @@ export default function PatientDetailsPage() {
         onClose={() => setOpenEdit(false)}
         patient={patient}
         onUpdated={(p) => setPatient(p)}
+      />
+      <UploadFileModal
+        open={openUpload}
+        onClose={() => setOpenUpload(false)}
+        patientId={patient.patientId}
+        onUploaded={(newFiles) => setFiles((prev) => [...prev, ...newFiles])}
       />
     </Wrapper>
   )
