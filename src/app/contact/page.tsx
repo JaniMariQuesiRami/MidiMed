@@ -5,10 +5,13 @@ import Image from 'next/image'
 import tw from 'tailwind-styled-components'
 import SharedHeader from '@/components/SharedHeader'
 import ContactForm from '@/components/ContactForm'
+import { useUser } from '@/contexts/UserContext'
+import { trackEvent } from '@/utils/trackEvent'
 
 export default function ContactPage() {
   const [position, setPosition] = useState({ x: 50, y: 50 })
   const [velocity, setVelocity] = useState({ vx: 1.5, vy: 1.2 })
+  const { user, tenant } = useUser()
 
   useEffect(() => {
     const move = () => {
@@ -27,6 +30,13 @@ export default function ContactPage() {
     const interval = setInterval(move, 10)
     return () => clearInterval(interval)
   }, [velocity])
+
+  useEffect(() => {
+    trackEvent('Visited Contact Page', {
+      userId: user?.uid,
+      tenantId: tenant?.tenantId,
+    })
+  }, [user?.uid, tenant?.tenantId])
 
   return (
     <Background>

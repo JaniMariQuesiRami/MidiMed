@@ -8,12 +8,15 @@ import SharedHeader from '@/components/SharedHeader'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Check, Star, TestTube, Briefcase, Stethoscope } from 'lucide-react'
+import { useUser } from '@/contexts/UserContext'
+import { trackEvent } from '@/utils/trackEvent'
 
 export default function PricingPage() {
   const [position, setPosition] = useState({ x: 50, y: 50 })
   const [velocity, setVelocity] = useState({ vx: 1.5, vy: 1.2 })
   const [currency, setCurrency] = useState<'USD' | 'GTQ'>('USD');
   const router = useRouter()
+  const { user, tenant } = useUser()
 
   const exchangeRate = 8;
 
@@ -49,6 +52,13 @@ export default function PricingPage() {
   const handleFreeTrialClick = () => {
     router.push('/signup')
   }
+
+  useEffect(() => {
+    trackEvent('Visited Pricing Page', {
+      userId: user?.uid,
+      tenantId: tenant?.tenantId,
+    })
+  }, [user?.uid, tenant?.tenantId])
 
   return (
     <Background>
