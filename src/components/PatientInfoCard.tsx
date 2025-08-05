@@ -1,24 +1,70 @@
 'use client'
 
+import { useState } from 'react'
 import tw from 'tailwind-styled-components'
 import { Button } from '@/components/ui/button'
 import { Pencil, User2 } from 'lucide-react'
 import type { Patient } from '@/types/db'
 import { format } from 'date-fns'
+import Image from 'next/image'
+import { deletePatientPhoto } from '@/db/patients'
+import { toast } from 'sonner'
+import LoadingSpinner from '@/components/LoadingSpinner'
+import ProfilePictureModal from './ProfilePictureModal'
 
 export default function PatientInfoCard({
   patient,
   onEdit,
+  onPhotoChange,
 }: {
   patient: Patient
   onEdit: () => void
+  onPhotoChange: (url: string) => void
 }) {
+  const [uploading] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  const handleDeletePhoto = async () => {
+    try {
+      await deletePatientPhoto(patient.patientId)
+      onPhotoChange('')
+      toast.success('Foto eliminada')
+    } catch (error: unknown) {
+      console.error('Error deleting photo:', error)
+      // Still clear the photo from UI if the database was updated but storage failed
+      if (error instanceof Error && error.message.includes('storage/object-not-found')) {
+        onPhotoChange('')
+        toast.success('Foto eliminada (el archivo ya no existía)')
+      } else {
+        toast.error('Error al eliminar foto')
+      }
+    }
+  }
+
   return (
     <CardContainer>
       <Content>
         <Header>
-          <Avatar>
-            <User2 className="w-5 h-5 text-muted-foreground" />
+          <Avatar
+            onClick={() => setIsModalOpen(true)}
+            className="relative cursor-pointer"
+          >
+            {patient.photoUrl ? (
+              <Image
+                src={patient.photoUrl}
+                alt={`${patient.firstName} ${patient.lastName}`}
+                width={40}
+                height={40}
+                className="rounded-full object-cover"
+              />
+            ) : (
+              <User2 className="w-5 h-5 text-muted-foreground" />
+            )}
+            {uploading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-background/70 rounded-full">
+                <LoadingSpinner />
+              </div>
+            )}
           </Avatar>
           <div>
             <Name>{patient.firstName} {patient.lastName}</Name>
@@ -72,6 +118,14 @@ export default function PatientInfoCard({
       <Button size="sm" onClick={onEdit} className="w-full mt-auto flex items-center gap-1">
       <Pencil size={14} /> Editar
       </Button>
+
+      <ProfilePictureModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        patient={patient}
+        onPhotoChange={onPhotoChange}
+        onDeletePhoto={handleDeletePhoto}
+      />
     </CardContainer>
   )
 }
