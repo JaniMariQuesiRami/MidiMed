@@ -11,13 +11,12 @@ const getBaseUrl = () => {
     : 'http://localhost:3000'
 }
 
-const actionCodeSettings = {
-  url: `${getBaseUrl()}/finishSignIn`,
-  handleCodeInApp: true,
-}
-
 export async function sendMagicLink(email: string): Promise<void> {
   try {
+    const actionCodeSettings = {
+      url: `${getBaseUrl()}/finishSignIn?email=${encodeURIComponent(email)}`,
+      handleCodeInApp: true,
+    }
     await sendSignInLinkToEmail(auth, email, actionCodeSettings)
     // Guardar el email en localStorage para recuperarlo después
     window.localStorage.setItem('emailForSignIn', email)
@@ -36,9 +35,13 @@ export async function completeMagicLinkSignIn(): Promise<void> {
     throw new Error('No magic link found in URL')
   }
 
-  const email = window.localStorage.getItem('emailForSignIn')
+  const storedEmail = window.localStorage.getItem('emailForSignIn')
+  const url = new URL(window.location.href)
+  const emailParam = url.searchParams.get('email')
+  const email = storedEmail || emailParam
+
   if (!email) {
-    throw new Error('Email not found in localStorage')
+    throw new Error('Email not found for sign in')
   }
 
   try {
