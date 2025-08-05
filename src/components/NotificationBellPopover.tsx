@@ -17,7 +17,6 @@ export default function NotificationBellPopover() {
   useEffect(() => {
     if (!user || !tenant) return
     
-    console.log('🔔 Setting up notification bell listener')
     setLoading(true)
     
     const unsub = listenToNotifications(
@@ -25,7 +24,6 @@ export default function NotificationBellPopover() {
       tenant.tenantId,
       { archived: false, limit: 5 },
       (notificationList) => {
-        console.log('🔔 Bell received notifications:', notificationList)
         // Filter only unread notifications for the bell
         const unreadNotifications = notificationList.filter((n) => !n.isRead)
         setNotifications(unreadNotifications)

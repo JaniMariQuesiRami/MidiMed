@@ -28,7 +28,7 @@ export async function uploadPatientFile(
 ): Promise<PatientFile> {
   try {
     const fileId = doc(collection(db, 'patientFiles')).id
-    const storagePath = `patients/${patientId}/files/${fileId}-${file.name}`
+    const storagePath = `tenants/${tenantId}/patients/${patientId}/files/${fileId}-${file.name}`
     const storageRef = ref(storage, storagePath)
     await uploadBytes(storageRef, file)
     const url = await getDownloadURL(storageRef)

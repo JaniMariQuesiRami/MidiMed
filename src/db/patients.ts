@@ -10,7 +10,7 @@ import {
   updateDoc,
   deleteDoc,
 } from 'firebase/firestore'
-import { uploadBytes, ref, getDownloadURL } from 'firebase/storage'
+import { uploadBytes, ref, getDownloadURL, deleteObject } from 'firebase/storage'
 import {
   Patient,
   PatientInput,
@@ -96,6 +96,33 @@ export async function uploadPatientPhoto(patientId: string, file: File): Promise
     return url
   } catch (err) {
     console.error('Error in uploadPatientPhoto:', err)
+    throw err
+  }
+}
+
+export async function deletePatientPhoto(patientId: string): Promise<void> {
+  try {
+    const storageRef = ref(storage, `patients/${patientId}/photo`)
+    
+    // Try to delete from storage, but don't fail if file doesn't exist
+    try {
+      await deleteObject(storageRef)
+    } catch (storageError: unknown) {
+      // If the file doesn't exist in storage, that's okay - we still want to clear the photoUrl
+      if (typeof storageError === 'object' && storageError !== null && 'code' in storageError && typeof storageError.code === 'string' && storageError.code !== 'storage/object-not-found') {
+        // Re-throw if it's a different error
+        throw storageError;
+      }
+      console.log(`Photo file not found in storage for patient ${patientId}, clearing photoUrl only`);
+    }
+    
+    // Always clear the photoUrl from the database
+    await updateDoc(doc(db, 'patients', patientId), {
+      photoUrl: null,
+      updatedAt: new Date().toISOString(),
+    })
+  } catch (err) {
+    console.error('Error in deletePatientPhoto:', err)
     throw err
   }
 }

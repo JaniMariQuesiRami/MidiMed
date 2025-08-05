@@ -1,15 +1,16 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import tw from 'tailwind-styled-components'
 import { Button } from '@/components/ui/button'
 import { Pencil, User2 } from 'lucide-react'
 import type { Patient } from '@/types/db'
 import { format } from 'date-fns'
 import Image from 'next/image'
-import { uploadPatientPhoto } from '@/db/patients'
+import { deletePatientPhoto } from '@/db/patients'
 import { toast } from 'sonner'
 import LoadingSpinner from '@/components/LoadingSpinner'
+import ProfilePictureModal from './ProfilePictureModal'
 
 export default function PatientInfoCard({
   patient,
@@ -20,27 +21,24 @@ export default function PatientInfoCard({
   onEdit: () => void
   onPhotoChange: (url: string) => void
 }) {
-  const inputRef = useRef<HTMLInputElement>(null)
-  const [uploading, setUploading] = useState(false)
+  const [uploading] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
-  const handleFiles = async (files: FileList | null) => {
-    if (!files || !files[0]) return
+  const handleDeletePhoto = async () => {
     try {
-      setUploading(true)
-      const url = await uploadPatientPhoto(patient.patientId, files[0])
-      onPhotoChange(url)
-      toast.success('Foto actualizada')
-    } catch {
-      toast.error('Error al subir foto')
-    } finally {
-      setUploading(false)
-      if (inputRef.current) inputRef.current.value = ''
+      await deletePatientPhoto(patient.patientId)
+      onPhotoChange('')
+      toast.success('Foto eliminada')
+    } catch (error: unknown) {
+      console.error('Error deleting photo:', error)
+      // Still clear the photo from UI if the database was updated but storage failed
+      if (error instanceof Error && error.message.includes('storage/object-not-found')) {
+        onPhotoChange('')
+        toast.success('Foto eliminada (el archivo ya no existía)')
+      } else {
+        toast.error('Error al eliminar foto')
+      }
     }
-  }
-
-  const onDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    handleFiles(e.dataTransfer.files)
   }
 
   return (
@@ -48,9 +46,7 @@ export default function PatientInfoCard({
       <Content>
         <Header>
           <Avatar
-            onDragOver={(e: React.DragEvent<HTMLDivElement>) => e.preventDefault()}
-            onDrop={onDrop}
-            onClick={() => inputRef.current?.click()}
+            onClick={() => setIsModalOpen(true)}
             className="relative cursor-pointer"
           >
             {patient.photoUrl ? (
@@ -70,13 +66,6 @@ export default function PatientInfoCard({
               </div>
             )}
           </Avatar>
-          <input
-            ref={inputRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={(e) => handleFiles(e.target.files)}
-          />
           <div>
             <Name>{patient.firstName} {patient.lastName}</Name>
             {patient.email && <Detail>{patient.email}</Detail>}
@@ -129,6 +118,14 @@ export default function PatientInfoCard({
       <Button size="sm" onClick={onEdit} className="w-full mt-auto flex items-center gap-1">
       <Pencil size={14} /> Editar
       </Button>
+
+      <ProfilePictureModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        patient={patient}
+        onPhotoChange={onPhotoChange}
+        onDeletePhoto={handleDeletePhoto}
+      />
     </CardContainer>
   )
 }

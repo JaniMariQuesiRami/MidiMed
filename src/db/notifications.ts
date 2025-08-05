@@ -16,29 +16,19 @@ import { Notification } from '@/types/db'
 
 export async function getNotifications(userId: string): Promise<Notification[]> {
   try {
-    console.log('🔔 Getting notifications for userId:', userId)
     
     const q = query(collection(db, 'notifications'), where('userId', '==', userId))
     const snap = await getDocs(q)
     
-    console.log('🔔 Basic notifications query result:', {
-      docCount: snap.docs.length,
-      isEmpty: snap.empty
-    })
     
     const notifications = snap.docs.map((d) => {
       const data = d.data()
-      console.log('🔔 Processing basic notification doc:', {
-        id: d.id,
-        data: data
-      })
       return {
         ...(data as Omit<Notification, 'notificationId'>),
         notificationId: d.id,
       }
     }) as Notification[]
     
-    console.log('🔔 Final basic notifications list:', notifications)
     return notifications
   } catch (err) {
     console.error('Error in getNotifications:', err)
@@ -105,12 +95,6 @@ export function listenToNotifications(
     return onSnapshot(q, (snap) => {
       const allNotifications = snap.docs.map((d) => {
         const data = d.data()
-        console.log('🔔 Processing notification doc:', {
-          id: d.id,
-          data: data,
-          archived: data.archived,
-          archivedType: typeof data.archived
-        })
         return {
           ...(data as Omit<Notification, 'notificationId'>),
           notificationId: d.id,
@@ -122,13 +106,6 @@ export function listenToNotifications(
       const filteredNotifications = allNotifications.filter(notification => {
         const isArchived = notification.archived === true
         const shouldShow = targetArchived ? isArchived : !isArchived
-        console.log('🔔 Filtering notification:', {
-          id: notification.notificationId,
-          archived: notification.archived,
-          isArchived,
-          targetArchived,
-          shouldShow
-        })
         return shouldShow
       })
       
@@ -154,13 +131,6 @@ export async function getMoreNotifications(
   },
 ): Promise<{ items: Notification[]; lastDoc: QueryDocumentSnapshot | null }> {
   try {
-    console.log('🔔 Getting more notifications with params:', {
-      userId,
-      tenantId,
-      archived: options.archived ?? false,
-      limit: options.limit ?? 10,
-      startAfterDoc: options.startAfterDoc.id
-    })
     
     // Query without archived filter - we'll filter in code to handle missing field
     const q = query(
@@ -174,19 +144,8 @@ export async function getMoreNotifications(
     // Firestore composite index required for: userId + tenantId + createdAt
     const snap = await getDocs(q)
     
-    console.log('🔔 More notifications query result:', {
-      docCount: snap.docs.length,
-      isEmpty: snap.empty
-    })
-    
     const allNotifications = snap.docs.map((d) => {
       const data = d.data()
-      console.log('🔔 Processing more notification doc:', {
-        id: d.id,
-        data: data,
-        archived: data.archived,
-        archivedType: typeof data.archived
-      })
       return {
         ...(data as Omit<Notification, 'notificationId'>),
         notificationId: d.id,
@@ -198,25 +157,11 @@ export async function getMoreNotifications(
     const filteredNotifications = allNotifications.filter(notification => {
       const isArchived = notification.archived === true
       const shouldShow = targetArchived ? isArchived : !isArchived
-      console.log('🔔 Filtering more notification:', {
-        id: notification.notificationId,
-        archived: notification.archived,
-        isArchived,
-        targetArchived,
-        shouldShow
-      })
       return shouldShow
     })
     
     // Limit the results after filtering
     const limitedNotifications = filteredNotifications.slice(0, options.limit ?? 10)
-    
-    console.log('🔔 More notifications final result:', {
-      total: allNotifications.length,
-      afterFilter: filteredNotifications.length,
-      afterLimit: limitedNotifications.length,
-      notifications: limitedNotifications
-    })
     
     return {
       items: limitedNotifications,
