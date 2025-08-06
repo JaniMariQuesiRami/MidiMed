@@ -28,6 +28,7 @@ import MobileHomeDashboard from '@/components/MobileHomeDashboard'
 import type { Patient, Appointment } from '@/types/db'
 import { toast } from 'sonner'
 import LoadingSpinner from '@/components/LoadingSpinner'
+import DashboardTutorial from '@/components/DashboardTutorial'
 
 const locales = { es }
 const localizer = dateFnsLocalizer({
@@ -138,6 +139,9 @@ export default function DashboardCalendar() {
     <>
       {/* Mobile Home Dashboard */}
       <MobileHomeDashboard />
+
+      {/* Onboarding Tutorial */}
+      <DashboardTutorial />
 
       {/* Desktop Calendar View */}
       <DesktopWrapper>

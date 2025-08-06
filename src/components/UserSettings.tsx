@@ -50,7 +50,7 @@ export default function UserSettings({ collapsed }: { collapsed: boolean }) {
 
   return (
     <>
-      <CardWrapper onClick={() => setOpen(true)}>
+      <CardWrapper data-tour="user-card" onClick={() => setOpen(true)}>
         {collapsed ? (
           <CollapsedCard>
             <UserIcon size={20} />

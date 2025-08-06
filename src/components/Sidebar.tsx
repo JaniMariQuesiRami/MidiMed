@@ -20,11 +20,11 @@ import { UserContext } from '@/contexts/UserContext'
 import { listenToNotifications } from '@/db/notifications'
 
 const navItems = [
-  { href: '/dashboard', label: 'Calendario', icon: Calendar },
-  { href: '/patients', label: 'Pacientes', icon: Users },
-  { href: '/notifications', label: 'Notificaciones', icon: Bell },
-  { href: '/reports', label: 'Reportes', icon: BarChart3 },
-  { href: '/settings', label: 'Ajustes', icon: Settings },
+  { href: '/dashboard', label: 'Calendario', icon: Calendar, tourId: 'nav-dashboard' },
+  { href: '/patients', label: 'Pacientes', icon: Users, tourId: 'nav-patients' },
+  { href: '/notifications', label: 'Notificaciones', icon: Bell, tourId: 'nav-notifications' },
+  { href: '/reports', label: 'Reportes', icon: BarChart3, tourId: 'nav-reports' },
+  { href: '/settings', label: 'Ajustes', icon: Settings, tourId: 'nav-settings' },
 ]
 
 interface SidebarProps {
@@ -84,10 +84,11 @@ export default function Sidebar({ collapsed = false, onCollapsedChange }: Sideba
         )}
 
         <NavList>
-          {navItems.map(({ href, label, icon: Icon }) => (
+        {navItems.map(({ href, label, icon: Icon, tourId }) => (
             <NavItem key={href} $active={pathname === href} $collapsed={collapsed}>
               <Link
                 href={href}
+                data-tour={tourId}
                 className={`flex items-center gap-2 w-full relative ${collapsed ? 'justify-center px-2 py-3' : 'px-4 py-3 '}`}
               >
                 <div className="flex items-center gap-2 w-full justify-center">
