@@ -8,6 +8,10 @@ import LoadingSpinner from '@/components/LoadingSpinner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Clock, AlertCircle } from 'lucide-react'
 import tw from 'tailwind-styled-components'
+import { auth, db } from '@/lib/firebase'
+import { doc, getDoc, updateDoc } from 'firebase/firestore'
+import { signOut } from 'firebase/auth'
+import { createUserFromInvite } from '@/db/users'
 
 export default function FinishSignInPage() {
   const [loading, setLoading] = useState(true)
@@ -33,8 +37,30 @@ export default function FinishSignInPage() {
         }
 
         await completeMagicLinkSignIn()
+
+        const user = auth.currentUser
+        if (!user) {
+          throw new Error('No user after sign in')
+        }
+
+        const userRef = doc(db, 'users', user.uid)
+        const userSnap = await getDoc(userRef)
+
+        if (userSnap.exists()) {
+          await updateDoc(userRef, { lastLoginAt: new Date().toISOString() })
+        } else {
+          const created = await createUserFromInvite(user.email ?? '', user.uid)
+          if (!created) {
+            setError('No se encontró una invitación válida para este correo.')
+            setErrorType('invalid')
+            await signOut(auth)
+            toast.error('No se encontró una invitación válida para este correo.')
+            return
+          }
+        }
+
         toast.success('¡Bienvenido! Has iniciado sesión exitosamente.')
-        
+
         // Redirigir al dashboard o página principal
         router.push('/dashboard')
       } catch (err) {
