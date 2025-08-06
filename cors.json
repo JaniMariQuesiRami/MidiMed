@@ -1,8 +1,18 @@
 [
   {
-    "origin": ["http://localhost:3000", "https://midimed.tech"],
-    "method": ["GET", "POST", "PUT", "DELETE"],
-    "maxAgeSeconds": 3600,
-    "responseHeader": ["Content-Type", "Authorization"]
+    "origin": [
+      "http://localhost:3000",
+      "http://midimed.tech",
+      "https://midimed.tech",
+      "http://www.midimed.tech",
+      "https://www.midimed.tech"
+    ],
+    "method": ["GET", "HEAD", "POST", "PUT", "DELETE", "OPTIONS"],
+    "responseHeader": [
+      "Authorization",
+      "Content-Type",
+      "x-goog-upload-protocol"
+    ],
+    "maxAgeSeconds": 3600
   }
 ]

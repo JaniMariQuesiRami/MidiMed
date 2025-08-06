@@ -27,11 +27,21 @@ const navItems = [
   { href: '/settings', label: 'Ajustes', icon: Settings },
 ]
 
-export default function Sidebar() {
+interface SidebarProps {
+  collapsed?: boolean
+  onCollapsedChange?: (collapsed: boolean) => void
+}
+
+export default function Sidebar({ collapsed = false, onCollapsedChange }: SidebarProps = {}) {
   const pathname = usePathname()
-  const [collapsed, setCollapsed] = useState(false)
   const { user, tenant } = useContext(UserContext)
   const [unreadCount, setUnreadCount] = useState(0)
+
+  const handleToggleCollapsed = (newCollapsed: boolean) => {
+    if (onCollapsedChange) {
+      onCollapsedChange(newCollapsed)
+    }
+  }
 
   useEffect(() => {
     if (!user || !tenant) return
@@ -57,7 +67,7 @@ export default function Sidebar() {
             <CollapsedLogoWrapper>
               <Logo src="/logoPrimary.svg" alt="Logo" width={28} height={28} />
             </CollapsedLogoWrapper>
-            <ToggleFloating onClick={() => setCollapsed(false)}>
+            <ToggleFloating onClick={() => handleToggleCollapsed(false)}>
               <ChevronsRight size={18} />
             </ToggleFloating>
           </>
@@ -67,7 +77,7 @@ export default function Sidebar() {
               <Logo src="/logoPrimary.svg" alt="Logo" width={28} height={28} />
               <BrandText>MidiMed</BrandText>
             </div>
-            <ToggleButton onClick={() => setCollapsed(true)}>
+            <ToggleButton onClick={() => handleToggleCollapsed(true)}>
               <ChevronsLeft size={18} />
             </ToggleButton>
           </BrandRow>
@@ -102,9 +112,10 @@ export default function Sidebar() {
 
 // styled components
 const Wrapper = tw.div<{ $collapsed: boolean }>`
-  relative h-full flex flex-col justify-between  transition-all
+  relative h-screen flex flex-col justify-between transition-all
   ${({ $collapsed }) => ($collapsed ? 'w-16 p-2' : 'w-64 p-3')}
   border-r border-sidebar-border bg-sidebar text-sidebar-foreground
+  overflow-hidden
 `
 
 const TopSection = tw.div`flex flex-col gap-8`
