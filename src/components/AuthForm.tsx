@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { signInWithEmailAndPassword } from 'firebase/auth'
 import { auth } from '@/lib/firebase'
 import { sendMagicLink } from '@/lib/magic-link'
+import { signOutUser } from '@/db/session'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -22,6 +23,8 @@ type AuthFormProps = {
 
 type LoginStep = 'email' | 'sent' | 'password'
 
+type SignupStep = 'form' | 'sent'
+
 export default function AuthForm({ mode }: AuthFormProps) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -31,6 +34,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
   const [address, setAddress] = useState('')
   const [loading, setLoading] = useState(false)
   const [loginStep, setLoginStep] = useState<LoginStep>('email')
+  const [signupStep, setSignupStep] = useState<SignupStep>('form')
 
   const handleMagicLinkSend = async () => {
     if (!email) {
@@ -95,24 +99,51 @@ export default function AuthForm({ mode }: AuthFormProps) {
     }
   }
 
+  const handleResendLink = async () => {
+    setLoading(true)
+    try {
+      await sendMagicLink(email)
+      toast.success('¡Enlace reenviado! Revisa tu correo.')
+    } catch (err) {
+      console.error('Error resending magic link:', err)
+      toast.error('Error al reenviar el enlace. Intenta nuevamente.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const handleAuth = async () => {
     setLoading(true)
     try {
-        if (mode === 'signup') {
-          const result = await signUp({
-            email,
-            password,
-            displayName,
-            tenantName,
-            phone,
-            address,
-          })
-          trackEvent('Created Account', {
-            userId: result.user.uid,
-            tenantId: result.tenantId,
-          })
-          toast.success('Cuenta creada exitosamente')
+      if (mode === 'signup') {
+        const result = await signUp({
+          email,
+          password,
+          displayName,
+          tenantName,
+          phone,
+          address,
+        })
+        trackEvent('Created Account', {
+          userId: result.user.uid,
+          tenantId: result.tenantId,
+        })
+
+        try {
+          await sendMagicLink(email)
+          toast.success('Organización creada. Revisa tu correo.')
+        } catch (linkErr) {
+          console.error('Error sending magic link after signup:', linkErr)
+          toast.error('Error al enviar el enlace. Intenta nuevamente.')
+        } finally {
+          try {
+            await signOutUser()
+          } catch (signOutErr) {
+            console.error('Error signing out after signup:', signOutErr)
+          }
+          setSignupStep('sent')
         }
+      }
     } catch (err: unknown) {
       if (
         typeof err === 'object' &&
@@ -173,6 +204,41 @@ export default function AuthForm({ mode }: AuthFormProps) {
               >
                 <Key className="h-4 w-4" />
                 Usar contraseña
+              </Button>
+            </div>
+          </CardContent>
+        </StyledCard>
+      </Wrapper>
+    )
+  }
+
+  if (mode === 'signup' && signupStep === 'sent') {
+    return (
+      <Wrapper>
+        <Title>MidiMed</Title>
+        <StyledCard>
+          <CardContent className="space-y-6 text-center">
+            <div className="space-y-4">
+              <div className="flex justify-center">
+                <Mail className="h-16 w-16 text-primary" />
+              </div>
+              <div className="space-y-2">
+                <p className="text-lg font-medium">Organización creada</p>
+                <p className="text-sm text-gray-600">
+                  Hemos enviado un enlace de acceso a <strong>{email}</strong>. Revisa tu correo para confirmar tu cuenta.
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-3 pt-4 border-t">
+              <p className="text-sm text-gray-500">¿No recibiste el correo?</p>
+              <Button
+                variant="outline"
+                onClick={handleResendLink}
+                disabled={loading}
+                className="w-full"
+              >
+                Enviar nuevo enlace
               </Button>
             </div>
           </CardContent>
