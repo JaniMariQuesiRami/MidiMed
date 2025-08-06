@@ -2,7 +2,7 @@ import { sendSignInLinkToEmail, signInWithEmailLink, isSignInWithEmailLink } fro
 import { auth } from './firebase'
 
 // Determinar la URL base según el entorno
-const getBaseUrl = () => {
+export const getBaseUrl = () => {
   if (typeof window !== 'undefined') {
     return window.location.origin
   }

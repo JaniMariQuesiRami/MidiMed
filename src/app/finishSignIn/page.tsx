@@ -43,12 +43,24 @@ export default function FinishSignInPage() {
           throw new Error('No user after sign in')
         }
 
+        // Verificar si el email está verificado (funcionalidad del HEAD)
+        if (!user.emailVerified) {
+          await signOut(auth)
+          setError('Debes verificar tu correo antes de iniciar sesión.')
+          setErrorType('general')
+          toast.error('Correo no verificado')
+          return
+        }
+
+        // Verificar si el usuario ya existe o crear desde invitación (funcionalidad del development)
         const userRef = doc(db, 'users', user.uid)
         const userSnap = await getDoc(userRef)
 
         if (userSnap.exists()) {
+          // Usuario existente, actualizar último login
           await updateDoc(userRef, { lastLoginAt: new Date().toISOString() })
         } else {
+          // Usuario nuevo, intentar crear desde invitación
           const created = await createUserFromInvite(user.email ?? '', user.uid)
           if (!created) {
             setError('No se encontró una invitación válida para este correo.')
