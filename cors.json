@@ -11,7 +11,16 @@
     "responseHeader": [
       "Authorization",
       "Content-Type",
-      "x-goog-upload-protocol"
+      "x-goog-resumable",
+      "x-goog-upload-protocol",
+      "x-goog-upload-command",
+      "x-goog-upload-offset",
+      "x-goog-upload-file-name",
+      "x-goog-upload-header-content-length",
+      "x-goog-upload-content-type",
+      "x-firebase-gmpid",
+      "x-client-data",
+      "x-goog-api-client"
     ],
     "maxAgeSeconds": 3600
   }

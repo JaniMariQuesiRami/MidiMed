@@ -114,7 +114,16 @@ export default function AuthForm({ mode }: AuthFormProps) {
           toast.success('Cuenta creada exitosamente')
         }
     } catch (err: unknown) {
-      toast.error('Error al autenticar')
+      if (
+        typeof err === 'object' &&
+        err !== null &&
+        'code' in err &&
+        err.code === 'auth/email-already-in-use'
+      ) {
+        toast.error('El correo ya está en uso. Por favor, utiliza otro correo.')
+      } else {
+        toast.error('Error al autenticar')
+      }
       console.error(err)
     } finally {
       setLoading(false)
