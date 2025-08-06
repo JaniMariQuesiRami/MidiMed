@@ -16,7 +16,6 @@ import { auth, db } from '@/lib/firebase'
 import { User, Tenant } from '@/types/db'
 import { useRouter, usePathname } from 'next/navigation'
 import { identifyUser } from '@/utils/identifyUser'
-import { toast } from 'sonner'
 
 type UserContextType = {
   user: User | null
