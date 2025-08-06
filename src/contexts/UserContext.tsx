@@ -79,7 +79,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
           const publicRoutes = ['/', '/login', '/signup', '/finishSignIn', '/contact', '/pricing']
           const currentPath = window.location.pathname
 
-          toast.error('Por favor verifica tu correo antes de iniciar sesión.')
           if (!publicRoutes.includes(currentPath)) {
             router.push('/login')
           }
