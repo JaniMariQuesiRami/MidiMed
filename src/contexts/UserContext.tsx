@@ -64,6 +64,27 @@ export function UserProvider({ children }: { children: ReactNode }) {
         return
       }
 
+      if (!firebaseUser.emailVerified) {
+        try {
+          await signOut(auth)
+        } catch (signOutErr) {
+          console.error('Error signing out unverified user:', signOutErr)
+        }
+        setUser(null)
+        setTenant(null)
+        setLoading(false)
+
+        if (mounted && typeof window !== 'undefined') {
+          const publicRoutes = ['/', '/login', '/signup', '/finishSignIn', '/contact', '/pricing']
+          const currentPath = window.location.pathname
+
+          if (!publicRoutes.includes(currentPath)) {
+            router.push('/login')
+          }
+        }
+        return
+      }
+
       try {
         const userData = await waitForDoc<User>(doc(db, 'users', firebaseUser.uid))
         setUser(userData)

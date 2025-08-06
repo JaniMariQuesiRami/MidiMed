@@ -1,9 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { signInWithEmailAndPassword } from 'firebase/auth'
+import { signInWithEmailAndPassword, sendEmailVerification } from 'firebase/auth'
 import { auth } from '@/lib/firebase'
-import { sendMagicLink } from '@/lib/magic-link'
+import { sendMagicLink, getBaseUrl } from '@/lib/magic-link'
+import { signOutUser } from '@/db/session'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -22,6 +23,8 @@ type AuthFormProps = {
 
 type LoginStep = 'email' | 'sent' | 'password'
 
+type SignupStep = 'form' | 'sent'
+
 export default function AuthForm({ mode }: AuthFormProps) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -31,6 +34,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
   const [address, setAddress] = useState('')
   const [loading, setLoading] = useState(false)
   const [loginStep, setLoginStep] = useState<LoginStep>('email')
+  const [signupStep, setSignupStep] = useState<SignupStep>('form')
 
   const handleMagicLinkSend = async () => {
     if (!email) {
@@ -62,6 +66,12 @@ export default function AuthForm({ mode }: AuthFormProps) {
           if (loginError.code === 'auth/user-not-found') {
             const { loginWithInvitation } = await import('@/db/users')
             await loginWithInvitation(email, password)
+            const invitedUser = auth.currentUser
+            if (invitedUser && !invitedUser.emailVerified) {
+              await signOutUser()
+              toast.error('Por favor verifica tu correo antes de iniciar sesión.')
+              return
+            }
             toast.success('¡Bienvenido! Tu cuenta ha sido activada.')
             return
           }
@@ -78,8 +88,14 @@ export default function AuthForm({ mode }: AuthFormProps) {
         throw loginError
       }
 
-      // Si login normal fue exitoso, actualizar lastLoginAt
+      // Si login normal fue exitoso, verificar correo
       const user = auth.currentUser
+      if (user && !user.emailVerified) {
+        await signOutUser()
+        toast.error('Por favor verifica tu correo antes de iniciar sesión.')
+        return
+      }
+
       if (user) {
         const { doc, updateDoc } = await import('firebase/firestore')
         const { db } = await import('@/lib/firebase')
@@ -95,26 +111,85 @@ export default function AuthForm({ mode }: AuthFormProps) {
     }
   }
 
+  const handleResendLink = async () => {
+    setLoading(true)
+    try {
+      await sendMagicLink(email)
+      toast.success('¡Enlace reenviado! Revisa tu correo.')
+    } catch (err) {
+      console.error('Error resending magic link:', err)
+      toast.error('Error al reenviar el enlace. Intenta nuevamente.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleResendVerification = async () => {
+    setLoading(true)
+    try {
+      const credential = await signInWithEmailAndPassword(auth, email, password)
+      await sendEmailVerification(credential.user, {
+        url: `${getBaseUrl()}/login`,
+      })
+      toast.success('Correo de verificación reenviado. Revisa tu correo.')
+    } catch (err) {
+      console.error('Error resending verification email:', err)
+      toast.error('Error al reenviar el correo. Intenta nuevamente.')
+    } finally {
+      try {
+        await signOutUser()
+      } catch (signOutErr) {
+        console.error('Error signing out after resending verification:', signOutErr)
+      }
+      setLoading(false)
+    }
+  }
+
   const handleAuth = async () => {
     setLoading(true)
     try {
-        if (mode === 'signup') {
-          const result = await signUp({
-            email,
-            password,
-            displayName,
-            tenantName,
-            phone,
-            address,
+      if (mode === 'signup') {
+        const result = await signUp({
+          email,
+          password,
+          displayName,
+          tenantName,
+          phone,
+          address,
+        })
+        trackEvent('Created Account', {
+          userId: result.user.uid,
+          tenantId: result.tenantId,
+        })
+
+        try {
+          await sendEmailVerification(result.user, {
+            url: `${getBaseUrl()}/login`,
           })
-          trackEvent('Created Account', {
-            userId: result.user.uid,
-            tenantId: result.tenantId,
-          })
-          toast.success('Cuenta creada exitosamente')
+          toast.success('Organización creada. Revisa tu correo para verificar la cuenta.')
+        } catch (linkErr) {
+          console.error('Error sending verification email after signup:', linkErr)
+          toast.error('Error al enviar el correo de verificación. Intenta nuevamente.')
+        } finally {
+          try {
+            await signOutUser()
+          } catch (signOutErr) {
+            console.error('Error signing out after signup:', signOutErr)
+          }
+          setSignupStep('sent')
         }
+      }
     } catch (err: unknown) {
-      toast.error('Error al autenticar')
+      if (
+        typeof err === 'object' &&
+        err !== null &&
+        'code' in err &&
+        err.code === 'auth/email-already-in-use'
+      ) {
+        toast.error('El correo ya está en uso. Por favor, utiliza otro correo.')
+      } else {
+        toast.error('Error al autenticar')
+      }
       console.error(err)
     } finally {
       setLoading(false)
@@ -144,9 +219,9 @@ export default function AuthForm({ mode }: AuthFormProps) {
             
             <div className="space-y-3 pt-4 border-t">
               <p className="text-sm text-gray-500">¿No recibiste el correo?</p>
-              <Button 
-                variant="outline" 
-                onClick={() => setLoginStep('email')}
+              <Button
+                variant="outline"
+                onClick={handleResendLink}
                 disabled={loading}
                 className="w-full"
               >
@@ -164,6 +239,41 @@ export default function AuthForm({ mode }: AuthFormProps) {
               >
                 <Key className="h-4 w-4" />
                 Usar contraseña
+              </Button>
+            </div>
+          </CardContent>
+        </StyledCard>
+      </Wrapper>
+    )
+  }
+
+  if (mode === 'signup' && signupStep === 'sent') {
+    return (
+      <Wrapper>
+        <Title>MidiMed</Title>
+        <StyledCard>
+          <CardContent className="space-y-6 text-center">
+            <div className="space-y-4">
+              <div className="flex justify-center">
+                <Mail className="h-16 w-16 text-primary" />
+              </div>
+              <div className="space-y-2">
+                <p className="text-lg font-medium">Organización creada</p>
+                <p className="text-sm text-gray-600">
+                  Hemos enviado un correo de verificación a <strong>{email}</strong>. Revisa tu correo para activar tu cuenta.
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-3 pt-4 border-t">
+              <p className="text-sm text-gray-500">¿No recibiste el correo?</p>
+              <Button
+                variant="outline"
+                onClick={handleResendVerification}
+                disabled={loading}
+                className="w-full"
+              >
+                Reenviar correo de verificación
               </Button>
             </div>
           </CardContent>

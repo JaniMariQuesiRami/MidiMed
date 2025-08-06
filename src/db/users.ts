@@ -128,3 +128,41 @@ export async function loginWithInvitation(email: string, tempPassword: string): 
     throw err
   }
 }
+
+export async function createUserFromInvite(
+  email: string,
+  uid: string,
+): Promise<boolean> {
+  try {
+    // Requires Firestore composite index: email+status
+    const invitesQuery = query(
+      collection(db, 'invites'),
+      where('email', '==', email),
+      where('status', '==', 'pending'),
+    )
+    const invitesSnap = await getDocs(invitesQuery)
+
+    if (invitesSnap.empty) return false
+
+    const inviteDoc = invitesSnap.docs[0]
+    const inviteData = inviteDoc.data()
+
+    await setDoc(doc(db, 'users', uid), {
+      tenantId: inviteData.tenantId,
+      uid,
+      email: inviteData.email,
+      displayName: inviteData.displayName,
+      role: inviteData.role,
+      invitedBy: inviteData.invitedBy,
+      createdAt: inviteData.createdAt,
+      lastLoginAt: new Date().toISOString(),
+    })
+
+    await updateDoc(inviteDoc.ref, { status: 'accepted' })
+
+    return true
+  } catch (err) {
+    console.error('Error in createUserFromInvite:', err)
+    throw err
+  }
+}

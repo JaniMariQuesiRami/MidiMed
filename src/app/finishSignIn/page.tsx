@@ -8,6 +8,10 @@ import LoadingSpinner from '@/components/LoadingSpinner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Clock, AlertCircle } from 'lucide-react'
 import tw from 'tailwind-styled-components'
+import { auth, db } from '@/lib/firebase'
+import { doc, getDoc, updateDoc } from 'firebase/firestore'
+import { signOut } from 'firebase/auth'
+import { createUserFromInvite } from '@/db/users'
 
 export default function FinishSignInPage() {
   const [loading, setLoading] = useState(true)
@@ -33,8 +37,42 @@ export default function FinishSignInPage() {
         }
 
         await completeMagicLinkSignIn()
+
+        const user = auth.currentUser
+        if (!user) {
+          throw new Error('No user after sign in')
+        }
+
+        // Verificar si el email está verificado (funcionalidad del HEAD)
+        if (!user.emailVerified) {
+          await signOut(auth)
+          setError('Debes verificar tu correo antes de iniciar sesión.')
+          setErrorType('general')
+          toast.error('Correo no verificado')
+          return
+        }
+
+        // Verificar si el usuario ya existe o crear desde invitación (funcionalidad del development)
+        const userRef = doc(db, 'users', user.uid)
+        const userSnap = await getDoc(userRef)
+
+        if (userSnap.exists()) {
+          // Usuario existente, actualizar último login
+          await updateDoc(userRef, { lastLoginAt: new Date().toISOString() })
+        } else {
+          // Usuario nuevo, intentar crear desde invitación
+          const created = await createUserFromInvite(user.email ?? '', user.uid)
+          if (!created) {
+            setError('No se encontró una invitación válida para este correo.')
+            setErrorType('invalid')
+            await signOut(auth)
+            toast.error('No se encontró una invitación válida para este correo.')
+            return
+          }
+        }
+
         toast.success('¡Bienvenido! Has iniciado sesión exitosamente.')
-        
+
         // Redirigir al dashboard o página principal
         router.push('/dashboard')
       } catch (err) {
