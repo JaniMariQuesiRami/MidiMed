@@ -1,6 +1,6 @@
 'use client'
 
-import { ReactNode } from 'react'
+import { ReactNode, useState } from 'react'
 import Sidebar from '@/components/Sidebar'
 import BottomTabs from '@/components/BottomTabs'
 import BrandLogo from '@/components/BrandLogo'
@@ -12,12 +12,17 @@ import tw from 'tailwind-styled-components'
 
 export default function ProtectedLayout({ children }: { children: ReactNode }) {
   const { theme, toggleTheme } = useTheme()
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  
   return (
     <LayoutWrapper>
       <SidebarWrapper>
-        <Sidebar />
+        <Sidebar 
+          collapsed={sidebarCollapsed} 
+          onCollapsedChange={setSidebarCollapsed}
+        />
       </SidebarWrapper>
-      <ContentWrapper>
+      <ContentWrapper $sidebarCollapsed={sidebarCollapsed}>
         <MobileHeader>
           <BrandLogo />
           <ActionsWrapper>
@@ -39,16 +44,17 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
 
 // styled components
 const LayoutWrapper = tw.div`
-  min-h-[100dvh] flex flex-col md:flex-row bg-background text-foreground
+  h-screen flex flex-col md:flex-row bg-background text-foreground overflow-hidden
 `
 
 const SidebarWrapper = tw.div`
   hidden md:block transition-all
+  h-screen fixed left-0 top-0 z-10
 `
 
-const ContentWrapper = tw.main`
+const ContentWrapper = tw.main<{ $sidebarCollapsed: boolean }>`
   flex-1 p-2 md:p-6 overflow-auto pb-20 md:pb-6
-  pt-[56px]
+  pt-[56px] ${({ $sidebarCollapsed }) => $sidebarCollapsed ? 'md:ml-16' : 'md:ml-64'}
 `
 
 const MobileHeader = tw.div`
