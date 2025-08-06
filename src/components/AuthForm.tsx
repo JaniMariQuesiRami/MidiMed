@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { signInWithEmailAndPassword } from 'firebase/auth'
+import { signInWithEmailAndPassword, sendEmailVerification } from 'firebase/auth'
 import { auth } from '@/lib/firebase'
-import { sendMagicLink } from '@/lib/magic-link'
+import { sendMagicLink, getBaseUrl } from '@/lib/magic-link'
 import { signOutUser } from '@/db/session'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -66,6 +66,12 @@ export default function AuthForm({ mode }: AuthFormProps) {
           if (loginError.code === 'auth/user-not-found') {
             const { loginWithInvitation } = await import('@/db/users')
             await loginWithInvitation(email, password)
+            const invitedUser = auth.currentUser
+            if (invitedUser && !invitedUser.emailVerified) {
+              await signOutUser()
+              toast.error('Por favor verifica tu correo antes de iniciar sesión.')
+              return
+            }
             toast.success('¡Bienvenido! Tu cuenta ha sido activada.')
             return
           }
@@ -82,8 +88,14 @@ export default function AuthForm({ mode }: AuthFormProps) {
         throw loginError
       }
 
-      // Si login normal fue exitoso, actualizar lastLoginAt
+      // Si login normal fue exitoso, verificar correo
       const user = auth.currentUser
+      if (user && !user.emailVerified) {
+        await signOutUser()
+        toast.error('Por favor verifica tu correo antes de iniciar sesión.')
+        return
+      }
+
       if (user) {
         const { doc, updateDoc } = await import('firebase/firestore')
         const { db } = await import('@/lib/firebase')
@@ -112,6 +124,27 @@ export default function AuthForm({ mode }: AuthFormProps) {
     }
   }
 
+  const handleResendVerification = async () => {
+    setLoading(true)
+    try {
+      const credential = await signInWithEmailAndPassword(auth, email, password)
+      await sendEmailVerification(credential.user, {
+        url: `${getBaseUrl()}/login`,
+      })
+      toast.success('Correo de verificación reenviado. Revisa tu correo.')
+    } catch (err) {
+      console.error('Error resending verification email:', err)
+      toast.error('Error al reenviar el correo. Intenta nuevamente.')
+    } finally {
+      try {
+        await signOutUser()
+      } catch (signOutErr) {
+        console.error('Error signing out after resending verification:', signOutErr)
+      }
+      setLoading(false)
+    }
+  }
+
   const handleAuth = async () => {
     setLoading(true)
     try {
@@ -130,11 +163,13 @@ export default function AuthForm({ mode }: AuthFormProps) {
         })
 
         try {
-          await sendMagicLink(email)
-          toast.success('Organización creada. Revisa tu correo.')
+          await sendEmailVerification(result.user, {
+            url: `${getBaseUrl()}/login`,
+          })
+          toast.success('Organización creada. Revisa tu correo para verificar la cuenta.')
         } catch (linkErr) {
-          console.error('Error sending magic link after signup:', linkErr)
-          toast.error('Error al enviar el enlace. Intenta nuevamente.')
+          console.error('Error sending verification email after signup:', linkErr)
+          toast.error('Error al enviar el correo de verificación. Intenta nuevamente.')
         } finally {
           try {
             await signOutUser()
@@ -184,9 +219,9 @@ export default function AuthForm({ mode }: AuthFormProps) {
             
             <div className="space-y-3 pt-4 border-t">
               <p className="text-sm text-gray-500">¿No recibiste el correo?</p>
-              <Button 
-                variant="outline" 
-                onClick={() => setLoginStep('email')}
+              <Button
+                variant="outline"
+                onClick={handleResendLink}
                 disabled={loading}
                 className="w-full"
               >
@@ -225,7 +260,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
               <div className="space-y-2">
                 <p className="text-lg font-medium">Organización creada</p>
                 <p className="text-sm text-gray-600">
-                  Hemos enviado un enlace de acceso a <strong>{email}</strong>. Revisa tu correo para confirmar tu cuenta.
+                  Hemos enviado un correo de verificación a <strong>{email}</strong>. Revisa tu correo para activar tu cuenta.
                 </p>
               </div>
             </div>
@@ -234,11 +269,11 @@ export default function AuthForm({ mode }: AuthFormProps) {
               <p className="text-sm text-gray-500">¿No recibiste el correo?</p>
               <Button
                 variant="outline"
-                onClick={handleResendLink}
+                onClick={handleResendVerification}
                 disabled={loading}
                 className="w-full"
               >
-                Enviar nuevo enlace
+                Reenviar correo de verificación
               </Button>
             </div>
           </CardContent>

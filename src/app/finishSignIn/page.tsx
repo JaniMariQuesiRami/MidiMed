@@ -8,6 +8,8 @@ import LoadingSpinner from '@/components/LoadingSpinner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Clock, AlertCircle } from 'lucide-react'
 import tw from 'tailwind-styled-components'
+import { auth } from '@/lib/firebase'
+import { signOut } from 'firebase/auth'
 
 export default function FinishSignInPage() {
   const [loading, setLoading] = useState(true)
@@ -33,8 +35,17 @@ export default function FinishSignInPage() {
         }
 
         await completeMagicLinkSignIn()
+        const user = auth.currentUser
+        if (!user?.emailVerified) {
+          await signOut(auth)
+          setError('Debes verificar tu correo antes de iniciar sesión.')
+          setErrorType('general')
+          toast.error('Correo no verificado')
+          return
+        }
+
         toast.success('¡Bienvenido! Has iniciado sesión exitosamente.')
-        
+
         // Redirigir al dashboard o página principal
         router.push('/dashboard')
       } catch (err) {

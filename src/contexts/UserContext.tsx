@@ -16,6 +16,7 @@ import { auth, db } from '@/lib/firebase'
 import { User, Tenant } from '@/types/db'
 import { useRouter, usePathname } from 'next/navigation'
 import { identifyUser } from '@/utils/identifyUser'
+import { toast } from 'sonner'
 
 type UserContextType = {
   user: User | null
@@ -57,6 +58,28 @@ export function UserProvider({ children }: { children: ReactNode }) {
           const publicRoutes = ['/', '/login', '/signup', '/finishSignIn', '/contact', '/pricing']
           const currentPath = window.location.pathname
           
+          if (!publicRoutes.includes(currentPath)) {
+            router.push('/login')
+          }
+        }
+        return
+      }
+
+      if (!firebaseUser.emailVerified) {
+        try {
+          await signOut(auth)
+        } catch (signOutErr) {
+          console.error('Error signing out unverified user:', signOutErr)
+        }
+        setUser(null)
+        setTenant(null)
+        setLoading(false)
+
+        if (mounted && typeof window !== 'undefined') {
+          const publicRoutes = ['/', '/login', '/signup', '/finishSignIn', '/contact', '/pricing']
+          const currentPath = window.location.pathname
+
+          toast.error('Por favor verifica tu correo antes de iniciar sesión.')
           if (!publicRoutes.includes(currentPath)) {
             router.push('/login')
           }
