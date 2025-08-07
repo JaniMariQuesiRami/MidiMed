@@ -1,6 +1,7 @@
 'use client'
 
 import { useContext, useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { UserContext } from '@/contexts/UserContext'
 import { User as UserIcon, X } from 'lucide-react'
 import { Switch } from '@/components/ui/switch'
@@ -14,16 +15,25 @@ import { doc, updateDoc } from 'firebase/firestore'
 import tw from 'tailwind-styled-components'
 
 export default function UserSettings({ collapsed }: { collapsed: boolean }) {
-  const { user, tenant, logout } = useContext(UserContext)
+  const { user, tenant } = useContext(UserContext)
   const { theme, toggleTheme } = useTheme()
   const [open, setOpen] = useState(false)
+  const [displayName, setDisplayName] = useState(user?.displayName || '')
+  const [mounted, setMounted] = useState(false)
   const modalRef = useRef<HTMLDivElement>(null)
-  const [displayName, setDisplayName] = useState('')
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const save = async () => {
     if (!user) return
     await updateProfile(auth.currentUser!, { displayName })
     await updateDoc(doc(db, 'users', user.uid), { displayName })
+  }
+
+  const logout = () => {
+    auth.signOut()
   }
 
   useEffect(() => {
@@ -68,7 +78,7 @@ export default function UserSettings({ collapsed }: { collapsed: boolean }) {
         )}
       </CardWrapper>
 
-      {open && (
+      {open && mounted && createPortal(
         <ModalOverlay>
           <ModalContent ref={modalRef}>
             <ModalHeader>
@@ -135,7 +145,8 @@ export default function UserSettings({ collapsed }: { collapsed: boolean }) {
               </div>
             </div>
           </ModalContent>
-        </ModalOverlay>
+        </ModalOverlay>,
+        document.body
       )}
     </>
   )

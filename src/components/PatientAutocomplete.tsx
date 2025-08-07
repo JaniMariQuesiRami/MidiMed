@@ -47,7 +47,7 @@ export default function PatientAutocomplete({ patients, value, onChange }: Props
         className="w-40"
       />
       {open && (
-        <ul className="absolute z-10 mt-1 max-h-40 w-full overflow-y-auto rounded-md border bg-white dark:bg-background shadow">
+        <ul className="absolute z-30 mt-1 max-h-40 w-full overflow-y-auto rounded-md border bg-white dark:bg-background shadow">
           {term === '' && (
             <li
               className="cursor-pointer px-2 py-1 hover:bg-muted"

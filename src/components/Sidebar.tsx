@@ -115,7 +115,7 @@ const Wrapper = tw.div<{ $collapsed: boolean }>`
   relative h-screen flex flex-col justify-between transition-all
   ${({ $collapsed }) => ($collapsed ? 'w-16 p-2' : 'w-64 p-3')}
   border-r border-sidebar-border bg-sidebar text-sidebar-foreground
-  overflow-hidden
+  ${({ $collapsed }) => ($collapsed ? '' : 'overflow-hidden')}
 `
 
 const TopSection = tw.div`flex flex-col gap-8`
