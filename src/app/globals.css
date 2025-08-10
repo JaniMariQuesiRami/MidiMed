@@ -152,3 +152,10 @@
 .rbc-day-slot .rbc-today {
   background-color: rgba(58, 189, 212, 0.15); /* versión dimmed del primary */
 }
+
+.tutorial-highlight {
+  box-shadow: 0 0 0 3px var(--primary);
+  border-radius: 0.5rem;
+  position: relative;
+  z-index: 50;
+}
