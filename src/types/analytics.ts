@@ -5,7 +5,9 @@ export type AnalyticsEvent =
   | 'Visited Registration Page'
   | 'Created Account'
   | 'Created Patient'
-  | 'Created Appointment';
+  | 'Created Appointment'
+  | 'Clicked Hero Signup'
+  | 'Clicked Hero Secondary CTA';
 
 export type AnalyticsEventProps = {
   userId?: string;
