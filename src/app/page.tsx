@@ -2,8 +2,6 @@
 import tw from "tailwind-styled-components";
 import SharedHeader from "@/components/SharedHeader";
 import { useUser } from "@/contexts/UserContext";
-import LandingCarousel from "@/components/LandingCarousel";
-import Iridescence from "@/components/Iridescence";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
@@ -13,6 +11,8 @@ import { saveUtmCampaignFromUrl } from "@/db/utmCampaigns";
 import "./shine.css";
 import TrustStats from "@/components/TrustStats";
 import { useTheme } from "@/contexts/ThemeContext";
+import FeatureHighlights from "@/components/FeatureHighlights";
+import DetailedFeatures from "@/components/DetailedFeatures";
 
 export default function Home() {
   const { theme } = useTheme();
@@ -32,7 +32,7 @@ export default function Home() {
   return (
     <Wrapper>
       <BackgroundContainer>
-        <Iridescence speed={0.3} amplitude={0.08} mouseReact />
+        {/* Background visual removed for now */}
       </BackgroundContainer>
 
       {/* HERO PANEL */}
@@ -45,13 +45,21 @@ export default function Home() {
             <HeroGrid>
               <HeroCol>
                 <Headline>
-                  Gestiona fácilmente tus pacientes, citas y expedientes médicos.
+                  <span className="block">
+                    <span className="text-highlight font-semibold">Recupera tiempo</span>
+                    :
+                  </span>
+                  <span className="block">
+                    Enfócate en tus{" "}
+                    <span className="text-highlight font-semibold">pacientes</span>
+                  </span>
+                  <span className="block">
+                    y en tu{" "}
+                    <span className="text-highlight font-semibold">vida</span>
+                  </span>
                 </Headline>
                 <Subheadline>
-                  Plataforma moderna y segura para clínicas ambulatorias: agenda
-                  inteligente, expedientes centralizados y recordatorios
-                  automatizados que reducen ausencias y ahorran horas
-                  administrativas.
+                  Automatizamos agenda, expedientes y resúmenes con IA para devolverte horas y permitirte equilibrar mejor tu práctica y tu vida personal.
                 </Subheadline>
                 <CTAGroup>
                   <Button
@@ -125,13 +133,9 @@ export default function Home() {
         </HeroPanel>
       </HeroSection>
 
-      {/* FEATURES */}
-      <CarouselSection>
-        <CarouselInner>
-          <SectionTitle>Lo que puedes hacer con MidiMed</SectionTitle>
-          <LandingCarousel />
-        </CarouselInner>
-      </CarouselSection>
+      {/* FEATURE HIGHLIGHTS */}
+      <FeatureHighlights />
+      <DetailedFeatures />
     </Wrapper>
   );
 }
@@ -143,8 +147,9 @@ const BackgroundContainer = tw.div`absolute inset-0 w-full h-full pointer-events
 const HeroSection = tw.section`relative z-10 w-full`;
 const HeroPanel = tw.div`
   relative w-full
-  bg-slate-50/90 dark:bg-slate-950/85 backdrop-blur-sm
-  shadow-md dark:shadow-[0_0_0_1px_rgba(255,255,255,0.04)]
+  bg-gradient-to-b from-[#dbeef9] to-[#e3e7f2] dark:from-[#0f2530] dark:to-[#163544]
+  backdrop-blur-sm
+  shadow-md ring-1 ring-[#8cc9d9]/50 dark:ring-[#0f2530] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.04)]
 `;
 const HeroInner = tw.div`
   w-full mx-auto max-w-[1680px]
@@ -152,7 +157,7 @@ const HeroInner = tw.div`
 `;
 const HeroGrid = tw.div`
   grid grid-cols-1 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]
-  gap-10 xl:gap-14 items-center min-h-[480px] pb-8 md:pb-0
+  gap-10 xl:gap-14 items-center min-h-[560px] pb-8 md:pb-0
 `;
 
 const HeroCol = tw.div`flex flex-col gap-6 justify-center pr-0 lg:pr-8`;
@@ -160,8 +165,8 @@ const HeroScreenshotCol = tw.div`hidden md:flex items-center justify-center`;
 const ScreenshotInner = tw.div`relative flex items-center justify-center`;
 
 const CTAGroup = tw.div`flex flex-wrap items-center gap-4`;
-const Headline = tw.h1`text-5xl sm:text-6xl font-bold leading-tight text-slate-900 dark:text-white max-w-[900px]`;
-const Subheadline = tw.p`text-lg sm:text-xl text-slate-700 dark:text-slate-300 leading-relaxed max-w-[720px]`;
+const Headline = tw.h1`text-5xl sm:text-6xl font-bold leading-tight text-slate-900 dark:text-white max-w-[720px]`;
+const Subheadline = tw.p`text-lg sm:text-xl text-slate-700 dark:text-slate-300 leading-relaxed max-w-[660px]`;
 
 /* ===== FULL-BLEED STATS STRIP ===== */
 const StatsFullBleed = tw.div`
@@ -179,11 +184,6 @@ const StatsRight = tw.div`
 `;
 
 const DeviceGroup = tw.div`
-  relative flex items-end justify-center translate-y-6 sm:translate-y-8 lg:translate-y-10 xl:translate-y-12 z-10
-  scale-110 sm:scale-120 lg:scale-135 xl:scale-140
+  relative flex items-end justify-center translate-y-8 sm:translate-y-12 lg:translate-y-16 xl:translate-y-20 z-10
+  scale-115 sm:scale-130 lg:scale-145 xl:scale-150
 `;
-
-/* ===== BELOW-HERO ===== */
-const CarouselSection = tw.section`relative z-10 w-full mt-4 px-6 sm:px-12 pb-16`;
-const CarouselInner = tw.div`max-w-6xl mx-auto flex flex-col items-center`;
-const SectionTitle = tw.h2`text-center text-white/80 text-sm uppercase tracking-wider mb-6 font-semibold`;
