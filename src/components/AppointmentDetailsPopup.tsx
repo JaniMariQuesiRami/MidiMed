@@ -28,6 +28,7 @@ export default function AppointmentDetailsPopup({
 }) {
   const [editOpen, setEditOpen] = useState(false)
   const [cancelLoading, setCancelLoading] = useState(false)
+  const [uncancelLoading, setUncancelLoading] = useState(false)
 
   if (!appointment) return null
 
@@ -64,8 +65,13 @@ export default function AppointmentDetailsPopup({
     setCancelLoading(true)
     try {
       await updateAppointment(appointment.appointmentId, {
-        ...appointment,
+        patientId: appointment.patientId,
+        providerId: appointment.providerId,
+        scheduledStart: appointment.scheduledStart,
+        scheduledEnd: appointment.scheduledEnd,
         status: 'cancelled',
+        reason: appointment.reason,
+        medicalRecordId: appointment.medicalRecordId ?? null,
       })
       onUpdated?.({ ...appointment, status: 'cancelled' })
       toast.success('Cita cancelada')
@@ -74,6 +80,28 @@ export default function AppointmentDetailsPopup({
       toast.error('No se pudo cancelar')
     } finally {
       setCancelLoading(false)
+    }
+  }
+
+  const uncancelAppt = async () => {
+    setUncancelLoading(true)
+    try {
+      await updateAppointment(appointment.appointmentId, {
+        patientId: appointment.patientId,
+        providerId: appointment.providerId,
+        scheduledStart: appointment.scheduledStart,
+        scheduledEnd: appointment.scheduledEnd,
+        status: 'scheduled',
+        reason: appointment.reason,
+        medicalRecordId: appointment.medicalRecordId ?? null,
+      })
+      onUpdated?.({ ...appointment, status: 'scheduled' })
+      toast.success('Cita reactivada')
+      onClose()
+    } catch {
+      toast.error('No se pudo reactivar')
+    } finally {
+      setUncancelLoading(false)
     }
   }
 
@@ -186,6 +214,16 @@ export default function AppointmentDetailsPopup({
             >
               {cancelLoading ? 'Cancelando...' : 'Cancelar'}
             </Button>
+            {appointment.status === 'cancelled' && (
+              <Button
+                size="sm"
+                className="flex-1 sm:flex-none"
+                onClick={uncancelAppt}
+                disabled={uncancelLoading}
+              >
+                {uncancelLoading ? 'Reactivando...' : 'Reactivar'}
+              </Button>
+            )}
           </div>
         </div>
         <CreateAppointmentModal

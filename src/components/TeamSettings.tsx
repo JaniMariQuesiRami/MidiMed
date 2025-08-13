@@ -4,7 +4,6 @@ import { getUsersByTenant, getInvitesByTenant, updateUser } from '@/db/users'
 import { UserContext } from '@/contexts/UserContext'
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import InviteUserModal from './InviteUserModal'
 import { format } from 'date-fns'
 import tw from 'tailwind-styled-components'
@@ -85,9 +84,9 @@ export default function TeamSettings() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {users.length === 0 ? (
+        {users.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="py-4 text-center">
+          <TableCell colSpan={5} className="py-4 text-center">
                       Sin usuarios
                     </TableCell>
                   </TableRow>
@@ -99,11 +98,12 @@ export default function TeamSettings() {
                         <RoleTag $role={u.role}>{u.role}</RoleTag>
                       </TableCell>
                       <TableCell>
-                        {u.role === 'provider' || u.role === 'admin' ? (
-                          <Input
+                        <div className="flex items-center">
+                          <input
+                            id={`color-${u.uid}`}
                             type="color"
-                            value={u.color || '#3b82f6'}
-                            className="h-8 w-8 p-0 border-none bg-transparent"
+                            defaultValue={u.color || '#3b82f6'}
+                            className="sr-only"
                             onChange={async (e) => {
                               const newColor = e.target.value
                               try {
@@ -118,9 +118,14 @@ export default function TeamSettings() {
                               }
                             }}
                           />
-                        ) : (
-                          '-'
-                        )}
+                          <button
+                            type="button"
+                            aria-label="Cambiar color"
+                            className="h-8 w-8 rounded-lg border-0 outline-none ring-0 cursor-pointer hover:opacity-90"
+                            style={{ backgroundColor: u.color || '#3b82f6' }}
+                            onClick={() => document.getElementById(`color-${u.uid}`)?.click()}
+                          />
+                        </div>
                       </TableCell>
                       <TableCell>{format(new Date(u.createdAt), 'dd/MM/yyyy')}</TableCell>
                       <TableCell>

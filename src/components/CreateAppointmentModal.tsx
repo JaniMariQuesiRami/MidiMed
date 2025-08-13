@@ -29,6 +29,7 @@ import {
   SelectContent,
   SelectValue,
 } from '@/components/ui/select'
+import SingleSelectAutocomplete from '@/components/SingleSelectAutocomplete'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -375,18 +376,12 @@ export default function CreateAppointmentModal({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Paciente</FormLabel>
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccione" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {patients.map((p) => (
-                        <SelectItem key={p.patientId} value={p.patientId}>
-                          {p.firstName} {p.lastName}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <SingleSelectAutocomplete
+                    items={patients.map((p) => ({ id: p.patientId, label: `${p.firstName} ${p.lastName}` }))}
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder="Seleccione paciente"
+                  />
                   <FormMessage />
                 </FormItem>
               )}
@@ -397,18 +392,12 @@ export default function CreateAppointmentModal({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Doctor</FormLabel>
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccione un doctor" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {users.map((u) => (
-                        <SelectItem key={u.uid} value={u.uid}>
-                          {u.displayName}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <SingleSelectAutocomplete
+                    items={users.map((u) => ({ id: u.uid, label: u.displayName }))}
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder="Seleccione un doctor"
+                  />
                   <FormMessage />
                 </FormItem>
               )}
