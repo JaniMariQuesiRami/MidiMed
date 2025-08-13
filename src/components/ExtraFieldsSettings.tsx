@@ -26,12 +26,10 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'sonner'
 import tw from 'tailwind-styled-components'
-
-const keyRegex = /^[a-z][a-zA-Z0-9]*$/
+import { Pencil, Trash } from 'lucide-react'
 
 const schema = z.object({
-  key: z.string().regex(keyRegex, 'camelCase requerido'),
-  label: z.string().min(1, 'Etiqueta requerida'),
+  label: z.string().min(1, 'Nombre requerido'),
   type: z.enum(['text', 'number', 'bool', 'date']),
 })
 
@@ -42,6 +40,8 @@ export default function ExtraFieldsSettings() {
   const [fields, setFields] = useState<ExtraFieldDef[]>([])
   const [open, setOpen] = useState(false)
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
+  const [fieldToDelete, setFieldToDelete] = useState<number | null>(null)
 
   useEffect(() => {
     if (tenant?.settings?.extraFields) {
@@ -51,11 +51,11 @@ export default function ExtraFieldsSettings() {
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { key: '', label: '', type: 'text' },
+    defaultValues: { label: '', type: 'text' },
   })
 
   const resetForm = () => {
-    form.reset({ key: '', label: '', type: 'text' })
+    form.reset({ label: '', type: 'text' })
     setEditingIndex(null)
   }
 
@@ -66,30 +66,64 @@ export default function ExtraFieldsSettings() {
 
   const openEdit = (idx: number) => {
     const f = fields[idx]
-    form.reset({ key: f.key, label: f.label, type: f.type })
+    form.reset({ label: f.label, type: f.type })
     setEditingIndex(idx)
     setOpen(true)
   }
 
+  // Helpers
+  const toCamelCase = (str: string) => {
+    const noAccents = str.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    const words = noAccents
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/gi, ' ')
+      .split(/\s+/)
+      .filter(Boolean)
+    if (words.length === 0) return 'campo'
+    const [first, ...rest] = words
+    const base = [first, ...rest.map(w => w.charAt(0).toUpperCase() + w.slice(1))].join('')
+    const startsWithLetter = /^[a-z]/.test(base)
+    return startsWithLetter ? base : `campo${base.charAt(0).toUpperCase()}${base.slice(1)}`
+  }
+
+  const makeUniqueKey = (baseKey: string) => {
+    let key = baseKey
+    let i = 2
+    const existing = new Set(fields.map(f => f.key))
+    while (existing.has(key)) {
+      key = `${baseKey}${i}`
+      i += 1
+    }
+    return key
+  }
+
   const saveField = async (values: FormValues) => {
     if (!tenant) return
-    const exists = fields.some((f, i) => f.key === values.key && i !== editingIndex)
-    if (exists) {
-      toast.error('La clave debe ser única')
-      return
-    }
-    const newField: ExtraFieldDef = {
-      key: values.key,
-      label: values.label,
-      type: values.type as ExtraFieldType,
-      collection: 'medicalRecords',
+    const collection = 'medicalRecords'
+    let newField: ExtraFieldDef
+    if (editingIndex !== null) {
+      // No cambiar la clave en edición para no romper datos existentes
+      const prev = fields[editingIndex]
+      newField = {
+        key: prev.key,
+        label: values.label,
+        type: values.type as ExtraFieldType,
+        collection,
+      }
+    } else {
+      // Generar clave camelCase única a partir del nombre
+      const baseKey = toCamelCase(values.label)
+      const uniqueKey = makeUniqueKey(baseKey)
+      newField = {
+        key: uniqueKey,
+        label: values.label,
+        type: values.type as ExtraFieldType,
+        collection,
+      }
     }
     let newFields: ExtraFieldDef[]
-    if (editingIndex !== null) {
-      newFields = fields.map((f, i) => (i === editingIndex ? newField : f))
-    } else {
-      newFields = [...fields, newField]
-    }
+    if (editingIndex !== null) newFields = fields.map((f, i) => (i === editingIndex ? newField : f))
+    else newFields = [...fields, newField]
     try {
       await updateExtraFields(tenant.tenantId, newFields)
       setFields(newFields)
@@ -102,9 +136,14 @@ export default function ExtraFieldsSettings() {
     }
   }
 
-  const deleteField = async (idx: number) => {
-    if (!tenant) return
-    if (!confirm('Eliminar campo?')) return
+  const openDeleteConfirm = (idx: number) => {
+    setFieldToDelete(idx)
+    setDeleteConfirmOpen(true)
+  }
+
+  const deleteField = async () => {
+    if (!tenant || fieldToDelete === null) return
+    const idx = fieldToDelete
     const newFields = fields.filter((_, i) => i !== idx)
     try {
       await updateExtraFields(tenant.tenantId, newFields)
@@ -113,6 +152,9 @@ export default function ExtraFieldsSettings() {
       toast.success('Campo eliminado')
     } catch {
       toast.error('No se pudo eliminar')
+    } finally {
+      setDeleteConfirmOpen(false)
+      setFieldToDelete(null)
     }
   }
 
@@ -125,8 +167,7 @@ export default function ExtraFieldsSettings() {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Key</TableHead>
-            <TableHead>Etiqueta</TableHead>
+            <TableHead>Nombre</TableHead>
             <TableHead>Tipo</TableHead>
             <TableHead>Colección</TableHead>
             <TableHead></TableHead>
@@ -140,13 +181,20 @@ export default function ExtraFieldsSettings() {
           ) : (
             fields.map((f, idx) => (
               <TableRow key={f.key}>
-                <TableCell>{f.key}</TableCell>
                 <TableCell>{f.label}</TableCell>
-                <TableCell>{f.type}</TableCell>
-                <TableCell>{f.collection}</TableCell>
+                <TableCell>{typeToEs(f.type)}</TableCell>
+                <TableCell>{collectionToEs(f.collection)}</TableCell>
                 <TableCell className="flex gap-2">
-                  <button onClick={() => openEdit(idx)} className="cursor-pointer">Editar</button>
-                  <button onClick={() => deleteField(idx)} className="cursor-pointer">Eliminar</button>
+                  <button onClick={() => openEdit(idx)} className="p-1 rounded hover:bg-muted cursor-pointer" aria-label="Editar">
+                    <Pencil size={16} />
+                  </button>
+                    <button
+                    onClick={() => openDeleteConfirm(idx)}
+                    className="p-1 rounded hover:bg-muted cursor-pointer text-red-600"
+                    aria-label="Eliminar"
+                    >
+                    <Trash size={16} />
+                    </button>
                 </TableCell>
               </TableRow>
             ))
@@ -163,22 +211,11 @@ export default function ExtraFieldsSettings() {
             <form onSubmit={form.handleSubmit(saveField)} className="space-y-3">
               <FormField
                 control={form.control}
-                name="key"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Key</FormLabel>
-                    <Input {...field} disabled={editingIndex !== null} />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
                 name="label"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Etiqueta</FormLabel>
-                    <Input {...field} />
+                    <FormLabel>Nombre del campo</FormLabel>
+                    <Input {...field} placeholder="Ej. Frecuencia cardíaca" />
                     <FormMessage />
                   </FormItem>
                 )}
@@ -196,7 +233,7 @@ export default function ExtraFieldsSettings() {
                       <SelectContent>
                         <SelectItem value="text">Texto</SelectItem>
                         <SelectItem value="number">Número</SelectItem>
-                        <SelectItem value="bool">Booleano</SelectItem>
+                        <SelectItem value="bool">Verdadero / Falso</SelectItem>
                         <SelectItem value="date">Fecha</SelectItem>
                       </SelectContent>
                     </Select>
@@ -206,11 +243,39 @@ export default function ExtraFieldsSettings() {
               />
               <div>
                 <FormLabel>Colección</FormLabel>
-                <Input value="medicalRecords" disabled />
+                <Input className="mt-1" value="Registros Médicos" disabled />
               </div>
               <Button type="submit" className="w-full">Guardar</Button>
             </form>
           </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Confirmar eliminación</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              ¿Estás seguro de que quieres eliminar este campo? Esta acción no se puede deshacer.
+            </p>
+            <div className="flex gap-2 justify-end">
+              <Button
+                variant="outline"
+                onClick={() => setDeleteConfirmOpen(false)}
+              >
+                Cancelar
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={deleteField}
+              >
+                Eliminar
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </Wrapper>
@@ -219,3 +284,24 @@ export default function ExtraFieldsSettings() {
 
 const Wrapper = tw.div`space-y-4 px-2 sm:px-4 pt-4`
 const Header = tw.div`flex justify-between items-center`
+
+// Display mappers
+function typeToEs(t: ExtraFieldType) {
+  switch (t) {
+    case 'text':
+      return 'Texto'
+    case 'number':
+      return 'Número'
+    case 'bool':
+      return 'Booleano'
+    case 'date':
+      return 'Fecha'
+    default:
+      return t
+  }
+}
+
+function collectionToEs(c: string) {
+  if (c === 'medicalRecords') return 'Registros Médicos'
+  return c
+}

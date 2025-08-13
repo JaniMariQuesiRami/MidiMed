@@ -20,8 +20,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { Plus } from 'lucide-react'
-import type { MedicalRecord } from '@/types/db'
-import type { ExtraFieldDef } from '@/types/db'
+import type { MedicalRecord, ExtraFieldDef, ExtraFieldType } from '@/types/db'
 
 const schema = z.object({
   summary: z.string().nonempty('Resumen requerido'),
@@ -58,10 +57,52 @@ export default function MedicalRecordFormModal({
   onUpdated?: (rec: MedicalRecord) => void
 }) {
   const { user, tenant } = useContext(UserContext)
-  const extraDefs = useMemo<ExtraFieldDef[]>(
-    () => tenant?.settings?.extraFields?.filter(f => f.collection === 'medicalRecords') || [],
-    [tenant],
-  )
+  
+  // Get extra field definitions - use current org settings for new records,
+  // but reconstruct from saved data for existing records to preserve historical fields
+  const extraDefs = useMemo<ExtraFieldDef[]>(() => {
+    const currentOrgExtraFields = tenant?.settings?.extraFields?.filter(f => f.collection === 'medicalRecords') || []
+    
+    // If editing an existing record, reconstruct extra field definitions from the saved data
+    if (record?.extras) {
+      const savedExtraFields: ExtraFieldDef[] = []
+      
+      // Add fields that exist in the saved record
+      Object.entries(record.extras).forEach(([key, value]) => {
+        // Try to determine the type from the saved value
+        let type: ExtraFieldType = 'text'
+        if (typeof value === 'boolean') {
+          type = 'bool'
+        } else if (typeof value === 'number') {
+          type = 'number'
+        } else if (typeof value === 'string' && value.match(/^\d{4}-\d{2}-\d{2}/)) {
+          type = 'date'
+        }
+        
+        // Check if this field exists in current org settings to get proper label
+        const currentField = currentOrgExtraFields.find(f => f.key === key)
+        
+        savedExtraFields.push({
+          key,
+          label: currentField?.label || key, // Use current label if available, fallback to key
+          type: currentField?.type || type, // Prefer current type if available
+          collection: 'medicalRecords'
+        })
+      })
+      
+      // Also add any new fields from current org settings that aren't in the saved record
+      currentOrgExtraFields.forEach(currentField => {
+        if (!savedExtraFields.some(f => f.key === currentField.key)) {
+          savedExtraFields.push(currentField)
+        }
+      })
+      
+      return savedExtraFields
+    }
+    
+    // For new records, use current organization settings
+    return currentOrgExtraFields
+  }, [tenant, record])
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
