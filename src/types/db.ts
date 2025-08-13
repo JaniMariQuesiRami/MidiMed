@@ -1,5 +1,13 @@
 import type { Timestamp } from 'firebase/firestore'
 
+export type ExtraFieldType = 'text' | 'number' | 'bool' | 'date'
+
+export type ExtraFieldDef = {
+  key: string
+  label: string
+  type: ExtraFieldType
+  collection: string // por ahora siempre "medicalRecords"
+}
 
 export type TenantSettings = {
   appointmentDurationMinutes: number
@@ -12,6 +20,7 @@ export type TenantSettings = {
     sat?: [string, string]
     sun?: [string, string]
   }
+  extraFields?: ExtraFieldDef[]
 }
 
 export type TenantCounters = {
@@ -102,6 +111,7 @@ export type MedicalRecord = {
   createdBy: string
   attachments?: MedicalRecordAttachment[]
   appointmentId?: string
+  extras: Record<string, string | number | boolean | null>
 }
 
 export type PatientFile = {
