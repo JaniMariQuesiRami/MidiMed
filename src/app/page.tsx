@@ -13,6 +13,8 @@ import TrustStats from "@/components/TrustStats";
 import { useTheme } from "@/contexts/ThemeContext";
 import FeatureHighlights from "@/components/FeatureHighlights";
 import DetailedFeatures from "@/components/DetailedFeatures";
+import ValueStripe from "@/components/ValueStripe";
+import WhyMidiMed from "@/components/WhyMidiMed";
 
 export default function Home() {
   const { theme } = useTheme();
@@ -98,7 +100,7 @@ export default function Home() {
                               alt="Vista escritorio de la aplicación MidiMed"
                               width={1100}
                               height={620}
-                              className="w-[760px] md:w-[880px] lg:w-[1000px] xl:w-[1100px] max-w-full h-auto"
+                              className="w-[760px] md:w-[820px] lg:w-[1000px] xl:w-[1100px] max-w-full h-auto lg:hidden xl:block"
                               priority
                             />
                             <Image
@@ -106,7 +108,7 @@ export default function Home() {
                               alt="Vista móvil de la aplicación MidiMed"
                               width={170}
                               height={360}
-                              className="absolute right-12 bottom-8 w-[140px] md:w-[150px] lg:w-[155px] h-auto"
+                              className="absolute right-12 bottom-8 w-[140px] md:w-[140px] lg:w-[200px] h-auto lg:relative lg:right-auto lg:bottom-auto xl:absolute xl:right-12 xl:bottom-8 xl:w-[155px] 2xl:block"
                               priority
                             />
                           </>
@@ -136,6 +138,8 @@ export default function Home() {
       {/* FEATURE HIGHLIGHTS */}
       <FeatureHighlights />
       <DetailedFeatures />
+      <ValueStripe />
+      <WhyMidiMed />
     </Wrapper>
   );
 }
@@ -170,7 +174,7 @@ const Subheadline = tw.p`text-lg sm:text-xl text-slate-700 dark:text-slate-300 l
 
 /* ===== FULL-BLEED STATS STRIP ===== */
 const StatsFullBleed = tw.div`
-  w-full bg-primary text-white relative
+  w-full bg-primary text-white relative md:mt-8 lg:mt-0
 `;
 const StatsContainer = tw.div`
   w-full mx-auto max-w-[1680px] px-3 sm:px-8 xl:px-14 2xl:px-20
@@ -184,6 +188,7 @@ const StatsRight = tw.div`
 `;
 
 const DeviceGroup = tw.div`
-  relative flex items-end justify-center translate-y-8 sm:translate-y-12 lg:translate-y-16 xl:translate-y-20 z-10
-  scale-115 sm:scale-130 lg:scale-145 xl:scale-150
+  relative flex items-end justify-center translate-y-8 sm:translate-y-12 md:translate-y-0 lg:translate-y-16 xl:translate-y-20 z-10
+  lg:-translate-x-6 xl:-translate-x-6 2xl:translate-x-0
+  scale-115 sm:scale-130 md:scale-100 lg:scale-145 xl:scale-150
 `;
