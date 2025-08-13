@@ -15,6 +15,12 @@ import FeatureHighlights from "@/components/FeatureHighlights";
 import DetailedFeatures from "@/components/DetailedFeatures";
 import ValueStripe from "@/components/ValueStripe";
 import WhyMidiMed from "@/components/WhyMidiMed";
+import FinalCTA from "@/components/FinalCTA";
+import FAQ from "@/components/FAQ";
+import Testimonials from "@/components/Testimonials";
+import SupportCTA from "@/components/SupportCTA";
+import FooterColumns from "@/components/FooterColumns";
+import BottomLegalBar from "@/components/BottomLegalBar";
 
 export default function Home() {
   const { theme } = useTheme();
@@ -140,6 +146,12 @@ export default function Home() {
       <DetailedFeatures />
       <ValueStripe />
       <WhyMidiMed />
+      <FinalCTA />
+      <FAQ />
+      <Testimonials />
+      <SupportCTA />
+      <FooterColumns />
+      <BottomLegalBar />
     </Wrapper>
   );
 }
