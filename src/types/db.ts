@@ -44,6 +44,7 @@ export type User = {
   lastLoginAt: string
   avatarUrl?: string
   invitedBy?: string
+  color?: string
 }
 
 export type Patient = {

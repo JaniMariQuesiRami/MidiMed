@@ -85,7 +85,7 @@ export default function CreateAppointmentModal({
     resolver: zodResolver(schema),
     defaultValues: {
       patientId: appointment?.patientId ?? patientId ?? '',
-      providerId: appointment?.providerId ?? user?.uid ?? '',
+      providerId: appointment?.providerId ?? (user?.role === 'provider' ? user.uid : ''),
       year: currentYear,
       month: '',
       day: '',
@@ -114,7 +114,7 @@ export default function CreateAppointmentModal({
         : ''
     form.reset({
       patientId: appointment?.patientId ?? patientId ?? '',
-      providerId: appointment?.providerId ?? user?.uid ?? '',
+      providerId: appointment?.providerId ?? (user?.role === 'provider' ? user.uid : ''),
       year,
       month,
       day,
@@ -136,8 +136,10 @@ export default function CreateAppointmentModal({
   useEffect(() => {
     form.setValue('patientId', appointment?.patientId ?? patientId ?? '')
     // Si no hay appointment (nueva cita) y hay usuario, setear el providerId al usuario actual
-    if (!appointment && user?.uid) {
+    if (!appointment && user?.uid && user.role === 'provider') {
       form.setValue('providerId', user.uid)
+    } else if (!appointment && user?.role !== 'provider') {
+      form.setValue('providerId', '')
     }
   }, [patientId, appointment, form, user])
 
@@ -149,7 +151,8 @@ export default function CreateAppointmentModal({
     ])
       .then(([patientsData, usersData]) => {
         setPatients(patientsData)
-        setUsers(usersData)
+        const allowed = usersData.filter((u) => u.role === 'admin' || u.role === 'provider')
+        setUsers(allowed)
       })
       .catch(() => toast.error('Error cargando datos'))
   }, [open, tenant])
@@ -401,7 +404,7 @@ export default function CreateAppointmentModal({
                     <SelectContent>
                       {users.map((u) => (
                         <SelectItem key={u.uid} value={u.uid}>
-                          {u.displayName} ({u.role})
+                          {u.displayName}
                         </SelectItem>
                       ))}
                     </SelectContent>

@@ -118,6 +118,7 @@ export async function loginWithInvitation(email: string, tempPassword: string): 
       invitedBy: invitationData.invitedBy,
       createdAt: invitationData.createdAt,
       lastLoginAt: new Date().toISOString(),
+      color: '#3b82f6',
     })
 
     // Marcar invitación como aceptada
@@ -156,6 +157,7 @@ export async function createUserFromInvite(
       invitedBy: inviteData.invitedBy,
       createdAt: inviteData.createdAt,
       lastLoginAt: new Date().toISOString(),
+      color: '#3b82f6',
     })
 
     await updateDoc(inviteDoc.ref, { status: 'accepted' })
@@ -163,6 +165,15 @@ export async function createUserFromInvite(
     return true
   } catch (err) {
     console.error('Error in createUserFromInvite:', err)
+    throw err
+  }
+}
+
+export async function updateUser(uid: string, data: Partial<User>): Promise<void> {
+  try {
+    await updateDoc(doc(db, 'users', uid), data)
+  } catch (err) {
+    console.error('Error in updateUser:', err)
     throw err
   }
 }

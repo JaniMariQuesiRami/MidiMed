@@ -1,9 +1,10 @@
 'use client'
 import { useContext, useEffect, useState } from 'react'
-import { getUsersByTenant, getInvitesByTenant } from '@/db/users'
+import { getUsersByTenant, getInvitesByTenant, updateUser } from '@/db/users'
 import { UserContext } from '@/contexts/UserContext'
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import InviteUserModal from './InviteUserModal'
 import { format } from 'date-fns'
 import tw from 'tailwind-styled-components'
@@ -78,6 +79,7 @@ export default function TeamSettings() {
                 <TableRow>
                   <TableHead>Email</TableHead>
                   <TableHead>Rol</TableHead>
+                  <TableHead>Color</TableHead>
                   <TableHead>Creado</TableHead>
                   <TableHead>Último acceso</TableHead>
                 </TableRow>
@@ -95,6 +97,30 @@ export default function TeamSettings() {
                       <TableCell>{u.email}</TableCell>
                       <TableCell>
                         <RoleTag $role={u.role}>{u.role}</RoleTag>
+                      </TableCell>
+                      <TableCell>
+                        {u.role === 'provider' || u.role === 'admin' ? (
+                          <Input
+                            type="color"
+                            value={u.color || '#3b82f6'}
+                            className="h-8 w-8 p-0 border-none bg-transparent"
+                            onChange={async (e) => {
+                              const newColor = e.target.value
+                              try {
+                                await updateUser(u.uid, { color: newColor })
+                                setUsers((prev) =>
+                                  prev.map((us) =>
+                                    us.uid === u.uid ? { ...us, color: newColor } : us,
+                                  ),
+                                )
+                              } catch {
+                                toast.error('No se pudo actualizar color')
+                              }
+                            }}
+                          />
+                        ) : (
+                          '-'
+                        )}
                       </TableCell>
                       <TableCell>{format(new Date(u.createdAt), 'dd/MM/yyyy')}</TableCell>
                       <TableCell>

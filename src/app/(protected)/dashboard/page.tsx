@@ -23,9 +23,10 @@ import { UserContext } from '@/contexts/UserContext'
 import CreateAppointmentModal from '@/components/CreateAppointmentModal'
 import AppointmentDetailsPopup from '@/components/AppointmentDetailsPopup'
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
-import PatientAutocomplete from '@/components/PatientAutocomplete'
+import MultiSelectAutocomplete from '@/components/MultiSelectAutocomplete'
 import MobileHomeDashboard from '@/components/MobileHomeDashboard'
-import type { Patient, Appointment } from '@/types/db'
+import type { Patient, Appointment, User } from '@/types/db'
+import { getUsersByTenant } from '@/db/users'
 import { toast } from 'sonner'
 import LoadingSpinner from '@/components/LoadingSpinner'
 
@@ -51,7 +52,9 @@ export default function DashboardCalendar() {
   const [view, setView] = useState<View | null>(null)
   const [date, setDate] = useState(new Date())
   const [patients, setPatients] = useState<Patient[]>([])
-  const [patientFilter, setPatientFilter] = useState('all')
+  const [doctors, setDoctors] = useState<User[]>([])
+  const [patientFilter, setPatientFilter] = useState<string[]>([])
+  const [doctorFilter, setDoctorFilter] = useState<string[]>([])
   type CalendarEvent = {
     start: Date
     end: Date
@@ -88,12 +91,12 @@ export default function DashboardCalendar() {
     const nameMap = new Map(
       patients.map((p) => [p.patientId, `${p.firstName} ${p.lastName}`]),
     )
-    const filterId = patientFilter === "all" ? undefined : patientFilter
     const list = await getAppointmentsInRange(
       start,
       end,
-      filterId,
+      patientFilter,
       tenant.tenantId,
+      doctorFilter,
     )
     setEvents(
       list.map((a) => ({
@@ -103,7 +106,7 @@ export default function DashboardCalendar() {
         resource: a,
       }))
     )
-  }, [view, patients, tenant, date, patientFilter])
+  }, [view, patients, tenant, date, patientFilter, doctorFilter])
 
   useEffect(() => {
     const isMobile = window.innerWidth < 640
@@ -112,7 +115,16 @@ export default function DashboardCalendar() {
 
   useEffect(() => {
     if (!tenant) return
-    getPatients(tenant.tenantId).then(setPatients).catch(() => { })
+    Promise.all([
+      getPatients(tenant.tenantId),
+      getUsersByTenant(tenant.tenantId),
+    ])
+      .then(([patientsData, usersData]) => {
+        setPatients(patientsData)
+        const docs = usersData.filter((u) => u.role === 'admin' || u.role === 'provider')
+        setDoctors(docs)
+      })
+      .catch(() => { })
   }, [tenant])
 
   useEffect(() => {
@@ -159,10 +171,17 @@ export default function DashboardCalendar() {
             </button>
           </div>
           <div className="flex items-center gap-2 ml-auto">
-            <PatientAutocomplete
-              patients={patients}
-              value={patientFilter}
-              onChange={(v) => setPatientFilter(v || 'all')}
+            <MultiSelectAutocomplete
+              items={patients.map((p) => ({ id: p.patientId, label: `${p.firstName} ${p.lastName}` }))}
+              selected={patientFilter}
+              onChange={setPatientFilter}
+              placeholder="Pacientes"
+            />
+            <MultiSelectAutocomplete
+              items={doctors.map((d) => ({ id: d.uid, label: d.displayName }))}
+              selected={doctorFilter}
+              onChange={setDoctorFilter}
+              placeholder="Doctores"
             />
             <button
               className="bg-primary text-white px-3 py-1 rounded flex items-center gap-1 cursor-pointer"
@@ -211,6 +230,18 @@ export default function DashboardCalendar() {
               }}
               style={{ height: 'calc(100vh - 150px)' }}
               selectable
+              eventPropGetter={(event) => {
+                const e = event as CalendarEvent
+                const color = doctors.find((d) => d.uid === e.resource.providerId)?.color || '#2563eb'
+                return {
+                  style: {
+                    backgroundColor: color,
+                    borderRadius: '4px',
+                    color: 'white',
+                    border: 'none'
+                  }
+                }
+              }}
               messages={{
                 showMore: (total) => `+${total} más`,
                 previous: 'Anterior',
@@ -262,7 +293,7 @@ export default function DashboardCalendar() {
         initialDate={slotDate}
         initialStart={slotStart}
         initialEnd={slotEnd}
-        patientId={patientFilter !== 'all' ? patientFilter : undefined}
+        patientId={patientFilter.length === 1 ? patientFilter[0] : undefined}
       />
       <AppointmentDetailsPopup
         appointment={selected?.appt || null}

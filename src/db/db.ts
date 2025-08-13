@@ -58,15 +58,16 @@ export async function signUp({
 		},
 	}
 
-	const userData: User = {
-		tenantId,
-		uid,
-		email,
-		displayName,
-		role: 'admin',
-		createdAt: now,
-		lastLoginAt: now,
-	}
+        const userData: User = {
+                tenantId,
+                uid,
+                email,
+                displayName,
+                role: 'admin',
+                createdAt: now,
+                lastLoginAt: now,
+                color: '#3b82f6',
+        }
 
 	await runTransaction(db, async (tx) => {
 		tx.set(doc(db, 'tenants', tenantId), tenantData)
