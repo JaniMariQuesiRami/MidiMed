@@ -293,7 +293,7 @@ function typeToEs(t: ExtraFieldType) {
     case 'number':
       return 'Número'
     case 'bool':
-      return 'Booleano'
+      return 'Verdaero / Falso'
     case 'date':
       return 'Fecha'
     default:
