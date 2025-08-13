@@ -1,6 +1,8 @@
 'use client'
 import { useEffect, useState, useCallback, useContext } from 'react'
 import { Calendar, View, dateFnsLocalizer } from 'react-big-calendar'
+import type { SlotInfo, EventProps as RBCEventProps, CalendarProps } from 'react-big-calendar'
+import type { EventInteractionArgs } from 'react-big-calendar/lib/addons/dragAndDrop'
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop'
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css'
 import {
@@ -36,6 +38,14 @@ import { Button } from '@/components/ui/button'
 import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
 
+// Calendar event type used across this file
+type CalendarEvent = {
+  start: Date
+  end: Date
+  title: string
+  resource: Appointment
+}
+
 const locales = { es }
 const localizer = dateFnsLocalizer({
   format: (date: Date, formatStr: string) =>
@@ -61,12 +71,6 @@ export default function DashboardCalendar() {
   const [doctors, setDoctors] = useState<User[]>([])
   const [patientFilter, setPatientFilter] = useState<string[]>([])
   const [doctorFilter, setDoctorFilter] = useState<string[]>([])
-  type CalendarEvent = {
-    start: Date
-    end: Date
-    title: string
-    resource: Appointment
-  }
   const [events, setEvents] = useState<CalendarEvent[]>([])
   const [open, setOpen] = useState(false)
   const [slotDate, setSlotDate] = useState<Date | null>(null)
@@ -223,7 +227,7 @@ export default function DashboardCalendar() {
         <div className="overflow-x-auto w-full">
           <div className="md:min-w-[700px] md:max-w-auto max-w-[100vw]">
             <DndProvider backend={HTML5Backend}>
-            <ModernCalendar
+            <DnDCalendar
               culture="es"
               localizer={localizer}
               events={events}
@@ -233,30 +237,34 @@ export default function DashboardCalendar() {
               onNavigate={setDate}
               onView={setView}
               resizable
-              onEventDrop={({ event, start, end }: any) => {
-                const e = event as CalendarEvent
-                setPendingChange({ type: 'move', event: e, start, end })
+              className="bg-white dark:bg-background rounded-2xl shadow-sm p-2"
+              onEventDrop={({ event, start, end }: EventInteractionArgs<CalendarEvent>) => {
+                const startDate = start instanceof Date ? start : new Date(start)
+                const endDate = end instanceof Date ? end : new Date(end)
+                setPendingChange({ type: 'move', event, start: startDate, end: endDate })
               }}
-              onEventResize={({ event, start, end }: any) => {
-                const e = event as CalendarEvent
-                setPendingChange({ type: 'resize', event: e, start, end })
+              onEventResize={({ event, start, end }: EventInteractionArgs<CalendarEvent>) => {
+                const startDate = start instanceof Date ? start : new Date(start)
+                const endDate = end instanceof Date ? end : new Date(end)
+                setPendingChange({ type: 'resize', event, start: startDate, end: endDate })
               }}
-              onSelectEvent={(event: object) => {
-                const e = event as CalendarEvent
-                setSelected({ appt: e.resource, name: e.title })
+              onSelectEvent={(event: CalendarEvent) => {
+                setSelected({ appt: event.resource, name: event.title })
               }}
-              onSelectSlot={(slot: any) => {
-                setSlotDate(slot.start)
-                setSlotStart(view === 'month' ? null : slot.start)
-                setSlotEnd(view === 'month' ? null : slot.end)
+              onSelectSlot={(slot: SlotInfo) => {
+                const startDate = slot.start instanceof Date ? slot.start : new Date(slot.start)
+                const endDate = slot.end instanceof Date ? slot.end : new Date(slot.end)
+                setSlotDate(startDate)
+                setSlotStart(view === 'month' ? null : startDate)
+                setSlotEnd(view === 'month' ? null : endDate)
                 setOpen(true)
               }}
               style={{ height: 'calc(100vh - 150px)' }}
               selectable
               draggableAccessor={() => true}
               resizableAccessor={() => true}
-              eventPropGetter={(event: any) => {
-                const e = event as CalendarEvent
+              eventPropGetter={(event: CalendarEvent) => {
+                const e = event
                 const color = doctors.find((d) => d.uid === e.resource.providerId)?.color || '#3abdd4'
                 const isCancelled = e.resource.status === 'cancelled'
                 return {
@@ -289,9 +297,9 @@ export default function DashboardCalendar() {
                 noEventsInRange: 'No hay eventos en este rango de fechas.'
               }}
               components={{
-                toolbar: () => null,
-        event: (props: any) => {
-                  const event = props.event as CalendarEvent;
+    toolbar: () => null,
+  event: (props: RBCEventProps<CalendarEvent>) => {
+      const event = props.event;
                   // Only show patient name (no hour) in week view
                   // event.title is "HH:mm - Nombre Paciente" or just "Nombre Paciente"
                   let name = event.title;
@@ -386,9 +394,11 @@ export default function DashboardCalendar() {
 }
 
 // Styled components
-// Enable drag & drop by wrapping Calendar (loosen types to accept addon props)
-const DnDCalendar = withDragAndDrop(Calendar as any) as any
-const ModernCalendar: any = tw(DnDCalendar)`bg-white dark:bg-background rounded-2xl shadow-sm p-2`;
+// Enable drag & drop by wrapping Calendar with proper generics
+type RBCalendarComp = React.ComponentType<CalendarProps<CalendarEvent, object>>
+const DnDCalendar = withDragAndDrop<CalendarEvent, object>(
+  Calendar as unknown as RBCalendarComp
+)
 const DesktopWrapper = tw.div`hidden md:flex md:flex-col gap-4 px-2 sm:px-4 pt-4`
 const Header = tw.div`flex flex-col sm:flex-row sm:items-center sm:justify-between sticky top-0 z-10 bg-white dark:bg-background px-2 sm:px-4 py-2 gap-2`
 const DateTitle = tw.h1`text-lg font-semibold w-full sm:w-auto`
