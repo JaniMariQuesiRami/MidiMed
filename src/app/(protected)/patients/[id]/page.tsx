@@ -11,6 +11,7 @@ import { getAppointmentsInRange, deleteAppointment } from '@/db/appointments'
 import type { Patient, MedicalRecord, Appointment, AppointmentStatus, PatientFile } from '@/types/db'
 import CreateAppointmentModal from '@/components/CreateAppointmentModal'
 import MedicalRecordFormModal from '@/components/MedicalRecordFormModal'
+import MedicalRecordDetailsPopup from '@/components/MedicalRecordDetailsPopup'
 import UploadFileModal from '@/components/UploadFileModal'
 import tw from 'tailwind-styled-components'
 import LoadingSpinner from '@/components/LoadingSpinner'
@@ -33,6 +34,7 @@ export default function PatientDetailsPage() {
   const [editingAppt, setEditingAppt] = useState<Appointment | null>(null)
   const [openRecord, setOpenRecord] = useState(false)
   const [editingRecord, setEditingRecord] = useState<MedicalRecord | null>(null)
+  const [viewRecord, setViewRecord] = useState<MedicalRecord | null>(null)
   const [openEdit, setOpenEdit] = useState(false)
   const [openUpload, setOpenUpload] = useState(false)
   const [completingAppt, setCompletingAppt] = useState<Appointment | null>(null)
@@ -102,7 +104,7 @@ export default function PatientDetailsPage() {
                 }
               }}
               onComplete={(a) => { setEditingRecord(null); setCompletingAppt(a); setOpenRecord(true); }}
-              onViewRecord={(r) => { setEditingRecord(r); setOpenRecord(true); }}
+              onViewRecord={(r) => { setViewRecord(r); }}
               translateStatus={translateStatus}
             />
           </Section>
@@ -120,7 +122,7 @@ export default function PatientDetailsPage() {
                 }
               }}
               onComplete={(a) => { setEditingRecord(null); setCompletingAppt(a); setOpenRecord(true); }}
-              onViewRecord={(r) => { setEditingRecord(r); setOpenRecord(true); }}
+              onViewRecord={(r) => { setViewRecord(r); }}
               translateStatus={translateStatus}
             />
           </Section>
@@ -204,6 +206,15 @@ export default function PatientDetailsPage() {
         onUpdated={(r) =>
           setRecords((prev) => prev.map((p) => (p.recordId === r.recordId ? r : p)))
         }
+      />
+      <MedicalRecordDetailsPopup
+        record={viewRecord}
+        onClose={() => setViewRecord(null)}
+        onEdit={(r) => {
+          setViewRecord(null)
+          setEditingRecord(r)
+          setOpenRecord(true)
+        }}
       />
       <EditPatientModal
         open={openEdit}
