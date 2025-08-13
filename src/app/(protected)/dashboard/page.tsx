@@ -192,13 +192,13 @@ export default function DashboardCalendar() {
               items={patients.map((p) => ({ id: p.patientId, label: `${p.firstName} ${p.lastName}` }))}
               selected={patientFilter}
               onChange={setPatientFilter}
-              placeholder="Pacientes"
+              placeholder="Filtrar pacientes..."
             />
             <MultiSelectAutocomplete
               items={doctors.map((d) => ({ id: d.uid, label: d.displayName }))}
               selected={doctorFilter}
               onChange={setDoctorFilter}
-              placeholder="Doctores"
+              placeholder="Filtrar doctores..."
             />
             <button
               className="bg-primary text-white px-3 py-1 rounded flex items-center gap-1 cursor-pointer"

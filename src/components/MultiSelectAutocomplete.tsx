@@ -54,7 +54,9 @@ export default function MultiSelectAutocomplete({
     <div ref={containerRef} className={`relative ${className || ''}`}>
       <button
         type="button"
-        className="w-48 border rounded px-2 py-1 text-left bg-background"
+        className={`w-48 border rounded px-2 py-1 text-left bg-background ${
+          selected.length === 0 ? 'text-muted-foreground' : ''
+        }`}
         onClick={() => setOpen((o) => !o)}
       >
         {summary}
