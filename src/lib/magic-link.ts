@@ -1,5 +1,6 @@
-import { sendSignInLinkToEmail, signInWithEmailLink, isSignInWithEmailLink } from 'firebase/auth'
-import { auth } from './firebase'
+import { signInWithEmailLink, isSignInWithEmailLink } from "firebase/auth"
+import { httpsCallable } from "firebase/functions"
+import { auth, functions } from "./firebase"
 
 // Determinar la URL base según el entorno
 export const getBaseUrl = () => {
@@ -12,17 +13,31 @@ export const getBaseUrl = () => {
 }
 
 export async function sendMagicLink(email: string): Promise<void> {
+  const generate = httpsCallable<
+    { email: string; redirectUrl?: string},
+    { ok: boolean; link?: string }
+  >(functions, "generateMagicSignInLink")
+
+  const payload = {
+    email: email.trim().toLowerCase(),
+    redirectUrl: window.location.origin,
+  }
+
   try {
-    const actionCodeSettings = {
-      url: `${getBaseUrl()}/finishSignIn?email=${encodeURIComponent(email)}`,
-      handleCodeInApp: true,
-    }
-    await sendSignInLinkToEmail(auth, email, actionCodeSettings)
-    // Guardar el email en localStorage para recuperarlo después
-    window.localStorage.setItem('emailForSignIn', email)
-  } catch (error) {
-    console.error('Error sending magic link:', error)
-    throw error
+    const res = await generate(payload)
+    const link = (res.data as any)?.link
+    if (link) window.location.href = link // solo dev
+    localStorage.setItem("emailForSignIn", email)
+  } catch (err: any) {
+    const code = err?.code as string | undefined
+    const msg =
+      code === "functions/failed-precondition" ? "SMTP no configurado." :
+      code === "functions/unavailable"        ? "Servicio no disponible. Intenta luego." :
+      code === "functions/deadline-exceeded"  ? "Tiempo de espera agotado. Reintenta." :
+      code === "functions/internal"           ? "No se pudo enviar el correo." :
+      err?.message || "Error al solicitar el enlace."
+    console.error("sendMagicLink", { code, err })
+    throw new Error(msg)
   }
 }
 
