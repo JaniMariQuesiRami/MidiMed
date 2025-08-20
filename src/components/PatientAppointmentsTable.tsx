@@ -2,11 +2,13 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@
 import { Pencil, Trash } from 'lucide-react'
 import { format } from 'date-fns'
 import type { Appointment, AppointmentStatus, MedicalRecord } from '@/types/db'
+import { ReportButtons } from './ReportButtons'
 
-export default function PatientAppointmentsTable({ title, appointments, records, onEdit, onDelete, onComplete, onViewRecord, translateStatus }: {
+export default function PatientAppointmentsTable({ title, appointments, records, loadingReports, onEdit, onDelete, onComplete, onViewRecord, translateStatus }: {
   title: string,
   appointments: Appointment[],
   records: MedicalRecord[],
+  loadingReports: Set<string>,
   onEdit: (a: Appointment) => void,
   onDelete: (a: Appointment) => void,
   onComplete: (a: Appointment) => void,
@@ -17,19 +19,20 @@ export default function PatientAppointmentsTable({ title, appointments, records,
     <div className="mb-4">
       <h2 className="font-medium">{title}</h2>
       <div className="overflow-x-auto">
-        <Table className="min-w-[600px]">
+        <Table className="min-w-[700px]">
           <TableHeader>
             <TableRow>
               <TableHead>Fecha</TableHead>
               <TableHead>Estado</TableHead>
               <TableHead>Notas</TableHead>
+              <TableHead>Reporte</TableHead>
               <TableHead></TableHead>
             </TableRow>
           </TableHeader>
         <TableBody>
           {appointments.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={4} className="py-4 text-center">
+              <TableCell colSpan={5} className="py-4 text-center">
                 No hay citas
               </TableCell>
             </TableRow>
@@ -39,6 +42,12 @@ export default function PatientAppointmentsTable({ title, appointments, records,
                 <TableCell>{format(new Date(a.scheduledStart), 'dd/MM/yyyy HH:mm')}</TableCell>
                 <TableCell>{translateStatus(a.status)}</TableCell>
                 <TableCell>{a.reason}</TableCell>
+                <TableCell>
+                  <ReportButtons 
+                    appointment={a} 
+                    isGeneratingReport={loadingReports.has(a.appointmentId)} 
+                  />
+                </TableCell>
                 <TableCell className="flex gap-2">
                   <button onClick={() => onEdit(a)} className="cursor-pointer"><Pencil size={16} /></button>
                   <button onClick={() => onDelete(a)} className="cursor-pointer"><Trash size={16} /></button>

@@ -9,6 +9,7 @@ import {
   getDoc,
   updateDoc,
   deleteDoc,
+  limit,
 } from 'firebase/firestore'
 import { uploadBytes, ref, getDownloadURL, deleteObject } from 'firebase/storage'
 import {
@@ -177,6 +178,28 @@ export async function getMedicalRecordById(id: string): Promise<MedicalRecord> {
   } catch (err) {
     console.error('Error in getMedicalRecordById:', err)
     throw err
+  }
+}
+
+export async function getMedicalRecordByAppointmentId(appointmentId: string): Promise<MedicalRecord | null> {
+  try {
+    const q = query(
+      collection(db, 'medicalRecords'), 
+      where('appointmentId', '==', appointmentId),
+      limit(1)
+    )
+    const snap = await getDocs(q)
+    if (snap.empty) return null
+    
+    const doc = snap.docs[0]
+    return {
+      ...(doc.data() as Omit<MedicalRecord, 'recordId'>),
+      recordId: doc.id,
+      extras: (doc.data() as MedicalRecord).extras || {},
+    }
+  } catch (err) {
+    console.error('Error in getMedicalRecordByAppointmentId:', err)
+    return null
   }
 }
 

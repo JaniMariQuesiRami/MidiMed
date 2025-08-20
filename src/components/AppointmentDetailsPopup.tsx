@@ -3,12 +3,13 @@
 import { Appointment } from '@/types/db'
 import { format } from 'date-fns'
 import tw from 'tailwind-styled-components'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { updateAppointment } from '@/db/appointments'
 import { toast } from 'sonner'
-import { CalendarDays, Clock, FileText, User, X, AlertCircle, CheckCircle, Calendar, Sparkles } from 'lucide-react'
+import { CalendarDays, Clock, FileText, User, X, AlertCircle, CheckCircle, Calendar, Sparkles, Download } from 'lucide-react'
 import CreateAppointmentModal from '@/components/CreateAppointmentModal'
+import { useAppointmentReport } from '@/hooks/useAppointmentReport'
 
 
 export default function AppointmentDetailsPopup({
@@ -29,6 +30,35 @@ export default function AppointmentDetailsPopup({
   const [editOpen, setEditOpen] = useState(false)
   const [cancelLoading, setCancelLoading] = useState(false)
   const [uncancelLoading, setUncancelLoading] = useState(false)
+  const { getReportForAppointment } = useAppointmentReport()
+  const [reportUrl, setReportUrl] = useState<string | null>(null)
+  const [reportLoading, setReportLoading] = useState(false)
+
+  useEffect(() => {
+    if (appointment?.status === 'completed') {
+      setReportLoading(true)
+      getReportForAppointment(appointment)
+        .then((reportData) => {
+          setReportUrl(reportData.downloadUrl)
+        })
+        .catch((error) => {
+          console.error('Error fetching report:', error)
+          setReportUrl(null)
+        })
+        .finally(() => {
+          setReportLoading(false)
+        })
+    }
+  }, [appointment, getReportForAppointment])
+
+  const handleDownloadRecipe = () => {
+    if (reportUrl) {
+      // Open in new tab so user doesn't lose current context
+      window.open(reportUrl, '_blank')
+    } else {
+      toast.error('No hay receta disponible para descargar')
+    }
+  }
 
   if (!appointment) return null
 
@@ -194,6 +224,19 @@ export default function AppointmentDetailsPopup({
               onClick={() => onViewRecord(appointment.medicalRecordId!)}
             >
               Ver registro médico
+            </Button>
+          )}
+          {appointment.status === 'completed' && (reportUrl || reportLoading) && (
+            <Button 
+              size="sm" 
+              variant="outline"
+              className="w-full sm:w-auto flex items-center gap-2"
+              onClick={handleDownloadRecipe}
+              disabled={reportLoading || !reportUrl}
+              title={reportUrl ? 'Abrir receta en nueva pestaña' : 'Cargando receta...'}
+            >
+              <Download className="w-4 h-4" />
+              {reportLoading ? 'Cargando...' : 'Descargar receta'}
             </Button>
           )}
           <div className="flex gap-2">

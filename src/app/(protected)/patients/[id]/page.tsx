@@ -38,6 +38,7 @@ export default function PatientDetailsPage() {
   const [openEdit, setOpenEdit] = useState(false)
   const [openUpload, setOpenUpload] = useState(false)
   const [completingAppt, setCompletingAppt] = useState<Appointment | null>(null)
+  const [loadingReports, setLoadingReports] = useState<Set<string>>(new Set())
 
   const translateStatus = (status: AppointmentStatus) => {
     switch (status) {
@@ -46,6 +47,19 @@ export default function PatientDetailsPage() {
       case 'cancelled': return 'Cancelada'
       default: return status
     }
+  }
+
+  const startReportGeneration = (appointmentId: string) => {
+    setLoadingReports(prev => new Set(prev).add(appointmentId))
+    
+    // After 20 seconds, remove from loading state
+    setTimeout(() => {
+      setLoadingReports(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(appointmentId)
+        return newSet
+      })
+    }, 20000) // 20 seconds
   }
 
   useEffect(() => {
@@ -96,6 +110,7 @@ export default function PatientDetailsPage() {
               title=""
               appointments={future}
               records={records}
+              loadingReports={loadingReports}
               onEdit={(a) => { setEditingAppt(a); setOpenAppt(true); }}
               onDelete={async (a) => {
                 if (confirm('Eliminar cita?')) {
@@ -114,6 +129,7 @@ export default function PatientDetailsPage() {
               title=""
               appointments={past}
               records={records}
+              loadingReports={loadingReports}
               onEdit={(a) => { setEditingAppt(a); setOpenAppt(true); }}
               onDelete={async (a) => {
                 if (confirm('Eliminar cita?')) {
@@ -201,6 +217,8 @@ export default function PatientDetailsPage() {
                   : p,
               ),
             )
+            // Start the report generation loading state
+            startReportGeneration(completingAppt.appointmentId)
           }
         }}
         onUpdated={(r) =>

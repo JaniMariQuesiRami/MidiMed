@@ -112,6 +112,12 @@ export type MedicalRecord = {
   createdBy: string
   attachments?: MedicalRecordAttachment[]
   appointmentId?: string
+  summaryPdf?: {
+    docId: string
+    storagePath: string
+    downloadUrl: string
+    createdAt: string
+  }
   extras: Record<string, string | number | boolean | null>
 }
 
