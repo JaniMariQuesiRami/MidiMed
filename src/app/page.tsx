@@ -54,7 +54,7 @@ export default function Home() {
       </BackgroundContainer>
 
       {/* HERO PANEL */}
-      <HeroSection>
+      <HeroSection role="banner" aria-labelledby="hero-heading">
         <HeroPanel>
           <HeaderSpacer />
 
@@ -62,22 +62,22 @@ export default function Home() {
           <HeroInner>
             <HeroGrid>
               <HeroCol>
-                <Headline>
+                <Headline id="hero-heading">
                   <span className="block">
-                    <span className="text-highlight font-semibold">Recupera tiempo</span>
+                    <span className="text-highlight font-semibold">Software Médico</span>
+                    {" "}que
+                  </span>
+                  <span className="block">
+                    <span className="text-highlight font-semibold">recupera tiempo</span>
                     :
                   </span>
                   <span className="block">
                     Enfócate en tus{" "}
                     <span className="text-highlight font-semibold">pacientes</span>
                   </span>
-                  <span className="block">
-                    y en tu{" "}
-                    <span className="text-highlight font-semibold">vida</span>
-                  </span>
                 </Headline>
                 <Subheadline>
-                  Automatizamos agenda, expedientes y aumentamos tu productividad con IA para devolverte horas y permitirte equilibrar mejor tu práctica y tu vida personal.
+                  Sistema de gestión clínica integral con IA que automatiza agenda médica digital, expedientes electrónicos e historias clínicas. Diseñado para consultorios y clínicas que buscan eficiencia y mejor atención al paciente.
                 </Subheadline>
                 <CTAGroup>
                   <Button
@@ -113,7 +113,7 @@ export default function Home() {
                           <>
                             <Image
                               src={laptopSrc}
-                              alt="Vista escritorio de la aplicación MidiMed"
+                              alt="Software médico MidiMed - Dashboard principal mostrando agenda de citas, gestión de pacientes y expedientes médicos digitales para consultorios"
                               width={1100}
                               height={620}
                               className="w-[760px] md:w-[820px] lg:w-[1000px] xl:w-[1100px] max-w-full h-auto lg:hidden xl:block"
@@ -121,7 +121,7 @@ export default function Home() {
                             />
                             <Image
                               src={phoneSrc}
-                              alt="Vista móvil de la aplicación MidiMed"
+                              alt="Aplicación móvil MidiMed - Acceso a historias clínicas y agenda médica desde dispositivos móviles para médicos"
                               width={170}
                               height={360}
                               className="absolute right-12 bottom-8 w-[140px] md:w-[140px] lg:w-[200px] h-auto lg:relative lg:right-auto lg:bottom-auto xl:absolute xl:right-12 xl:bottom-8 xl:w-[155px] 2xl:block"
