@@ -13,19 +13,33 @@ export function useAppointmentReport() {
   const [reportCache, setReportCache] = useState<Map<string, ReportData>>(new Map())
   const loadingPromises = useRef<Map<string, Promise<ReportData>>>(new Map())
 
-  const getReportForAppointment = useCallback(async (appointment: Appointment): Promise<ReportData> => {
+  const getReportForAppointment = useCallback(async (appointment: Appointment, forceFresh = false): Promise<ReportData> => {
     const cacheKey = appointment.appointmentId
     
-    // Check cache first
-    const cached = reportCache.get(cacheKey)
-    if (cached && cached.status !== 'loading') {
-      return cached
+    // Check cache first (unless forceFresh is true)
+    if (!forceFresh) {
+      const cached = reportCache.get(cacheKey)
+      if (cached && cached.status !== 'loading') {
+        return cached
+      }
     }
 
-    // Check if already loading
-    const existingPromise = loadingPromises.current.get(cacheKey)
-    if (existingPromise) {
-      return existingPromise
+    // Check if already loading (unless forceFresh is true)
+    if (!forceFresh) {
+      const existingPromise = loadingPromises.current.get(cacheKey)
+      if (existingPromise) {
+        return existingPromise
+      }
+    }
+
+    // If forceFresh, clear cache first
+    if (forceFresh) {
+      setReportCache(prev => {
+        const newCache = new Map(prev)
+        newCache.delete(cacheKey)
+        return newCache
+      })
+      loadingPromises.current.delete(cacheKey)
     }
 
     // Start loading

@@ -4,10 +4,11 @@ import { format } from 'date-fns'
 import type { Appointment, AppointmentStatus, MedicalRecord } from '@/types/db'
 import { ReportButtons } from './ReportButtons'
 
-export default function PatientAppointmentsTable({ title, appointments, records, onEdit, onDelete, onComplete, onViewRecord, translateStatus }: {
+export default function PatientAppointmentsTable({ title, appointments, records, loadingReports, onEdit, onDelete, onComplete, onViewRecord, translateStatus }: {
   title: string,
   appointments: Appointment[],
   records: MedicalRecord[],
+  loadingReports: Set<string>,
   onEdit: (a: Appointment) => void,
   onDelete: (a: Appointment) => void,
   onComplete: (a: Appointment) => void,
@@ -42,7 +43,10 @@ export default function PatientAppointmentsTable({ title, appointments, records,
                 <TableCell>{translateStatus(a.status)}</TableCell>
                 <TableCell>{a.reason}</TableCell>
                 <TableCell>
-                  <ReportButtons appointment={a} />
+                  <ReportButtons 
+                    appointment={a} 
+                    isGeneratingReport={loadingReports.has(a.appointmentId)} 
+                  />
                 </TableCell>
                 <TableCell className="flex gap-2">
                   <button onClick={() => onEdit(a)} className="cursor-pointer"><Pencil size={16} /></button>
