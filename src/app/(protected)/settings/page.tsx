@@ -3,10 +3,11 @@ import { useState } from 'react'
 import OrganizationSettingsForm from '@/components/OrganizationSettingsForm'
 import TeamSettings from '@/components/TeamSettings'
 import ExtraFieldsSettings from '@/components/ExtraFieldsSettings'
+import PlanDetailsPanel from '@/components/PlanDetailsPanel'
 import tw from 'tailwind-styled-components'
 
 export default function SettingsPage() {
-  const [tab, setTab] = useState<'org' | 'team' | 'forms'>('org')
+  const [tab, setTab] = useState<'org' | 'team' | 'forms' | 'plan'>('org')
 
   return (
     <Wrapper>
@@ -20,10 +21,14 @@ export default function SettingsPage() {
         <Tab $active={tab === 'forms'} onClick={() => setTab('forms')}>
           Formularios
         </Tab>
+        <Tab $active={tab === 'plan'} onClick={() => setTab('plan')}>
+          Planes
+        </Tab>
       </Tabs>
       {tab === 'org' && <OrganizationSettingsForm />}
       {tab === 'team' && <TeamSettings />}
       {tab === 'forms' && <ExtraFieldsSettings />}
+      {tab === 'plan' && <PlanDetailsPanel />}
     </Wrapper>
   )
 }
