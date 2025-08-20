@@ -15,6 +15,8 @@ import FeatureHighlights from "@/components/FeatureHighlights";
 import DetailedFeatures from "@/components/DetailedFeatures";
 import ValueStripe from "@/components/ValueStripe";
 import WhyMidiMed from "@/components/WhyMidiMed";
+import PricingSection from "@/components/PricingSection";
+import ContactSection from "@/components/ContactSection";
 import FinalCTA from "@/components/FinalCTA";
 import FAQ from "@/components/FAQ";
 import Testimonials from "@/components/Testimonials";
@@ -25,6 +27,13 @@ import BottomLegalBar from "@/components/BottomLegalBar";
 export default function Home() {
   const { theme } = useTheme();
   const { user, tenant } = useUser();
+
+  const handlePricingClick = () => {
+    const pricingSection = document.getElementById('pricing');
+    if (pricingSection) {
+      pricingSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  }
 
   useEffect(() => {
     trackEvent("Visited Landing Page", {
@@ -39,6 +48,7 @@ export default function Home() {
 
   return (
     <Wrapper>
+      <SharedHeader currentPage="landing" />
       <BackgroundContainer>
         {/* Background visual removed for now */}
       </BackgroundContainer>
@@ -46,7 +56,7 @@ export default function Home() {
       {/* HERO PANEL */}
       <HeroSection>
         <HeroPanel>
-          <SharedHeader currentPage="landing" />
+          <HeaderSpacer />
 
           {/* Constrained content row */}
           <HeroInner>
@@ -67,13 +77,13 @@ export default function Home() {
                   </span>
                 </Headline>
                 <Subheadline>
-                  Automatizamos agenda, expedientes y resúmenes con IA para devolverte horas y permitirte equilibrar mejor tu práctica y tu vida personal.
+                  Automatizamos agenda, expedientes y aumentamos tu productividad con IA para devolverte horas y permitirte equilibrar mejor tu práctica y tu vida personal.
                 </Subheadline>
                 <CTAGroup>
                   <Button
                     asChild
                     size="lg"
-                    className="bg-primary text-white hover:bg-primary/90 font-semibold px-8 py-3 text-lg shadow-lg"
+                    className="bg-primary text-white hover:bg-primary/90 font-semibold px-8 py-3 text-lg shadow-lg relative overflow-hidden shine-btn"
                   >
                     <Link href="/signup">Empieza gratis</Link>
                   </Button>
@@ -83,7 +93,7 @@ export default function Home() {
                     size="lg"
                     className="border-slate-300 text-slate-700 hover:bg-slate-100 dark:border-slate-500 dark:text-slate-100 dark:hover:bg-slate-800/70 dark:hover:border-slate-400 font-medium px-8 py-3 text-lg transition-colors"
                   >
-                    <Link href="/pricing">Ver planes</Link>
+                    <button onClick={handlePricingClick}>Ver planes</button>
                   </Button>
                 </CTAGroup>
               </HeroCol>
@@ -146,10 +156,12 @@ export default function Home() {
       <DetailedFeatures />
       <ValueStripe />
       <WhyMidiMed />
+      <PricingSection />
       <FinalCTA />
       <FAQ />
       <Testimonials />
       <SupportCTA />
+      <ContactSection />
       <FooterColumns />
       <BottomLegalBar />
     </Wrapper>
@@ -157,15 +169,16 @@ export default function Home() {
 }
 
 /* ===== LAYOUT ===== */
-const Wrapper = tw.div`min-h-[100dvh] flex flex-col relative`;
+const Wrapper = tw.div`min-h-[100dvh] flex flex-col relative overflow-x-hidden`;
 const BackgroundContainer = tw.div`absolute inset-0 w-full h-full pointer-events-none z-0`;
 
-const HeroSection = tw.section`relative z-10 w-full`;
+const HeroSection = tw.section`relative z-10 w-full overflow-x-hidden`;
 const HeroPanel = tw.div`
   relative w-full
   bg-gradient-to-b from-[#dbeef9] to-[#e3e7f2] dark:from-[#0f2530] dark:to-[#163544]
   backdrop-blur-sm
   shadow-md ring-1 ring-[#8cc9d9]/50 dark:ring-[#0f2530] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.04)]
+  overflow-x-hidden
 `;
 const HeroInner = tw.div`
   w-full mx-auto max-w-[1680px]
@@ -186,7 +199,7 @@ const Subheadline = tw.p`text-lg sm:text-xl text-slate-700 dark:text-slate-300 l
 
 /* ===== FULL-BLEED STATS STRIP ===== */
 const StatsFullBleed = tw.div`
-  w-full bg-primary text-white relative md:mt-8 lg:mt-0
+  w-full bg-primary text-white relative md:mt-8 lg:mt-0 overflow-x-hidden
 `;
 const StatsContainer = tw.div`
   w-full mx-auto max-w-[1680px] px-3 sm:px-8 xl:px-14 2xl:px-20
@@ -203,4 +216,8 @@ const DeviceGroup = tw.div`
   relative flex items-end justify-center translate-y-8 sm:translate-y-12 md:translate-y-0 lg:translate-y-16 xl:translate-y-20 z-10
   lg:-translate-x-6 xl:-translate-x-6 2xl:translate-x-0
   scale-115 sm:scale-130 md:scale-100 lg:scale-145 xl:scale-150
+`;
+
+const HeaderSpacer = tw.div`
+  h-20 w-full
 `;

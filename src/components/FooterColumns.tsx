@@ -39,16 +39,16 @@ export default function FooterColumns() {
           <div className="space-y-4">
             <h3 className="font-semibold text-slate-900 dark:text-white text-base">Aprender</h3>
             <nav className="flex flex-col space-y-3">
-              <Link href="/features" className="text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary text-sm transition-colors">
+              <Link href="/en-construccion" className="text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary text-sm transition-colors">
                 Funciones
               </Link>
               <Link href="/pricing" className="text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary text-sm transition-colors">
                 Precios
               </Link>
-              <Link href="/tutorials" className="text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary text-sm transition-colors">
+              <Link href="/en-construccion" className="text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary text-sm transition-colors">
                 Tutoriales
               </Link>
-              <Link href="/documentation" className="text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary text-sm transition-colors">
+              <Link href="/en-construccion" className="text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary text-sm transition-colors">
                 Documentación
               </Link>
             </nav>
@@ -58,16 +58,16 @@ export default function FooterColumns() {
           <div className="space-y-4">
             <h3 className="font-semibold text-slate-900 dark:text-white text-base">Acerca de nosotros</h3>
             <nav className="flex flex-col space-y-3">
-              <Link href="/news" className="text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary text-sm transition-colors">
+              <Link href="/en-construccion" className="text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary text-sm transition-colors">
                 Noticias
               </Link>
-              <Link href="/faq" className="text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary text-sm transition-colors">
+              <Link href="/en-consutrccion" className="text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary text-sm transition-colors">
                 Preguntas frecuentes
               </Link>
-              <Link href="/about" className="text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary text-sm transition-colors">
+              <Link href="/en-construccion" className="text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary text-sm transition-colors">
                 Nuestra historia
               </Link>
-              <Link href="/careers" className="text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary text-sm transition-colors">
+              <Link href="/en-construccion" className="text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary text-sm transition-colors">
                 Únete al equipo
               </Link>
             </nav>
@@ -79,14 +79,14 @@ export default function FooterColumns() {
             <div className="space-y-3">
               <div className="flex items-center space-x-2 text-slate-600 dark:text-slate-300 text-sm">
                 <Mail size={16} />
-                <a href="mailto:hola@midimed.com" className="hover:text-primary transition-colors">
+                <a href="mailto:hola@midimed.com" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
                   hola@midimed.com
                 </a>
               </div>
               <div className="flex items-center space-x-2 text-slate-600 dark:text-slate-300 text-sm">
                 <Phone size={16} />
-                <a href="tel:+15551234567" className="hover:text-primary transition-colors">
-                  +1 (555) 123-4567
+                <a href="tel:+50231021287" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
+                  +502 3102-1287
                 </a>
               </div>
             </div>
@@ -94,19 +94,21 @@ export default function FooterColumns() {
               <p className="text-slate-600 dark:text-slate-300 text-sm mb-3">Síguenos</p>
               <div className="flex space-x-3">
                 <a 
-                  href="https://instagram.com/midimed" 
+                  href="https://instagram.com/midimed.tech" 
                   className="text-slate-400 hover:text-primary transition-colors"
                   aria-label="Instagram"
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
                   <Instagram size={20} />
                 </a>
-                <a 
+                {/* <a 
                   href="https://facebook.com/midimed" 
                   className="text-slate-400 hover:text-primary transition-colors"
                   aria-label="Facebook"
                 >
                   <Facebook size={20} />
-                </a>
+                </a> */}
               </div>
             </div>
           </div>

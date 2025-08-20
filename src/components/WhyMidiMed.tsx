@@ -16,8 +16,7 @@ export default function WhyMidiMed() {
             <Eyebrow>¿Por qué utilizar MidiMed?</Eyebrow>
             <Title id="why-title">Una plataforma diseñada para devolverte tiempo</Title>
             <Intro>
-              MidiMed es una plataforma fácil de usar, segura y accesible para clínicas de todos los tamaños en
-              Latinoamérica. Mejora el control de agendas, expedientes, recetas, ingresos y más, mientras
+              MidiMed es una plataforma fácil de usar, segura y accesible para clínicas de todos los tamaños. Mejora el control de agendas, expedientes, recetas, ingresos y más, mientras
               automatiza tareas para que tu equipo se concentre en los pacientes.
             </Intro>
             <Points>
@@ -57,7 +56,7 @@ export default function WhyMidiMed() {
 }
 
 // Styled
-const Section = tw.section`w-full relative pt-8 md:pt-12`;
+const Section = tw.section`w-full relative pt-8 md:pt-12 pb-8`;
 const Inner = tw.div`w-full mx-auto max-w-[1680px] px-3 sm:px-8 xl:px-14 2xl:px-20`;
 const Grid = tw.div`grid items-center gap-8 md:gap-12 grid-cols-1 md:grid-cols-2`;
 

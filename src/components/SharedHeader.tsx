@@ -7,7 +7,7 @@ import { useTheme } from '@/contexts/ThemeContext'
 import BrandLogo from '@/components/BrandLogo'
 import { Button } from '@/components/ui/button'
 import tw from 'tailwind-styled-components'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 type SharedHeaderProps = {
   showAuthButtons?: boolean
@@ -18,24 +18,84 @@ export default function SharedHeader({ showAuthButtons = true, currentPage = 'la
   const router = useRouter()
   const { theme, toggleTheme } = useTheme()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false)
+  const [isHovered, setIsHovered] = useState(false)
+  const [isScrolling, setIsScrolling] = useState(false)
   const pathname = usePathname()
+
+  useEffect(() => {
+    let scrollTimeout: NodeJS.Timeout
+
+    const handleScroll = () => {
+      const scrollTop = window.scrollY
+      setIsScrolled(scrollTop > 20)
+      setIsScrolling(true)
+      
+      clearTimeout(scrollTimeout)
+      scrollTimeout = setTimeout(() => {
+        setIsScrolling(false)
+      }, 150) // Stop scrolling state after 150ms of no scroll
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+      clearTimeout(scrollTimeout)
+    }
+  }, [])
+
+  const handleHomeClick = () => {
+    if (pathname === '/') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      router.push('/');
+    }
+  }
+
+  const handlePricingClick = () => {
+    if (pathname === '/') {
+      const pricingSection = document.getElementById('pricing');
+      if (pricingSection) {
+        pricingSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      router.push('/pricing');
+    }
+  }
+
+  const handleContactClick = () => {
+    if (pathname === '/') {
+      const contactSection = document.getElementById('contact');
+      if (contactSection) {
+        contactSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      router.push('/contact');
+    }
+  }
 
   return (
     <>
-      <Header>
+      <Header 
+        $isScrolled={isScrolled} 
+        $isHovered={isHovered} 
+        $isScrolling={isScrolling}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
         <HeaderInner>
           {/* Logo - clickable to go to landing */}
-          <LogoWrapper onClick={() => router.push('/')}>
+          <LogoWrapper onClick={handleHomeClick}>
             <BrandLogo />
           </LogoWrapper>
 
           {/* Navigation Links - Desktop */}
           <NavLinks>
-            <NavButton $active={pathname === '/'} onClick={() => router.push('/')}>Inicio</NavButton>
-            <NavButton $active={pathname.startsWith('/pricing')} onClick={() => router.push('/pricing')}>
+            <NavButton $active={pathname === '/'} onClick={handleHomeClick}>Inicio</NavButton>
+            <NavButton $active={pathname.startsWith('/pricing')} onClick={handlePricingClick}>
               Precios
             </NavButton>
-            <NavButton $active={pathname.startsWith('/contact')} onClick={() => router.push('/contact')}>
+            <NavButton $active={pathname.startsWith('/contact')} onClick={handleContactClick}>
               Contáctanos
             </NavButton>
           </NavLinks>
@@ -95,19 +155,19 @@ export default function SharedHeader({ showAuthButtons = true, currentPage = 'la
             <MobileMenuBody>
               <div className="space-y-2">
                 <MobileNavButton $active={pathname === '/'} onClick={() => {
-                  router.push('/')
+                  handleHomeClick()
                   setIsMobileMenuOpen(false)
                 }}>
                   Inicio
                 </MobileNavButton>
                 <MobileNavButton $active={pathname.startsWith('/pricing')} onClick={() => {
-                  router.push('/pricing')
+                  handlePricingClick()
                   setIsMobileMenuOpen(false)
                 }}>
                   Precios
                 </MobileNavButton>
                 <MobileNavButton $active={pathname.startsWith('/contact')} onClick={() => {
-                  router.push('/contact')
+                  handleContactClick()
                   setIsMobileMenuOpen(false)
                 }}>
                   Contáctanos
@@ -163,8 +223,19 @@ export default function SharedHeader({ showAuthButtons = true, currentPage = 'la
 }
 
 // Styled components
-const Header = tw.header`
-  w-full relative z-10 bg-transparent
+const Header = tw.header<{ $isScrolled?: boolean; $isHovered?: boolean; $isScrolling?: boolean }>`
+  w-full fixed top-0 left-0 z-50 transition-all duration-300
+  ${({ $isScrolled, $isHovered, $isScrolling }) => {
+    if (!$isScrolled) return 'bg-transparent'
+    
+    // When scrolled but not hovered and not actively scrolling - more transparent
+    if ($isScrolled && !$isHovered && !$isScrolling) {
+      return 'bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm shadow-md border-b border-slate-200/30 dark:border-slate-700/30'
+    }
+    
+    // When scrolled and (hovered or actively scrolling) - more opaque
+    return 'bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-lg border-b border-slate-200/50 dark:border-slate-700/50'
+  }}
 `
 
 const HeaderInner = tw.div`

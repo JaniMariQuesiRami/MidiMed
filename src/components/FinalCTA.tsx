@@ -2,16 +2,29 @@
 import tw from "tailwind-styled-components";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export default function FinalCTA() {
+  const pathname = usePathname();
+
+  const handlePricingClick = () => {
+    if (pathname === '/') {
+      const pricingSection = document.getElementById('pricing');
+      if (pricingSection) {
+        pricingSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      window.location.href = '/pricing';
+    }
+  }
   return (
     <Section>
       <Background>
         <Inner>
           <Content>
-            <Headline>Comienza hoy y recupera tiempo para lo que importa</Headline>
+            <Headline>Comienza hoy y recupera tiempo para lo que realmente importa</Headline>
             <Subcopy>
-              Únete a cientos de clínicas en Latinoamérica que ya usan MidiMed para automatizar 
+              Únete a cientos de clínicas en Guatemala que ya usan MidiMed para automatizar 
               procesos, mejorar la atención y aumentar la rentabilidad.
             </Subcopy>
             <CTAGroup>
@@ -26,9 +39,9 @@ export default function FinalCTA() {
                 asChild
                 variant="outline"
                 size="lg"
-                className="border-slate-300 text-slate-700 hover:bg-slate-100 dark:border-slate-500 dark:text-slate-100 dark:hover:bg-slate-800/70 dark:hover:border-slate-400 font-medium px-8 py-3 text-lg transition-colors"
+                className="border-primary text-primary hover:bg-primary hover:text-white dark:border-primary dark:text-primary dark:hover:bg-primary dark:hover:text-white font-medium px-8 py-3 text-lg transition-colors"
               >
-                <Link href="/pricing">Ver planes</Link>
+                <button onClick={handlePricingClick}>Ver planes</button>
               </Button>
             </CTAGroup>
           </Content>
@@ -39,16 +52,15 @@ export default function FinalCTA() {
 }
 
 // Styled
-const Section = tw.section`w-full relative pt-8 md:pt-12`;
+const Section = tw.section`w-full relative`;
 const Background = tw.div`
   w-full 
-  bg-gradient-to-br from-primary via-primary to-highlight
-  dark:from-slate-900 dark:via-slate-800 dark:to-slate-700
-  text-white
+  bg-white dark:bg-slate-900
   py-16 md:py-20
+  border-b border-slate-200 dark:border-slate-700
 `;
 const Inner = tw.div`w-full mx-auto max-w-[1680px] px-3 sm:px-8 xl:px-14 2xl:px-20`;
 const Content = tw.div`text-center max-w-4xl mx-auto`;
-const Headline = tw.h2`text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6`;
-const Subcopy = tw.p`text-lg sm:text-xl text-white/90 leading-relaxed mb-8`;
+const Headline = tw.h2`text-3xl sm:text-4xl lg:text-5xl font-bold text-primary dark:text-primary mb-6`;
+const Subcopy = tw.p`text-lg sm:text-xl text-slate-600 dark:text-slate-300 leading-relaxed mb-8`;
 const CTAGroup = tw.div`flex flex-wrap items-center justify-center gap-4`;

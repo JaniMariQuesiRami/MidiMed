@@ -35,7 +35,7 @@ export default function Testimonials() {
       <Inner>
         <Header>
           <Title>Lo que dicen nuestros usuarios</Title>
-          <Subtitle>Médicos de toda Latinoamérica confían en MidiMed</Subtitle>
+          <Subtitle>Médicos de toda Guatemala confían en MidiMed</Subtitle>
         </Header>
         <Grid>
           {testimonials.map((testimonial, index) => (

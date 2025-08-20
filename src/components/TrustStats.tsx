@@ -6,9 +6,9 @@ import { useTheme } from "@/contexts/ThemeContext";
 type Stat = { value: string; label: string };
 
 const stats: Stat[] = [
+  { value: "+100", label: "Doctores" },
+  { value: "+10K", label: "Citas gestionadas" },
   { value: "24/7", label: "Soporte" },
-  { value: "100+", label: "Doctores" },
-  { value: "1M+", label: "Citas gestionadas" },
 ];
 
 interface TrustStatsProps {

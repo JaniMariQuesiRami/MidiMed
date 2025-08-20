@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import tw from 'tailwind-styled-components'
 import SharedHeader from '@/components/SharedHeader'
-import ContactForm from '@/components/ContactForm'
+import ContactSection from '@/components/ContactSection'
 import { useUser } from '@/contexts/UserContext'
 import { trackEvent } from '@/utils/trackEvent'
 
@@ -51,9 +51,7 @@ export default function ContactPage() {
           height={60}
           style={{ top: position.y, left: position.x }}
         />
-        <FormWrapper>
-          <ContactForm />
-        </FormWrapper>
+        <ContactSection />
       </ContentArea>
     </Background>
   )
@@ -61,9 +59,7 @@ export default function ContactPage() {
 
 // Styled components
 const Background = tw.div`
-  relative h-screen w-full flex flex-col overflow-hidden
-  bg-gradient-to-tr from-[#0589c2] via-[#3abdd4] to-[#93efff] animate-gradient
-  dark:from-[#0d1421] dark:via-[#1a2332] dark:to-[#2a3441]
+  relative min-h-screen w-full flex flex-col overflow-hidden
 `
 
 const HeaderContainer = tw.div`
@@ -71,13 +67,9 @@ const HeaderContainer = tw.div`
 `
 
 const ContentArea = tw.div`
-  flex-1 flex items-center justify-center relative w-full min-h-0 p-4
+  flex-1 relative w-full min-h-0 p-4
 `
 
 const BouncingLogo = tw(Image)`
   fixed z-10 transition-transform duration-100 ease-linear pointer-events-none
-`
-
-const FormWrapper = tw.div`
-  z-20 relative w-full
 `
