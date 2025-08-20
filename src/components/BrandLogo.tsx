@@ -4,10 +4,12 @@ import Image from 'next/image'
 import tw from 'tailwind-styled-components'
 import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
+import { useTheme } from '@/contexts/ThemeContext'
 
 export default function BrandLogo() {
   const [isMobile, setIsMobile] = useState(false)
   const pathname = usePathname()
+  const { theme } = useTheme()
 
   // Páginas donde el texto debe ser blanco y el logo normal en mobile
   const forceWhitePages = ['/pricing', '/contact', '/login', '/signup']
@@ -24,12 +26,11 @@ export default function BrandLogo() {
     return () => window.removeEventListener('resize', checkIfMobile)
   }, [])
 
-  const showLogo = isMobile && forceWhiteText ? "/logo.svg" : isMobile ? "/logoPrimary.svg" : "/logo.svg"
-
+  const logoSrc = theme === 'dark' ? '/logo.svg' : '/logoLightmode.svg'
   return (
     <Wrapper>
       <Image 
-        src={showLogo}
+        src={logoSrc}
         alt="Logo" 
         width={28} 
         height={28} 
@@ -44,7 +45,6 @@ const Wrapper = tw.div`
 `
 
 const BrandText = tw.span<{ $isMobile: boolean, $forceWhiteText?: boolean }>`
-  text-lg font-semibold
-  ${({ $isMobile, $forceWhiteText }) =>
-    $isMobile && $forceWhiteText ? 'text-white/80' : $isMobile ? 'text-primary' : 'text-white/80'}
+  text-lg font-semibold tracking-tight
+  text-slate-800 dark:text-white
 `

@@ -4,6 +4,7 @@ module.exports = {
     './app/**/*.{ts,tsx}',
     './components/**/*.{ts,tsx}',
     './pages/**/*.{ts,tsx}',
+    './src/**/*.{ts,tsx,js,jsx,mdx}',
   ],
   darkMode: 'class',
   theme: {
@@ -19,6 +20,7 @@ module.exports = {
           DEFAULT: '#f9f9f9',
           dark: '#1a1a1a',
         },
+        highlight: '#208697'
       },
     },
   },
