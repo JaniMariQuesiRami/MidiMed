@@ -113,7 +113,7 @@ export default function Home() {
                           <>
                             <Image
                               src={laptopSrc}
-                              alt="Vista escritorio de la aplicación MidiMed"
+                              alt="Software médico MidiMed - Dashboard principal mostrando agenda de citas, gestión de pacientes y expedientes médicos digitales para consultorios"
                               width={1100}
                               height={620}
                               className="w-[760px] md:w-[820px] lg:w-[1000px] xl:w-[1100px] max-w-full h-auto lg:hidden xl:block"
@@ -121,7 +121,7 @@ export default function Home() {
                             />
                             <Image
                               src={phoneSrc}
-                              alt="Vista móvil de la aplicación MidiMed"
+                              alt="Aplicación móvil MidiMed - Acceso a historias clínicas y agenda médica desde dispositivos móviles para médicos"
                               width={170}
                               height={360}
                               className="absolute right-12 bottom-8 w-[140px] md:w-[140px] lg:w-[200px] h-auto lg:relative lg:right-auto lg:bottom-auto xl:absolute xl:right-12 xl:bottom-8 xl:w-[155px] 2xl:block"
