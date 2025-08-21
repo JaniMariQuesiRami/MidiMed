@@ -13,9 +13,9 @@ export const getBaseUrl = () => {
 }
 
 export async function sendMagicLink(email: string): Promise<void> {
-  const generate = httpsCallable<
-    { email: string; redirectUrl?: string},
-    { ok: boolean; link?: string }
+  const generateMagicSignInLink = httpsCallable<
+    { email: string; redirectUrl?: string; dryRun?: boolean },
+    { ok: boolean; link?: string; to?: string; template?: string; locale?: string; vars?: Record<string, unknown>; dryRun?: boolean }
   >(functions, "generateMagicSignInLink")
 
   const payload = {
@@ -24,18 +24,19 @@ export async function sendMagicLink(email: string): Promise<void> {
   }
 
   try {
-    const res = await generate(payload)
-    const link = (res.data as any)?.link
+    const res = await generateMagicSignInLink(payload)
+    const link = res.data?.link
     if (link) window.location.href = link // solo dev
     localStorage.setItem("emailForSignIn", email)
-  } catch (err: any) {
-    const code = err?.code as string | undefined
+  } catch (err: unknown) {
+    const code = (err as { code?: string })?.code
+    const message = (err as { message?: string })?.message
     const msg =
       code === "functions/failed-precondition" ? "SMTP no configurado." :
       code === "functions/unavailable"        ? "Servicio no disponible. Intenta luego." :
       code === "functions/deadline-exceeded"  ? "Tiempo de espera agotado. Reintenta." :
       code === "functions/internal"           ? "No se pudo enviar el correo." :
-      err?.message || "Error al solicitar el enlace."
+      message || "Error al solicitar el enlace."
     console.error("sendMagicLink", { code, err })
     throw new Error(msg)
   }
