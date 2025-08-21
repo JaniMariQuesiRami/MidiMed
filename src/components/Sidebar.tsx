@@ -51,7 +51,8 @@ export default function Sidebar({ collapsed = false, onCollapsedChange }: Sideba
       tenant.tenantId,
       { archived: false, limit: 50 },
       (notifications) => {
-        const unread = notifications.filter((n) => !n.isRead).length
+        // Only count notifications that are unread and explicitly not archived
+        const unread = notifications.filter((n) => !n.isRead && n.archived !== true).length
         setUnreadCount(unread)
       }
     )

@@ -90,15 +90,17 @@ export default function SharedHeader({ showAuthButtons = true, currentPage = 'la
           </LogoWrapper>
 
           {/* Navigation Links - Desktop */}
-          <NavLinks>
-            <NavButton $active={pathname === '/'} onClick={handleHomeClick}>Inicio</NavButton>
-            <NavButton $active={pathname.startsWith('/pricing')} onClick={handlePricingClick}>
-              Precios
-            </NavButton>
-            <NavButton $active={pathname.startsWith('/contact')} onClick={handleContactClick}>
-              Contáctanos
-            </NavButton>
-          </NavLinks>
+          {currentPage !== 'signup' && (
+            <NavLinks>
+              <NavButton $active={pathname === '/'} onClick={handleHomeClick}>Inicio</NavButton>
+              <NavButton $active={pathname.startsWith('/pricing')} onClick={handlePricingClick}>
+                Precios
+              </NavButton>
+              <NavButton $active={pathname.startsWith('/contact')} onClick={handleContactClick}>
+                Contáctanos
+              </NavButton>
+            </NavLinks>
+          )}
 
           {/* Mobile Menu Button */}
           <div className="sm:hidden flex items-center gap-3">
@@ -154,26 +156,30 @@ export default function SharedHeader({ showAuthButtons = true, currentPage = 'la
             
             <MobileMenuBody>
               <div className="space-y-2">
-                <MobileNavButton $active={pathname === '/'} onClick={() => {
-                  handleHomeClick()
-                  setIsMobileMenuOpen(false)
-                }}>
-                  Inicio
-                </MobileNavButton>
-                <MobileNavButton $active={pathname.startsWith('/pricing')} onClick={() => {
-                  handlePricingClick()
-                  setIsMobileMenuOpen(false)
-                }}>
-                  Precios
-                </MobileNavButton>
-                <MobileNavButton $active={pathname.startsWith('/contact')} onClick={() => {
-                  handleContactClick()
-                  setIsMobileMenuOpen(false)
-                }}>
-                  Contáctanos
-                </MobileNavButton>
-                
-                <MenuDivider />
+                {currentPage !== 'signup' && (
+                  <>
+                    <MobileNavButton $active={pathname === '/'} onClick={() => {
+                      handleHomeClick()
+                      setIsMobileMenuOpen(false)
+                    }}>
+                      Inicio
+                    </MobileNavButton>
+                    <MobileNavButton $active={pathname.startsWith('/pricing')} onClick={() => {
+                      handlePricingClick()
+                      setIsMobileMenuOpen(false)
+                    }}>
+                      Precios
+                    </MobileNavButton>
+                    <MobileNavButton $active={pathname.startsWith('/contact')} onClick={() => {
+                      handleContactClick()
+                      setIsMobileMenuOpen(false)
+                    }}>
+                      Contáctanos
+                    </MobileNavButton>
+                    
+                    <MenuDivider />
+                  </>
+                )}
                 
                 {showAuthButtons && currentPage !== 'signup' && (
                   <div className="px-4 py-2">

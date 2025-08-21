@@ -68,6 +68,7 @@ export type Tenant = {
   phone: string
   address: string
   logoUrl?: string
+  specialties?: string[] // Solo especialidades como array
   settings: TenantSettings
   counters: TenantCounters
   billing: TenantBilling
