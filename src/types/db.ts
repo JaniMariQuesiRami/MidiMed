@@ -46,6 +46,20 @@ export type TenantBilling = {
   status: TenantBillingStatus
 }
 
+  // "billing": {
+  //   "paidThrough": "2025-09-01T00:00:00.000Z",
+  //   "plan": "BASIC",
+  //   "purchasedAt": "2025-08-01T00:00:00.000Z",
+  //   "status": "PAID_ACTIVE"
+  // },
+
+  //   "billing": {
+  //   "plan": "TRIAL",
+  //   "trialDays": 15,
+  //     "trialStartAt": "2025-08-20T00:00:00.000Z",
+  //   "status": "TRIAL_ACTIVE"
+  // }
+
 export type Tenant = {
   tenantId: string
   name: string

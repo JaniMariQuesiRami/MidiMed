@@ -15,8 +15,8 @@ export default function GlobalBillingBanner() {
 
   const message =
     status === 'TRIAL_EXPIRED'
-      ? 'Tu periodo de prueba terminó. Contáctanos para activar un plan.'
-      : 'No hemos recibido tu renovación de plan. Se deshabilitará el acceso en los proximos 7 dias.'
+      ? 'El periodo de prueba terminó, contáctanos para activar un plan. Se deshabilitará el acceso en los próximos 7 días.'
+      : 'No hemos recibido pago de renovación de plan. Se deshabilitará el acceso en los próximos 7 días.'
 
   const bg =
     status === 'TRIAL_EXPIRED'
@@ -36,4 +36,4 @@ export default function GlobalBillingBanner() {
   )
 }
 
-const Banner = tw.div`w-full p-2 text-center text-sm flex items-center justify-center`
+const Banner = tw.div`w-full p-2 text-center text-sm flex items-center justify-center rounded-lg`
