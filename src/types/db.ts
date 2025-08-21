@@ -29,6 +29,37 @@ export type TenantCounters = {
   medicalRecords: number
 }
 
+export type TenantPlanType = 'TRIAL' | 'BASIC' | 'PRO' | 'ENTERPRISE'
+
+export type TenantBillingStatus =
+  | 'TRIAL_ACTIVE'
+  | 'TRIAL_EXPIRED'
+  | 'PAID_ACTIVE'
+  | 'PAST_DUE'
+
+export type TenantBilling = {
+  plan: TenantPlanType
+  trialStartAt?: string // ISO
+  trialDays?: number
+  purchasedAt?: string // ISO
+  paidThrough?: string // ISO
+  status: TenantBillingStatus
+}
+
+  // "billing": {
+  //   "paidThrough": "2025-09-01T00:00:00.000Z",
+  //   "plan": "BASIC",
+  //   "purchasedAt": "2025-08-01T00:00:00.000Z",
+  //   "status": "PAID_ACTIVE"
+  // },
+
+  //   "billing": {
+  //   "plan": "TRIAL",
+  //   "trialDays": 15,
+  //     "trialStartAt": "2025-08-20T00:00:00.000Z",
+  //   "status": "TRIAL_ACTIVE"
+  // }
+
 export type Tenant = {
   tenantId: string
   name: string
@@ -39,6 +70,7 @@ export type Tenant = {
   logoUrl?: string
   settings: TenantSettings
   counters: TenantCounters
+  billing: TenantBilling
 }
 
 export type UserRole = "admin" | "provider" | "staff"
@@ -177,15 +209,15 @@ export type Invite = {
   tempPassword?: string // Contraseña temporal para el primer login
 }
 
-export type Billing = {
+export type PlanUpgradeRequest = {
+  requestId: string
   tenantId: string
-  plan: "basic" | "pro"
-  subscriptionStart: string
-  subscriptionEnd: string
-  isActive: boolean
-  paymentProvider: string
-  paymentProviderSubscriptionId: string
-  paymentProviderCustomerId: string
+  userId: string
+  currentPlan: TenantPlanType
+  currentStatus: TenantBillingStatus
+  message: string
+  createdAt: string
+  handled: boolean
 }
 
 // Input types

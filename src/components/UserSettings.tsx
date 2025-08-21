@@ -13,6 +13,7 @@ import { auth, db } from '@/lib/firebase'
 import { updateProfile } from 'firebase/auth'
 import { doc, updateDoc } from 'firebase/firestore'
 import tw from 'tailwind-styled-components'
+import UserPlanCard from '@/components/UserPlanCard'
 
 export default function UserSettings({ collapsed }: { collapsed: boolean }) {
   const { user, tenant } = useContext(UserContext)
@@ -60,23 +61,7 @@ export default function UserSettings({ collapsed }: { collapsed: boolean }) {
 
   return (
     <>
-      <CardWrapper onClick={() => setOpen(true)}>
-        {collapsed ? (
-          <CollapsedCard>
-            <UserIcon size={20} />
-          </CollapsedCard>
-        ) : (
-          <FullCard>
-            <div className="flex items-center gap-2">
-              <UserIcon size={18} />
-              <div>
-                <TenantName>{tenant.name}</TenantName>
-                <UserEmail>{user.email}</UserEmail>
-              </div>
-            </div>
-          </FullCard>
-        )}
-      </CardWrapper>
+      <UserPlanCard collapsed={collapsed} onClick={() => setOpen(true)} />
 
       {open && mounted && createPortal(
         <ModalOverlay>
@@ -151,13 +136,6 @@ export default function UserSettings({ collapsed }: { collapsed: boolean }) {
     </>
   )
 }
-
-// styles
-const CardWrapper = tw.div`cursor-pointer`
-const FullCard = tw.div`mt-4 p-4 rounded-md border bg-muted`
-const CollapsedCard = tw.div`mt-4 p-3 rounded-md border bg-muted flex justify-center text-muted-foreground`
-const TenantName = tw.p`text-sm font-semibold`
-const UserEmail = tw.p`text-xs text-muted-foreground`
 
 const ModalOverlay = tw.div`
   fixed inset-0 bg-black/50 z-50 flex items-center justify-center

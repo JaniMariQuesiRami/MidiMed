@@ -33,15 +33,15 @@ export async function signUp({
 	const tenantId = `${slugify(tenantName)}-${randomId}`
 	const now = new Date().toISOString()
 
-	const tenantData: Tenant = {
-		tenantId,
-		name: tenantName,
-		createdAt: now,
-		email,
-		phone,
-		address,
-		settings: {
-			appointmentDurationMinutes: 30,
+        const tenantData: Tenant = {
+                tenantId,
+                name: tenantName,
+                createdAt: now,
+                email,
+                phone,
+                address,
+                settings: {
+                        appointmentDurationMinutes: 30,
                         workingHours: {
                                 mon: ['08:00', '17:00'],
                                 tue: ['08:00', '17:00'],
@@ -50,13 +50,19 @@ export async function signUp({
                                 fri: ['08:00', '15:00'],
                                 sat: ['08:00', '12:00'],
                         },
-		},
-		counters: {
-			patients: 0,
-			appointments: 0,
-			medicalRecords: 0,
-		},
-	}
+                },
+                counters: {
+                        patients: 0,
+                        appointments: 0,
+                        medicalRecords: 0,
+                },
+                billing: {
+                        plan: 'TRIAL',
+                        trialStartAt: now,
+                        trialDays: 15,
+                        status: 'TRIAL_ACTIVE',
+                },
+        }
 
         const userData: User = {
                 tenantId,

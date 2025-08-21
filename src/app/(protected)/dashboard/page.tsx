@@ -184,7 +184,7 @@ export default function DashboardCalendar() {
               onClick={() => setDate(new Date())}
               type="button"
             >
-              Ir a hoy
+              Hoy
             </button>
           </div>
           <div className="flex items-center gap-2 ml-auto">
