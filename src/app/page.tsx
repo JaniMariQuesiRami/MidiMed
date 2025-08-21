@@ -54,7 +54,7 @@ export default function Home() {
       </BackgroundContainer>
 
       {/* HERO PANEL */}
-      <HeroSection role="banner" aria-labelledby="hero-heading">
+      <HeroSection>
         <HeroPanel>
           <HeaderSpacer />
 
@@ -62,22 +62,22 @@ export default function Home() {
           <HeroInner>
             <HeroGrid>
               <HeroCol>
-                <Headline id="hero-heading">
+                <Headline>
                   <span className="block">
-                    <span className="text-highlight font-semibold">Software Médico</span>
-                    {" "}que
-                  </span>
-                  <span className="block">
-                    <span className="text-highlight font-semibold">recupera tiempo</span>
+                    <span className="text-highlight font-semibold">Recupera tiempo</span>
                     :
                   </span>
                   <span className="block">
                     Enfócate en tus{" "}
                     <span className="text-highlight font-semibold">pacientes</span>
                   </span>
+                  <span className="block">
+                    y en tu{" "}
+                    <span className="text-highlight font-semibold">vida</span>
+                  </span>
                 </Headline>
                 <Subheadline>
-                  Sistema de gestión clínica integral con IA que automatiza agenda médica digital, expedientes electrónicos e historias clínicas. Diseñado para consultorios y clínicas que buscan eficiencia y mejor atención al paciente.
+                  Automatizamos agenda, expedientes y aumentamos tu productividad con IA para devolverte horas y permitirte equilibrar mejor tu práctica y tu vida personal.
                 </Subheadline>
                 <CTAGroup>
                   <Button

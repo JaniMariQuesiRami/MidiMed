@@ -12,24 +12,30 @@ interface FeatureItemProps {
 const features: FeatureItemProps[] = [
   {
     icon: <CalendarDays className="w-6 h-6" />,
-    title: "Agenda médica digital inteligente",
-    desc: "Sistema de citas médicas online con programación automática, recordatorios y gestión centralizada para optimizar el flujo de pacientes.",
+    title: "Agenda centralizada",
+    desc: "Programa, reprograma y visualiza el día completo en segundos.",
   },
   {
     icon: <FileText className="w-6 h-6" />,
-    title: "Expedientes electrónicos unificados",
-    desc: "Historia clínica digital completa y segura con acceso instantáneo desde cualquier dispositivo, cumpliendo normativas médicas.",
+    title: "Expedientes unificados",
+    desc: "Historia clínica completa y siempre accesible en un solo lugar.",
   },
   {
     icon: <Sparkles className="w-6 h-6" />,
-    title: "Automatización médica con IA",
-    desc: "Inteligencia artificial médica que genera resúmenes clínicos automáticos, reduce trabajo administrativo y mejora la documentación.",
+    title: "Automatización con IA",
+    desc: "Resúmenes clínicos generados automáticamente tras cada consulta.",
   },
   {
     icon: <BarChart3 className="w-6 h-6" />,
-    title: "Reportes clínicos y analítica médica",
-    desc: "Métricas de consultorios, estadísticas de pacientes y reportes médicos automatizados para decisiones basadas en datos.",
+    title: "Reportes y analítica",
+    desc: "Métricas claras para decisiones rápidas y basadas en datos.",
   },
+  // Extra opcional (quinto) que podrías activar luego:
+  // {
+  //   icon: <MessageSquare className="w-6 h-6" />,
+  //   title: "WhatsApp integrado",
+  //   desc: "Comunicación directa y recordatorios automatizados.",
+  // },
 ];
 
 export default function FeatureHighlights() {
@@ -37,10 +43,10 @@ export default function FeatureHighlights() {
     <Section aria-labelledby="features-heading">
       <Inner>
         <HeaderBlock>
-          <Eyebrow>Software Médico Integral</Eyebrow>
-          <Title id="features-heading">Sistema completo de gestión clínica para consultorios modernos</Title>
+          <Eyebrow>Características Clave</Eyebrow>
+          <Title id="features-heading">Todo lo esencial para tu clínica en un solo lugar</Title>
           <Intro>
-            Plataforma médica todo-en-uno que optimiza la gestión de pacientes, automatiza expedientes electrónicos y transforma la experiencia clínica con inteligencia artificial diseñada específicamente para profesionales de la salud.
+            Optimiza operaciones, reduce errores administrativos y ofrece una experiencia superior al paciente con un sistema moderno y seguro.
           </Intro>
         </HeaderBlock>
 

@@ -13,10 +13,11 @@ export default function WhyMidiMed() {
             </MediaInner>
           </Media>
           <Content>
-            <Eyebrow>¿Por qué elegir nuestro software médico?</Eyebrow>
-            <Title id="why-title">Plataforma médica diseñada para devolverte tiempo y mejorar tu práctica</Title>
+            <Eyebrow>¿Por qué utilizar MidiMed?</Eyebrow>
+            <Title id="why-title">Una plataforma diseñada para devolverte tiempo</Title>
             <Intro>
-              MidiMed es el software de gestión clínica más completo para consultorios y clínicas modernas. Combina agenda médica digital, expedientes electrónicos seguros y automatización con IA para transformar cómo gestionas tu práctica médica y te relacionas con tus pacientes.
+              MidiMed es una plataforma fácil de usar, segura y accesible para clínicas de todos los tamaños. Mejora el control de agendas, expedientes, recetas, ingresos y más, mientras
+              automatiza tareas para que tu equipo se concentre en los pacientes.
             </Intro>
             <Points>
               <Point>
@@ -24,8 +25,8 @@ export default function WhyMidiMed() {
                   <Clock className="w-5 h-5" />
                 </IconWrap>
                 <div>
-                  <PointTitle>Elimina trabajo administrativo repetitivo</PointTitle>
-                  <PointDesc>Automatización médica inteligente: recordatorios automáticos, reprogramación de citas y tareas administrativas sin intervención manual.</PointDesc>
+                  <PointTitle>Reduce trabajo administrativo</PointTitle>
+                  <PointDesc>Recordatorios, reprogramación y tareas repetitivas automatizadas.</PointDesc>
                 </div>
               </Point>
               <Point>
@@ -33,8 +34,8 @@ export default function WhyMidiMed() {
                   <CheckCircle2 className="w-5 h-5" />
                 </IconWrap>
                 <div>
-                  <PointTitle>Historia clínica digital estandarizada</PointTitle>
-                  <PointDesc>Expedientes electrónicos con formatos médicos estándar que garantizan continuidad clínica y cumplimiento normativo completo.</PointDesc>
+                  <PointTitle>Documentación consistente</PointTitle>
+                  <PointDesc>Notas y formatos estandarizados para mejor continuidad clínica.</PointDesc>
                 </div>
               </Point>
               <Point>
@@ -42,8 +43,8 @@ export default function WhyMidiMed() {
                   <Shield className="w-5 h-5" />
                 </IconWrap>
                 <div>
-                  <PointTitle>Decisiones médicas basadas en datos</PointTitle>
-                  <PointDesc>Analítica médica avanzada con indicadores de consultorios, reportes automáticos y métricas que revelan oportunidades de mejora.</PointDesc>
+                  <PointTitle>Mejores decisiones con datos</PointTitle>
+                  <PointDesc>Indicadores y reportes que muestran ahorros y oportunidades.</PointDesc>
                 </div>
               </Point>
             </Points>
