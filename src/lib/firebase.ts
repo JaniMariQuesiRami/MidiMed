@@ -19,5 +19,5 @@ const app = !getApps().length ? initializeApp(firebaseConfig) : getApp()
 // Exportar servicios
 export const auth = getAuth(app)
 export const db = getFirestore(app)
-export const functions = getFunctions(app, "us-central1")
+export const functions = getFunctions(app)
 export const storage = getStorage(app)
