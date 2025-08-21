@@ -177,3 +177,34 @@ export async function updateUser(uid: string, data: Partial<User>): Promise<void
     throw err
   }
 }
+
+export async function checkUserOrInviteExistsByEmail(email: string): Promise<{ exists: boolean; type: 'user' | 'invite' | null }> {
+  try {
+    const normalizedEmail = email.trim().toLowerCase()
+    
+    // Check if user exists in users collection
+    const userQuery = query(collection(db, 'users'), where('email', '==', normalizedEmail))
+    const userSnap = await getDocs(userQuery)
+    
+    if (!userSnap.empty) {
+      return { exists: true, type: 'user' }
+    }
+    
+    // Check if user has a pending invitation
+    const inviteQuery = query(
+      collection(db, 'invites'), 
+      where('email', '==', normalizedEmail),
+      where('status', '==', 'pending')
+    )
+    const inviteSnap = await getDocs(inviteQuery)
+    
+    if (!inviteSnap.empty) {
+      return { exists: true, type: 'invite' }
+    }
+    
+    return { exists: false, type: null }
+  } catch (err) {
+    console.error('Error in checkUserOrInviteExistsByEmail:', err)
+    return { exists: false, type: null }
+  }
+}

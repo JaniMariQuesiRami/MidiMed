@@ -44,6 +44,20 @@ export default function AuthForm({ mode }: AuthFormProps) {
 
     setLoading(true)
     try {
+      // Check if user or invitation exists
+      const { checkUserOrInviteExistsByEmail } = await import('@/db/users')
+      const userCheck = await checkUserOrInviteExistsByEmail(email)
+      
+      if (!userCheck.exists) {
+        // User doesn't exist and has no invitation - redirect to signup
+        toast.error('No encontramos una cuenta con ese correo. Te redirigiremos al registro.')
+        setTimeout(() => {
+          window.location.href = `/signup?email=${encodeURIComponent(email)}`
+        }, 2000)
+        return
+      }
+      
+      // User exists or has invitation - proceed with magic link
       await sendMagicLink(email)
       setLoginStep('sent')
       toast.success('¡Enlace enviado! Revisa tu correo.')
@@ -58,6 +72,19 @@ export default function AuthForm({ mode }: AuthFormProps) {
   const handlePasswordAuth = async () => {
     setLoading(true)
     try {
+      // Check if user or invitation exists
+      const { checkUserOrInviteExistsByEmail } = await import('@/db/users')
+      const userCheck = await checkUserOrInviteExistsByEmail(email)
+      
+      if (!userCheck.exists) {
+        // User doesn't exist and has no invitation - redirect to signup
+        toast.error('No encontramos una cuenta con ese correo. Te redirigiremos al registro.')
+        setTimeout(() => {
+          window.location.href = `/signup?email=${encodeURIComponent(email)}`
+        }, 2000)
+        return
+      }
+
       // Intentar login normal primero
       try {
         await signInWithEmailAndPassword(auth, email, password)

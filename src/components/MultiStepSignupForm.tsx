@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { sendEmailVerification } from 'firebase/auth'
 import { signUp } from '@/db/db'
 import { Input } from '@/components/ui/input'
@@ -56,6 +57,7 @@ interface FormData {
 }
 
 export default function MultiStepSignupForm() {
+  const searchParams = useSearchParams()
   const [currentStep, setCurrentStep] = useState<SignupStep>('personal')
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState<FormData>({
@@ -67,6 +69,14 @@ export default function MultiStepSignupForm() {
     specialties: [],
     password: '',
   })
+
+  // Prefill email from URL parameters if coming from login redirect
+  useEffect(() => {
+    const emailParam = searchParams.get('email')
+    if (emailParam) {
+      setFormData(prev => ({ ...prev, email: emailParam }))
+    }
+  }, [searchParams])
 
   const updateFormData = (updates: Partial<FormData>) => {
     setFormData(prev => ({ ...prev, ...updates }))
