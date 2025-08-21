@@ -16,6 +16,7 @@ export async function signUp({
 	tenantName,
 	phone,
 	address,
+	specialties,
 }: {
 	email: string
 	password: string
@@ -23,6 +24,7 @@ export async function signUp({
 	tenantName: string
 	phone: string
 	address: string
+	specialties?: string[]
 }) {
 	const userCredential = await createUserWithEmailAndPassword(auth, email, password)
 	const user = userCredential.user
@@ -40,6 +42,7 @@ export async function signUp({
                 email,
                 phone,
                 address,
+                specialties,
                 settings: {
                         appointmentDurationMinutes: 30,
                         workingHours: {

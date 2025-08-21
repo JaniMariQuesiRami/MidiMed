@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect } from 'react'
-import AuthForm from '@/components/AuthForm'
+import MultiStepSignupForm from '@/components/MultiStepSignupForm'
 import AuthScreenLayout from '@/components/AuthScreenLayout'
 import { useUser } from '@/contexts/UserContext'
 import { trackEvent } from '@/utils/trackEvent'
@@ -18,7 +18,7 @@ export default function SignupPage() {
 
   return (
     <AuthScreenLayout>
-      <AuthForm mode="signup" />
+      <MultiStepSignupForm />
     </AuthScreenLayout>
   )
 }
