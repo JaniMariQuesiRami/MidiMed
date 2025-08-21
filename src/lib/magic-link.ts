@@ -1,6 +1,5 @@
-import { signInWithEmailLink, isSignInWithEmailLink } from "firebase/auth"
-import { httpsCallable } from "firebase/functions"
-import { auth, functions } from "./firebase"
+import { sendSignInLinkToEmail, signInWithEmailLink, isSignInWithEmailLink } from 'firebase/auth'
+import { auth } from './firebase'
 
 // Determinar la URL base según el entorno
 export const getBaseUrl = () => {
@@ -13,32 +12,17 @@ export const getBaseUrl = () => {
 }
 
 export async function sendMagicLink(email: string): Promise<void> {
-  const generateMagicSignInLink = httpsCallable<
-    { email: string; redirectUrl?: string; dryRun?: boolean },
-    { ok: boolean; link?: string; to?: string; template?: string; locale?: string; vars?: Record<string, unknown>; dryRun?: boolean }
-  >(functions, "generateMagicSignInLink")
-
-  const payload = {
-    email: email.trim().toLowerCase(),
-    redirectUrl: window.location.origin,
-  }
-
   try {
-    const res = await generateMagicSignInLink(payload)
-    const link = res.data?.link
-    if (link) window.location.href = link // solo dev
-    localStorage.setItem("emailForSignIn", email)
-  } catch (err: unknown) {
-    const code = (err as { code?: string })?.code
-    const message = (err as { message?: string })?.message
-    const msg =
-      code === "functions/failed-precondition" ? "SMTP no configurado." :
-      code === "functions/unavailable"        ? "Servicio no disponible. Intenta luego." :
-      code === "functions/deadline-exceeded"  ? "Tiempo de espera agotado. Reintenta." :
-      code === "functions/internal"           ? "No se pudo enviar el correo." :
-      message || "Error al solicitar el enlace."
-    console.error("sendMagicLink", { code, err })
-    throw new Error(msg)
+    const actionCodeSettings = {
+      url: `${getBaseUrl()}/finishSignIn?email=${encodeURIComponent(email)}`,
+      handleCodeInApp: true,
+    }
+    await sendSignInLinkToEmail(auth, email, actionCodeSettings)
+    // Guardar el email en localStorage para recuperarlo después
+    window.localStorage.setItem('emailForSignIn', email)
+  } catch (error) {
+    console.error('Error sending magic link:', error)
+    throw error
   }
 }
 
