@@ -29,12 +29,12 @@ export default function PaymentFailedPage() {
     router.push('/settings?tab=planes')
   }
 
-  const handleGoToSettings = () => {
+  const handleGoToDashboard = () => {
     trackEvent('Payment Failed - Go to Settings', {
       userId: user?.uid,
       tenantId: tenant?.tenantId,
     })
-    router.push('/settings')
+    router.push('/dashboard')
   }
 
   return (
@@ -52,9 +52,9 @@ export default function PaymentFailedPage() {
 
         {/* Main Content */}
         <ContentSection>
-          <MainTitle>Pago no procesado</MainTitle>
+          <MainTitle>No se pudo procesar el pago</MainTitle>
           <MainMessage>
-            No pudimos procesar tu pago. Esto puede ser temporal, por favor intenta nuevamente.
+            Hubo un problema al procesar tu pago. No te preocupes, estos inconvenientes son temporales y se pueden solucionar fácilmente.
           </MainMessage>
 
           {/* Error Information */}
@@ -74,9 +74,9 @@ export default function PaymentFailedPage() {
               <RefreshCw className="w-5 h-5 mr-2" />
               Reintentar Pago
             </PrimaryButton>
-            <SecondaryButton onClick={handleGoToSettings}>
+            <SecondaryButton onClick={handleGoToDashboard}>
               <ArrowLeft className="w-5 h-5 mr-2" />
-              Volver a Configuración
+              Ir al Dashboard
             </SecondaryButton>
           </ActionSection>
 

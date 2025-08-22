@@ -29,12 +29,12 @@ export default function PaymentCancelledPage() {
     router.push('/settings?tab=planes')
   }
 
-  const handleGoToSettings = () => {
+  const handleGoToDashboard = () => {
     trackEvent('Payment Cancelled - Go to Settings', {
       userId: user?.uid,
       tenantId: tenant?.tenantId,
     })
-    router.push('/settings')
+    router.push('/dashboard')
   }
 
   return (
@@ -74,9 +74,9 @@ export default function PaymentCancelledPage() {
               <RotateCcw className="w-5 h-5 mr-2" />
               Completar Pago
             </PrimaryButton>
-            <SecondaryButton onClick={handleGoToSettings}>
+            <SecondaryButton onClick={handleGoToDashboard}>
               <ArrowLeft className="w-5 h-5 mr-2" />
-              Volver a Configuración
+              Ir al Dashboard
             </SecondaryButton>
           </ActionSection>
 
