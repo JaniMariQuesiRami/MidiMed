@@ -65,11 +65,19 @@ export const metadata: Metadata = {
     
     // Regional terms
     "software médico México",
+    "software médico Guatemala", 
     "sistema clínico Latinoamérica",
+    "sistema clínico Guatemala",
+    "software clínico Guatemala",
     "telemedicina",
+    "telemedicina Guatemala",
     
     // Brand
     "MidiMed",
+    "MidiMed tech", 
+    "MidiMed guatemala",
+    "MidiMed software",
+    "MidiMed Mexico",
   ],
   authors: [{ name: "MidiMed", url: "https://midimed.tech" }],
   creator: "MidiMed",
@@ -123,6 +131,7 @@ export const metadata: Metadata = {
     canonical: "https://midimed.tech",
     languages: {
       "es-MX": "https://midimed.tech",
+      "es-GT": "https://midimed.tech", 
       "es-ES": "https://midimed.tech",
       "es": "https://midimed.tech",
     },
@@ -152,6 +161,9 @@ export default function RootLayout({
         <meta name="geo.region" content="MX" />
         <meta name="geo.country" content="Mexico" />
         <meta name="geo.placename" content="México" />
+        <meta name="geo.region" content="GT" />
+        <meta name="geo.country" content="Guatemala" /> 
+        <meta name="geo.placename" content="Guatemala" />
         <meta name="category" content="Healthcare Software" />
         <meta name="coverage" content="Worldwide" />
         <meta name="distribution" content="Global" />
@@ -159,6 +171,7 @@ export default function RootLayout({
         <meta name="target" content="medical professionals, doctors, clinics, healthcare providers" />
         <link rel="canonical" href="https://midimed.tech" />
         <link rel="alternate" hrefLang="es-mx" href="https://midimed.tech" />
+        <link rel="alternate" hrefLang="es-gt" href="https://midimed.tech" />
         <link rel="alternate" hrefLang="es-es" href="https://midimed.tech" />
         <link rel="alternate" hrefLang="es" href="https://midimed.tech" />
         <link rel="alternate" hrefLang="x-default" href="https://midimed.tech" />
