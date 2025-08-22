@@ -1,6 +1,7 @@
 "use client";
 import tw from "tailwind-styled-components";
 import { CheckCircle2, Clock, Shield } from "lucide-react";
+import Image from "next/image";
 
 export default function WhyMidiMed() {
   return (
@@ -8,9 +9,25 @@ export default function WhyMidiMed() {
       <Inner>
         <Grid>
           <Media>
-            <MediaInner>
-              <PlaceholderText>Imagen / Mockup</PlaceholderText>
-            </MediaInner>
+            {/* Render theme-aware mockup directly without any container/frame */}
+            <Image
+              src="/whyMidiMedLight.png"
+              alt="Mockup de la plataforma MidiMed"
+              width={1024}
+              height={768}
+              className="w-full h-auto object-contain block dark:hidden"
+              sizes="(min-width: 768px) 50vw, 100vw"
+              priority
+            />
+            <Image
+              src="/whyMidiMedDark.png"
+              alt="Mockup de la plataforma MidiMed (modo oscuro)"
+              width={1024}
+              height={768}
+              className="w-full h-auto object-contain hidden dark:block"
+              sizes="(min-width: 768px) 50vw, 100vw"
+              priority
+            />
           </Media>
           <Content>
             <Eyebrow>¿Por qué utilizar MidiMed?</Eyebrow>
@@ -61,8 +78,6 @@ const Inner = tw.div`w-full mx-auto max-w-[1680px] px-3 sm:px-8 xl:px-14 2xl:px-
 const Grid = tw.div`grid items-center gap-8 md:gap-12 grid-cols-1 md:grid-cols-2`;
 
 const Media = tw.div``;
-const MediaInner = tw.div`relative aspect-[16/10] w-full rounded-2xl bg-gradient-to-br from-primary/15 via-primary/5 to-primary/0 ring-1 ring-primary/20 dark:from-primary/10 dark:via-primary/5 dark:to-transparent flex items-center justify-center`;
-const PlaceholderText = tw.div`text-sm font-medium text-slate-500 dark:text-slate-400`;
 
 const Content = tw.div`flex flex-col gap-5`;
 const Eyebrow = tw.span`text-highlight text-base sm:text-lg font-semibold tracking-wide uppercase`;
