@@ -2,21 +2,9 @@
 import tw from "tailwind-styled-components";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 
 export default function FinalCTA() {
-  const pathname = usePathname();
 
-  const handlePricingClick = () => {
-    if (pathname === '/') {
-      const pricingSection = document.getElementById('pricing');
-      if (pricingSection) {
-        pricingSection.scrollIntoView({ behavior: 'smooth' });
-      }
-    } else {
-      window.location.href = '/pricing';
-    }
-  }
   return (
     <Section>
       <Background>
@@ -34,14 +22,6 @@ export default function FinalCTA() {
                 className="bg-primary text-white hover:bg-primary/90 font-semibold px-8 py-3 text-lg shadow-lg"
               >
                 <Link href="/signup">Empieza gratis</Link>
-              </Button>
-              <Button
-                asChild
-                variant="outline"
-                size="lg"
-                className="border-primary text-primary hover:bg-primary hover:text-white dark:border-primary dark:text-primary dark:hover:bg-primary dark:hover:text-white font-medium px-8 py-3 text-lg transition-colors"
-              >
-                <button onClick={handlePricingClick}>Ver planes</button>
               </Button>
             </CTAGroup>
           </Content>

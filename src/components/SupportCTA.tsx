@@ -7,7 +7,7 @@ import { MessageCircle, Zap } from 'lucide-react';
 export default function SupportCTA() {
   return (
     <section className="w-full px-4 py-8 md:px-8 md:py-12">
-      <div className="bg-primary rounded-2xl md:rounded-2xl px-6 py-12 md:px-8 md:py-16 text-center text-white max-w-6xl mx-auto">
+  <div className="bg-primary dark:bg-[#0f2530] rounded-2xl md:rounded-2xl px-6 py-12 md:px-8 md:py-16 text-center text-white max-w-6xl mx-auto transition-colors ring-1 ring-primary/20 dark:ring-white/10">
         <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 leading-tight">
           ¿Tienes alguna duda o necesitas soporte?
         </h2>
