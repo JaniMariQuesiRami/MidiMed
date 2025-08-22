@@ -22,7 +22,6 @@ export async function sendMagicLink(email: string): Promise<void> {
     email: email.trim().toLowerCase(),
     redirectUrl: window.location.origin,
   }
-
   
   try {
     const res = await generateMagicSignInLink(payload)
