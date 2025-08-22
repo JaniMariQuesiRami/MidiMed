@@ -7,7 +7,15 @@ export type AnalyticsEvent =
   | 'Created Patient'
   | 'Created Appointment'
   | 'Clicked Hero Signup'
-  | 'Clicked Hero Secondary CTA';
+  | 'Clicked Hero Secondary CTA'
+  | 'Payment Success Page Visited'
+  | 'Payment Success - Go to Dashboard'
+  | 'Payment Failed Page Visited'
+  | 'Payment Failed - Retry Payment'
+  | 'Payment Failed - Go to Settings'
+  | 'Payment Cancelled Page Visited'
+  | 'Payment Cancelled - Retry Payment'
+  | 'Payment Cancelled - Go to Settings';
 
 export type AnalyticsEventProps = {
   userId?: string;
