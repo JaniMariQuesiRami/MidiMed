@@ -23,6 +23,7 @@ export async function sendMagicLink(email: string): Promise<void> {
     redirectUrl: window.location.origin,
   }
 
+  
   try {
     const res = await generateMagicSignInLink(payload)
     const link = res.data?.link
