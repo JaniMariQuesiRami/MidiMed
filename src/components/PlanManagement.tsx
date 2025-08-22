@@ -4,6 +4,7 @@ import { useState, useEffect, useContext } from 'react'
 import { UserContext } from '@/contexts/UserContext'
 import PlanPill from '@/components/PlanPill'
 import ContactUsModal from '@/components/ContactUsModal'
+import PaymentConfirmationModal from '@/components/PaymentConfirmationModal'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import tw from 'tailwind-styled-components'
 import { addDays, parseISO } from 'date-fns'
@@ -45,6 +46,8 @@ function formatDate(date: Date) {
 export default function PlanManagement() {
   const { tenant, user } = useContext(UserContext)
   const [contactModalOpen, setContactModalOpen] = useState(false)
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false)
+  const [selectedPlanForPayment, setSelectedPlanForPayment] = useState<string | null>(null)
   const [plans, setPlans] = useState<(PlanCatalog & { id: string })[]>([])
   const [loading, setLoading] = useState(true)
   const [processingPlan, setProcessingPlan] = useState<string | null>(null)
@@ -82,20 +85,30 @@ export default function PlanManagement() {
     }
   }
 
-  const handlePlanSelection = async (planId: string) => {
+  const handlePlanSelection = (planId: string) => {
     if (!user || !tenant) {
       toast.error('Error de autenticación')
       return
     }
 
-    setProcessingPlan(planId)
+    setSelectedPlanForPayment(planId)
+    setPaymentModalOpen(true)
+  }
+
+  const handlePaymentConfirmation = async () => {
+    if (!user || !tenant || !selectedPlanForPayment) {
+      toast.error('Error de autenticación')
+      return
+    }
+
+    setProcessingPlan(selectedPlanForPayment)
     
     try {
       const createInvoice = httpsCallable(functions, 'createMonthlyInvoice')
       const result = await createInvoice({
         userId: user.uid,
         tenantId: tenant.tenantId,
-        planCatalogId: planId
+        planCatalogId: selectedPlanForPayment
       })
 
       // Redirect to Recurrente checkout
@@ -107,6 +120,8 @@ export default function PlanManagement() {
       toast.error('Error al procesar el pago. Por favor intenta de nuevo.')
     } finally {
       setProcessingPlan(null)
+      setPaymentModalOpen(false)
+      setSelectedPlanForPayment(null)
     }
   }
 
@@ -439,6 +454,18 @@ export default function PlanManagement() {
         )}
       </Section>
 
+      <PaymentConfirmationModal
+        isOpen={paymentModalOpen}
+        onClose={() => {
+          setPaymentModalOpen(false)
+          setSelectedPlanForPayment(null)
+        }}
+        onConfirm={handlePaymentConfirmation}
+        email={tenant?.email || ''}
+        planName={selectedPlanForPayment ? getTranslatedPlanName(plans.find(p => p.id === selectedPlanForPayment)?.plan || 'BASIC') : ''}
+        isProcessing={!!processingPlan}
+      />
+
       <ContactUsModal open={contactModalOpen} onOpenChange={setContactModalOpen} />
     </Container>
   )
@@ -536,7 +563,7 @@ const FeatureText = tw.span<PlanCardTitleProps>`
 const PlanCardFooter = tw.div`pt-4 border-t border-border`
 
 const CurrentPlanButton = tw.button`
-  w-full py-3 px-4 bg-muted text-muted-foreground rounded-lg font-medium cursor-not-allowed
+  w-full h-12 py-3 px-4 bg-muted text-muted-foreground rounded-lg font-medium cursor-not-allowed
   flex items-center justify-center
 `
 
@@ -546,7 +573,7 @@ interface UpgradeButtonProps {
 }
 
 const UpgradeButton = tw.button<UpgradeButtonProps>`
-  relative w-full py-3 px-4 rounded-lg font-medium transition-colors
+  relative w-full h-12 py-3 px-4 rounded-lg font-medium transition-colors
   flex items-center justify-center
   ${(p) => p.$pro ? 'bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-600 hover:to-cyan-600 text-white' :
     p.$enterprise ? 'bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white' :
@@ -555,7 +582,7 @@ const UpgradeButton = tw.button<UpgradeButtonProps>`
 `
 
 const ContactButton = tw.button`
-  w-full py-3 px-4 border border-border text-foreground rounded-lg font-medium
+  w-full h-12 py-3 px-4 border border-border text-foreground rounded-lg font-medium
   hover:bg-muted transition-colors
 `
 

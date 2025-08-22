@@ -107,7 +107,8 @@ export default function PaymentSuccessContent() {
       userId: user?.uid,
       tenantId: tenant?.tenantId,
     })
-    router.push('/dashboard')
+    // Use window.location.href to trigger a full page refresh and reload tenant data
+    window.location.href = '/dashboard'
   }
 
   const renderContent = () => {
