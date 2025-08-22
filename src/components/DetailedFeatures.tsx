@@ -14,8 +14,14 @@ interface DetailedFeature {
   cta?: { label: string; href: string };
   media?: {
     type: "image" | "placeholder";
+    // Single image fallback
     src?: string;
+    // Optional light/dark variants
+    srcLight?: string;
+    srcDark?: string;
     alt?: string;
+  width?: number;
+  height?: number;
   };
 }
 
@@ -33,7 +39,14 @@ const FEATURES: DetailedFeature[] = [
     ],
     highlights: ["Automática", "Multicanal", "Sin huecos"],
     cta: { label: "Probar agenda", href: "/signup?feature=agenda" },
-    media: { type: "placeholder" },
+    media: {
+      type: "image",
+      srcLight: "/recordatorioLight.svg",
+      srcDark: "/recordatorioDark.svg",
+      alt: "Recordatorios automáticos a pacientes",
+      width: 1024,
+      height: 768,
+    },
   },
   {
     id: "expediente-unificado",
@@ -48,22 +61,36 @@ const FEATURES: DetailedFeature[] = [
     ],
     highlights: ["Unificado", "Buscable"],
     cta: { label: "Ver expedientes", href: "/signup?feature=expediente" },
-    media: { type: "placeholder" },
+    media: {
+      type: "image",
+      srcLight: "/expedienteLight.svg",
+      srcDark: "/expedienteDark.svg",
+      alt: "Expediente clínico MidiMed",
+      width: 1024,
+      height: 768,
+    },
   },
   {
-    id: "resumenes-ia",
-    kicker: "IA clínica",
-    title: "Resúmenes listos en segundos",
+    id: "agendamiento-avanzado",
+    kicker: "Agendamiento avanzado",
+    title: "Agendamiento fácil y sin errores",
     description:
-      "Genera formatos clínicos (SOAP, notas de evolución) y extrae diagnósticos y planes para que escribas menos y atiendas mejor.",
+      "Gestiona tus citas de manera eficiente con recordatorios automáticos, reprogramación asistida y bloques inteligentes para evitar huecos y ausencias.",
     points: [
-      "Resumen automático de consulta",
-      "Extracción de diagnósticos y planes",
-      "Edición rápida antes de guardar",
+      "Recordatorios automáticos por WhatsApp y correo",
+      "Reprogramación sencilla ante cancelaciones",
+      "Bloques inteligentes para optimizar la agenda",
     ],
-    highlights: ["Rápido", "Preciso"],
-    cta: { label: "Usar IA clínica", href: "/signup?feature=ia" },
-    media: { type: "placeholder" },
+    highlights: ["Automático", "Sin huecos"],
+    cta: { label: "Probar agendamiento", href: "/signup?feature=agenda" },
+    media: {
+      type: "image",
+      srcLight: "/agendaInteligenteLight.svg",
+      srcDark: "/agendaInteligenteDark.svg",
+      alt: "Agendamiento avanzado MidiMed",
+      width: 1531,
+      height: 580,
+    },
   },
   {
     id: "coordinacion-equipo",
@@ -78,7 +105,14 @@ const FEATURES: DetailedFeature[] = [
     ],
     highlights: ["Organizado", "Colaborativo"],
     cta: { label: "Organizar equipo", href: "/signup?feature=equipo" },
-    media: { type: "placeholder" },
+    media: {
+      type: "image",
+      srcLight: "/rolesLight.svg",
+      srcDark: "/rolesDark.svg",
+      alt: "Coordinación de equipo MidiMed",
+      width: 1024,
+      height: 768,
+    },
   },
   {
     id: "analitica-reportes",
@@ -93,7 +127,14 @@ const FEATURES: DetailedFeature[] = [
     ],
     highlights: ["Productividad", "Retención"],
     cta: { label: "Ver analítica", href: "/signup?feature=analitica" },
-    media: { type: "placeholder" },
+    media: {
+      type: "image",
+      srcLight: "/reporteLight.png",
+      srcDark: "/reporteDark.png",
+      alt: "Analitica y reportes",
+      width: 1024,
+      height: 768,
+    },
   },
 ];
 
@@ -180,12 +221,66 @@ const CTAWrap = tw.div`pt-4`;
 
 /* ========= Media ========= */
 function Media({ feature }: { feature: DetailedFeature }) {
-  if (feature.media?.type === "image" && feature.media.src) {
-    return (
-      <MediaFrame>
-        <Image src={feature.media.src} alt={feature.media.alt || feature.title} fill className="object-cover" />
-      </MediaFrame>
-    );
+  const m = feature.media;
+  if (m?.type === "image") {
+    if (m.srcLight || m.srcDark) {
+  return (
+    <div>
+          {m.srcLight && (
+            <Image
+              src={m.srcLight}
+              alt={m.alt || feature.title}
+      width={m.width ?? 1531}
+      height={m.height ?? 580}
+              sizes="(min-width: 1024px) 640px, 100vw"
+              className="w-full h-auto dark:hidden"
+            />
+          )}
+          {m.srcDark && (
+            <Image
+              src={m.srcDark}
+              alt={m.alt || feature.title}
+      width={m.width ?? 1531}
+      height={m.height ?? 580}
+              sizes="(min-width: 1024px) 640px, 100vw"
+              className="w-full h-auto hidden dark:block"
+            />
+          )}
+          {!m.srcLight && m.src && (
+            <Image
+              src={m.src}
+              alt={m.alt || feature.title}
+              width={m.width ?? 1531}
+              height={m.height ?? 580}
+              sizes="(min-width: 1024px) 640px, 100vw"
+              className="w-full h-auto dark:hidden"
+            />
+          )}
+          {!m.srcDark && m.src && (
+            <Image
+              src={m.src}
+              alt={m.alt || feature.title}
+              width={m.width ?? 1531}
+              height={m.height ?? 580}
+              sizes="(min-width: 1024px) 640px, 100vw"
+              className="w-full h-auto hidden dark:block"
+            />
+          )}
+        </div>
+      );
+    }
+    if (m.src) {
+      return (
+        <Image
+          src={m.src}
+          alt={m.alt || feature.title}
+          width={m.width ?? 1531}
+          height={m.height ?? 580}
+          sizes="(min-width: 1024px) 640px, 100vw"
+          className="w-full h-auto"
+        />
+      );
+    }
   }
   return (
     <MediaPlaceholder>
@@ -194,6 +289,5 @@ function Media({ feature }: { feature: DetailedFeature }) {
   );
 }
 
-const MediaFrame = tw.div`relative aspect-[16/10] w-full overflow-hidden rounded-2xl ring-1 ring-slate-200/60 dark:ring-slate-700/50`;
-const MediaPlaceholder = tw.div`relative aspect-[16/10] w-full rounded-2xl bg-gradient-to-br from-primary/15 via-primary/5 to-primary/0 ring-1 ring-primary/20 dark:from-primary/10 dark:via-primary/5 dark:to-transparent flex items-center justify-center`;
+const MediaPlaceholder = tw.div`relative w-full rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent ring-1 ring-primary/20 dark:from-primary/10 dark:via-primary/5 dark:to-transparent flex items-center justify-center py-12`;
 const PlaceholderText = tw.div`text-sm font-medium text-slate-500 dark:text-slate-400`;
