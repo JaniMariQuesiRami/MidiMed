@@ -83,7 +83,7 @@ export default function PricingSection({ id = "pricing" }: { id?: string }) {
               </Feature>
               <Feature>
                 <Check className="w-4 h-4 text-green-600" />
-                Hasta 50 pacientes
+                Hasta 20 pacientes
               </Feature>
               <Feature>
                 <Check className="w-4 h-4 text-green-600" />
@@ -130,7 +130,7 @@ export default function PricingSection({ id = "pricing" }: { id?: string }) {
               </Feature>
               <Feature>
                 <Check className="w-4 h-4 text-green-600" />
-                Hasta 200 pacientes
+                Hasta 100 pacientes
               </Feature>
               <Feature>
                 <Check className="w-4 h-4 text-green-600" />

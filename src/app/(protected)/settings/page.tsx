@@ -1,13 +1,14 @@
 "use client"
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import OrganizationSettingsForm from '@/components/OrganizationSettingsForm'
 import TeamSettings from '@/components/TeamSettings'
 import ExtraFieldsSettings from '@/components/ExtraFieldsSettings'
-import PlanDetailsPanel from '@/components/PlanDetailsPanel'
+import PlanManagement from '@/components/PlanManagement'
+import LoadingSpinner from '@/components/LoadingSpinner'
 import tw from 'tailwind-styled-components'
 
-export default function SettingsPage() {
+function SettingsContent() {
   const searchParams = useSearchParams()
   const [tab, setTab] = useState<'org' | 'team' | 'forms' | 'plan'>('org')
 
@@ -37,8 +38,20 @@ export default function SettingsPage() {
       {tab === 'org' && <OrganizationSettingsForm />}
       {tab === 'team' && <TeamSettings />}
       {tab === 'forms' && <ExtraFieldsSettings />}
-      {tab === 'plan' && <PlanDetailsPanel />}
+      {tab === 'plan' && <PlanManagement />}
     </Wrapper>
+  )
+}
+
+export default function SettingsPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center py-12">
+        <LoadingSpinner />
+      </div>
+    }>
+      <SettingsContent />
+    </Suspense>
   )
 }
 

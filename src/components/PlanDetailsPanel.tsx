@@ -18,7 +18,7 @@ function formatDate(date: Date) {
 export default function PlanDetailsPanel() {
   const { tenant } = useContext(UserContext)
   const [open, setOpen] = useState(false)
-  if (!tenant) return null
+  if (!tenant?.billing) return null
 
   const { billing } = tenant
   const trialStart = billing.trialStartAt ? parseISO(billing.trialStartAt) : null
