@@ -3,12 +3,13 @@
 import { Appointment } from '@/types/db'
 import { format } from 'date-fns'
 import tw from 'tailwind-styled-components'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { updateAppointment } from '@/db/appointments'
 import { toast } from 'sonner'
-import { CalendarDays, Clock, FileText, User, X, AlertCircle, CheckCircle, Calendar, Sparkles } from 'lucide-react'
+import { CalendarDays, Clock, FileText, User, X, AlertCircle, CheckCircle, Calendar, Sparkles, Download } from 'lucide-react'
 import CreateAppointmentModal from '@/components/CreateAppointmentModal'
+import { useAppointmentReport } from '@/hooks/useAppointmentReport'
 
 
 export default function AppointmentDetailsPopup({
@@ -28,6 +29,36 @@ export default function AppointmentDetailsPopup({
 }) {
   const [editOpen, setEditOpen] = useState(false)
   const [cancelLoading, setCancelLoading] = useState(false)
+  const [uncancelLoading, setUncancelLoading] = useState(false)
+  const { getReportForAppointment } = useAppointmentReport()
+  const [reportUrl, setReportUrl] = useState<string | null>(null)
+  const [reportLoading, setReportLoading] = useState(false)
+
+  useEffect(() => {
+    if (appointment?.status === 'completed') {
+      setReportLoading(true)
+      getReportForAppointment(appointment)
+        .then((reportData) => {
+          setReportUrl(reportData.downloadUrl)
+        })
+        .catch((error) => {
+          console.error('Error fetching report:', error)
+          setReportUrl(null)
+        })
+        .finally(() => {
+          setReportLoading(false)
+        })
+    }
+  }, [appointment, getReportForAppointment])
+
+  const handleDownloadRecipe = () => {
+    if (reportUrl) {
+      // Open in new tab so user doesn't lose current context
+      window.open(reportUrl, '_blank')
+    } else {
+      toast.error('No hay receta disponible para descargar')
+    }
+  }
 
   if (!appointment) return null
 
@@ -64,8 +95,13 @@ export default function AppointmentDetailsPopup({
     setCancelLoading(true)
     try {
       await updateAppointment(appointment.appointmentId, {
-        ...appointment,
+        patientId: appointment.patientId,
+        providerId: appointment.providerId,
+        scheduledStart: appointment.scheduledStart,
+        scheduledEnd: appointment.scheduledEnd,
         status: 'cancelled',
+        reason: appointment.reason,
+        medicalRecordId: appointment.medicalRecordId ?? null,
       })
       onUpdated?.({ ...appointment, status: 'cancelled' })
       toast.success('Cita cancelada')
@@ -74,6 +110,28 @@ export default function AppointmentDetailsPopup({
       toast.error('No se pudo cancelar')
     } finally {
       setCancelLoading(false)
+    }
+  }
+
+  const uncancelAppt = async () => {
+    setUncancelLoading(true)
+    try {
+      await updateAppointment(appointment.appointmentId, {
+        patientId: appointment.patientId,
+        providerId: appointment.providerId,
+        scheduledStart: appointment.scheduledStart,
+        scheduledEnd: appointment.scheduledEnd,
+        status: 'scheduled',
+        reason: appointment.reason,
+        medicalRecordId: appointment.medicalRecordId ?? null,
+      })
+      onUpdated?.({ ...appointment, status: 'scheduled' })
+      toast.success('Cita reactivada')
+      onClose()
+    } catch {
+      toast.error('No se pudo reactivar')
+    } finally {
+      setUncancelLoading(false)
     }
   }
 
@@ -168,6 +226,19 @@ export default function AppointmentDetailsPopup({
               Ver registro médico
             </Button>
           )}
+          {appointment.status === 'completed' && (reportUrl || reportLoading) && (
+            <Button 
+              size="sm" 
+              variant="outline"
+              className="w-full sm:w-auto flex items-center gap-2"
+              onClick={handleDownloadRecipe}
+              disabled={reportLoading || !reportUrl}
+              title={reportUrl ? 'Abrir receta en nueva pestaña' : 'Cargando receta...'}
+            >
+              <Download className="w-4 h-4" />
+              {reportLoading ? 'Cargando...' : 'Descargar receta'}
+            </Button>
+          )}
           <div className="flex gap-2">
             <Button 
               size="sm" 
@@ -186,6 +257,16 @@ export default function AppointmentDetailsPopup({
             >
               {cancelLoading ? 'Cancelando...' : 'Cancelar'}
             </Button>
+            {appointment.status === 'cancelled' && (
+              <Button
+                size="sm"
+                className="flex-1 sm:flex-none"
+                onClick={uncancelAppt}
+                disabled={uncancelLoading}
+              >
+                {uncancelLoading ? 'Reactivando...' : 'Reactivar'}
+              </Button>
+            )}
           </div>
         </div>
         <CreateAppointmentModal

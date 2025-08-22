@@ -9,6 +9,7 @@ import MobileUserSettings from '@/components/MobileUserSettings'
 import { useTheme } from '@/contexts/ThemeContext'
 import { Moon, Sun } from 'lucide-react'
 import tw from 'tailwind-styled-components'
+import GlobalBillingBanner from '@/components/GlobalBillingBanner'
 
 export default function ProtectedLayout({ children }: { children: ReactNode }) {
   const { theme, toggleTheme } = useTheme()
@@ -33,6 +34,7 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
             <MobileUserSettings />
           </ActionsWrapper>
         </MobileHeader>
+        <GlobalBillingBanner />
         {children}
       </ContentWrapper>
       <BottomTabsWrapper>

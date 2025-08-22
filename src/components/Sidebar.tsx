@@ -51,7 +51,8 @@ export default function Sidebar({ collapsed = false, onCollapsedChange }: Sideba
       tenant.tenantId,
       { archived: false, limit: 50 },
       (notifications) => {
-        const unread = notifications.filter((n) => !n.isRead).length
+        // Only count notifications that are unread and explicitly not archived
+        const unread = notifications.filter((n) => !n.isRead && n.archived !== true).length
         setUnreadCount(unread)
       }
     )
@@ -115,7 +116,7 @@ const Wrapper = tw.div<{ $collapsed: boolean }>`
   relative h-screen flex flex-col justify-between transition-all
   ${({ $collapsed }) => ($collapsed ? 'w-16 p-2' : 'w-64 p-3')}
   border-r border-sidebar-border bg-sidebar text-sidebar-foreground
-  overflow-hidden
+  ${({ $collapsed }) => ($collapsed ? '' : 'overflow-hidden')}
 `
 
 const TopSection = tw.div`flex flex-col gap-8`

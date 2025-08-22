@@ -1,6 +1,10 @@
 'use client'
 import { useEffect, useState, useCallback, useContext } from 'react'
 import { Calendar, View, dateFnsLocalizer } from 'react-big-calendar'
+import type { SlotInfo, EventProps as RBCEventProps, CalendarProps } from 'react-big-calendar'
+import type { EventInteractionArgs } from 'react-big-calendar/lib/addons/dragAndDrop'
+import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop'
+import 'react-big-calendar/lib/addons/dragAndDrop/styles.css'
 import {
   format,
   parse,
@@ -18,16 +22,29 @@ import 'react-big-calendar/lib/css/react-big-calendar.css'
 import '@/app/(protected)/dashboard/rbc-modern.css'
 import tw from 'tailwind-styled-components'
 import { getPatients } from '@/db/patients'
-import { getAppointmentsInRange } from '@/db/appointments'
+import { getAppointmentsInRange, updateAppointment } from '@/db/appointments'
 import { UserContext } from '@/contexts/UserContext'
 import CreateAppointmentModal from '@/components/CreateAppointmentModal'
 import AppointmentDetailsPopup from '@/components/AppointmentDetailsPopup'
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
-import PatientAutocomplete from '@/components/PatientAutocomplete'
+import MultiSelectAutocomplete from '@/components/MultiSelectAutocomplete'
 import MobileHomeDashboard from '@/components/MobileHomeDashboard'
-import type { Patient, Appointment } from '@/types/db'
+import type { Patient, Appointment, User } from '@/types/db'
+import { getUsersByTenant } from '@/db/users'
 import { toast } from 'sonner'
 import LoadingSpinner from '@/components/LoadingSpinner'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { DndProvider } from 'react-dnd'
+import { HTML5Backend } from 'react-dnd-html5-backend'
+
+// Calendar event type used across this file
+type CalendarEvent = {
+  start: Date
+  end: Date
+  title: string
+  resource: Appointment
+}
 
 const locales = { es }
 const localizer = dateFnsLocalizer({
@@ -51,19 +68,22 @@ export default function DashboardCalendar() {
   const [view, setView] = useState<View | null>(null)
   const [date, setDate] = useState(new Date())
   const [patients, setPatients] = useState<Patient[]>([])
-  const [patientFilter, setPatientFilter] = useState('all')
-  type CalendarEvent = {
-    start: Date
-    end: Date
-    title: string
-    resource: Appointment
-  }
+  const [doctors, setDoctors] = useState<User[]>([])
+  const [patientFilter, setPatientFilter] = useState<string[]>([])
+  const [doctorFilter, setDoctorFilter] = useState<string[]>([])
   const [events, setEvents] = useState<CalendarEvent[]>([])
   const [open, setOpen] = useState(false)
   const [slotDate, setSlotDate] = useState<Date | null>(null)
   const [slotStart, setSlotStart] = useState<Date | null>(null)
   const [slotEnd, setSlotEnd] = useState<Date | null>(null)
   const [selected, setSelected] = useState<{ appt: Appointment; name: string } | null>(null)
+  const [pendingChange, setPendingChange] = useState<{
+    type: 'move' | 'resize'
+    event: CalendarEvent
+    start: Date
+    end: Date
+  } | null>(null)
+  const [savingChange, setSavingChange] = useState(false)
 
   const navigate = (step: number) => {
     if (view === 'month') setDate((d) => addMonths(d, step))
@@ -88,12 +108,12 @@ export default function DashboardCalendar() {
     const nameMap = new Map(
       patients.map((p) => [p.patientId, `${p.firstName} ${p.lastName}`]),
     )
-    const filterId = patientFilter === "all" ? undefined : patientFilter
     const list = await getAppointmentsInRange(
       start,
       end,
-      filterId,
+      patientFilter,
       tenant.tenantId,
+      doctorFilter,
     )
     setEvents(
       list.map((a) => ({
@@ -103,7 +123,7 @@ export default function DashboardCalendar() {
         resource: a,
       }))
     )
-  }, [view, patients, tenant, date, patientFilter])
+  }, [view, patients, tenant, date, patientFilter, doctorFilter])
 
   useEffect(() => {
     const isMobile = window.innerWidth < 640
@@ -112,7 +132,16 @@ export default function DashboardCalendar() {
 
   useEffect(() => {
     if (!tenant) return
-    getPatients(tenant.tenantId).then(setPatients).catch(() => { })
+    Promise.all([
+      getPatients(tenant.tenantId),
+      getUsersByTenant(tenant.tenantId),
+    ])
+      .then(([patientsData, usersData]) => {
+        setPatients(patientsData)
+        const docs = usersData.filter((u) => u.role === 'admin' || u.role === 'provider')
+        setDoctors(docs)
+      })
+      .catch(() => { })
   }, [tenant])
 
   useEffect(() => {
@@ -155,14 +184,21 @@ export default function DashboardCalendar() {
               onClick={() => setDate(new Date())}
               type="button"
             >
-              Ir a hoy
+              Hoy
             </button>
           </div>
           <div className="flex items-center gap-2 ml-auto">
-            <PatientAutocomplete
-              patients={patients}
-              value={patientFilter}
-              onChange={(v) => setPatientFilter(v || 'all')}
+            <MultiSelectAutocomplete
+              items={patients.map((p) => ({ id: p.patientId, label: `${p.firstName} ${p.lastName}` }))}
+              selected={patientFilter}
+              onChange={setPatientFilter}
+              placeholder="Filtrar pacientes..."
+            />
+            <MultiSelectAutocomplete
+              items={doctors.map((d) => ({ id: d.uid, label: d.displayName }))}
+              selected={doctorFilter}
+              onChange={setDoctorFilter}
+              placeholder="Filtrar doctores..."
             />
             <button
               className="bg-primary text-white px-3 py-1 rounded flex items-center gap-1 cursor-pointer"
@@ -190,7 +226,8 @@ export default function DashboardCalendar() {
         </Header>
         <div className="overflow-x-auto w-full">
           <div className="md:min-w-[700px] md:max-w-auto max-w-[100vw]">
-            <ModernCalendar
+            <DndProvider backend={HTML5Backend}>
+            <DnDCalendar
               culture="es"
               localizer={localizer}
               events={events}
@@ -199,20 +236,50 @@ export default function DashboardCalendar() {
               date={date}
               onNavigate={setDate}
               onView={setView}
-              onSelectEvent={(event: object) => {
-                const e = event as CalendarEvent
-                setSelected({ appt: e.resource, name: e.title })
+              resizable
+              className="bg-white dark:bg-background rounded-2xl shadow-sm p-2"
+              onEventDrop={({ event, start, end }: EventInteractionArgs<CalendarEvent>) => {
+                const startDate = start instanceof Date ? start : new Date(start)
+                const endDate = end instanceof Date ? end : new Date(end)
+                setPendingChange({ type: 'move', event, start: startDate, end: endDate })
               }}
-              onSelectSlot={(slot) => {
-                setSlotDate(slot.start)
-                setSlotStart(view === 'month' ? null : slot.start)
-                setSlotEnd(view === 'month' ? null : slot.end)
+              onEventResize={({ event, start, end }: EventInteractionArgs<CalendarEvent>) => {
+                const startDate = start instanceof Date ? start : new Date(start)
+                const endDate = end instanceof Date ? end : new Date(end)
+                setPendingChange({ type: 'resize', event, start: startDate, end: endDate })
+              }}
+              onSelectEvent={(event: CalendarEvent) => {
+                setSelected({ appt: event.resource, name: event.title })
+              }}
+              onSelectSlot={(slot: SlotInfo) => {
+                const startDate = slot.start instanceof Date ? slot.start : new Date(slot.start)
+                const endDate = slot.end instanceof Date ? slot.end : new Date(slot.end)
+                setSlotDate(startDate)
+                setSlotStart(view === 'month' ? null : startDate)
+                setSlotEnd(view === 'month' ? null : endDate)
                 setOpen(true)
               }}
               style={{ height: 'calc(100vh - 150px)' }}
               selectable
+              draggableAccessor={() => true}
+              resizableAccessor={() => true}
+              eventPropGetter={(event: CalendarEvent) => {
+                const e = event
+                const color = doctors.find((d) => d.uid === e.resource.providerId)?.color || '#3abdd4'
+                const isCancelled = e.resource.status === 'cancelled'
+                return {
+                  style: {
+                    background: color,
+                    borderRadius: '4px',
+                    color: 'white',
+                    border: 'none',
+                    opacity: isCancelled ? 0.5 : 1,
+                    filter: isCancelled ? 'grayscale(20%)' : undefined
+                  }
+                }
+              }}
               messages={{
-                showMore: (total) => `+${total} más`,
+                showMore: (total: number) => `+${total} más`,
                 previous: 'Anterior',
                 next: 'Siguiente',
                 today: 'Hoy',
@@ -230,9 +297,9 @@ export default function DashboardCalendar() {
                 noEventsInRange: 'No hay eventos en este rango de fechas.'
               }}
               components={{
-                toolbar: () => null,
-                event: (props) => {
-                  const event = props.event as CalendarEvent;
+    toolbar: () => null,
+  event: (props: RBCEventProps<CalendarEvent>) => {
+      const event = props.event;
                   // Only show patient name (no hour) in week view
                   // event.title is "HH:mm - Nombre Paciente" or just "Nombre Paciente"
                   let name = event.title;
@@ -241,14 +308,66 @@ export default function DashboardCalendar() {
                     name = name.replace(/^\d{2}:\d{2} - /, '');
                   }
                   return (
-                    <div className="font-semibold text-white text-sm px-1 truncate" style={{ lineHeight: '1.2' }}>{name}</div>
+          <div className={`font-semibold text-white text-sm px-1 truncate ${event.resource.status === 'cancelled' ? 'line-through' : ''}`} style={{ lineHeight: '1.2' }}>{name}</div>
                   );
                 }
               }}
             />
+            </DndProvider>
           </div>
         </div>
       </DesktopWrapper>
+
+      {/* Confirm move/resize dialog */}
+      <Dialog open={!!pendingChange} onOpenChange={(v) => !v && setPendingChange(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{pendingChange?.type === 'resize' ? 'Confirmar duración' : 'Confirmar reprogramación'}</DialogTitle>
+            <DialogDescription asChild>
+              <div className="space-y-1">
+                {pendingChange && (
+                  <>
+                    <p><span className="font-medium">Antes:</span> {format(pendingChange.event.start, "EEE d MMM yyyy HH:mm", { locale: es })} - {format(pendingChange.event.end, "HH:mm", { locale: es })}</p>
+                    <p><span className="font-medium">Después:</span> {format(pendingChange.start, "EEE d MMM yyyy HH:mm", { locale: es })} - {format(pendingChange.end, "HH:mm", { locale: es })}</p>
+                  </>
+                )}
+              </div>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setPendingChange(null)} disabled={savingChange}>Cancelar</Button>
+            <Button
+              onClick={async () => {
+                if (!pendingChange) return
+                try {
+                  setSavingChange(true)
+                  const appt = pendingChange.event.resource
+                  await updateAppointment(appt.appointmentId, {
+                    patientId: appt.patientId,
+                    providerId: appt.providerId,
+                    scheduledStart: pendingChange.start.toISOString(),
+                    scheduledEnd: pendingChange.end.toISOString(),
+                    status: appt.status,
+                    reason: appt.reason,
+                    medicalRecordId: appt.medicalRecordId ?? null,
+                  })
+                  setPendingChange(null)
+                  await loadEvents()
+                  toast.success(pendingChange.type === 'resize' ? 'Cita actualizada' : 'Cita reprogramada')
+                } catch (err) {
+                  console.error('Error confirming change', err)
+                  toast.error('No se pudo guardar cambios')
+                } finally {
+                  setSavingChange(false)
+                }
+              }}
+              disabled={savingChange}
+            >
+              {savingChange ? 'Guardando…' : 'Confirmar'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <CreateAppointmentModal
         open={open}
@@ -262,7 +381,7 @@ export default function DashboardCalendar() {
         initialDate={slotDate}
         initialStart={slotStart}
         initialEnd={slotEnd}
-        patientId={patientFilter !== 'all' ? patientFilter : undefined}
+        patientId={patientFilter.length === 1 ? patientFilter[0] : undefined}
       />
       <AppointmentDetailsPopup
         appointment={selected?.appt || null}
@@ -275,9 +394,13 @@ export default function DashboardCalendar() {
 }
 
 // Styled components
-const ModernCalendar = tw(Calendar)`bg-white dark:bg-background rounded-2xl shadow-sm p-2`;
+// Enable drag & drop by wrapping Calendar with proper generics
+type RBCalendarComp = React.ComponentType<CalendarProps<CalendarEvent, object>>
+const DnDCalendar = withDragAndDrop<CalendarEvent, object>(
+  Calendar as unknown as RBCalendarComp
+)
 const DesktopWrapper = tw.div`hidden md:flex md:flex-col gap-4 px-2 sm:px-4 pt-4`
-const Header = tw.div`flex flex-col sm:flex-row sm:items-center sm:justify-between sticky top-0 z-0 bg-white dark:bg-background px-2 sm:px-4 py-2 gap-2`
+const Header = tw.div`flex flex-col sm:flex-row sm:items-center sm:justify-between sticky top-0 z-10 bg-white dark:bg-background px-2 sm:px-4 py-2 gap-2`
 const DateTitle = tw.h1`text-lg font-semibold w-full sm:w-auto`
 const ViewSwitcher = tw.div`flex gap-2 sm:flex`
 const SwitchButton = tw.button<{ $active: boolean }>`

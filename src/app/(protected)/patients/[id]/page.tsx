@@ -11,6 +11,7 @@ import { getAppointmentsInRange, deleteAppointment } from '@/db/appointments'
 import type { Patient, MedicalRecord, Appointment, AppointmentStatus, PatientFile } from '@/types/db'
 import CreateAppointmentModal from '@/components/CreateAppointmentModal'
 import MedicalRecordFormModal from '@/components/MedicalRecordFormModal'
+import MedicalRecordDetailsPopup from '@/components/MedicalRecordDetailsPopup'
 import UploadFileModal from '@/components/UploadFileModal'
 import tw from 'tailwind-styled-components'
 import LoadingSpinner from '@/components/LoadingSpinner'
@@ -33,9 +34,11 @@ export default function PatientDetailsPage() {
   const [editingAppt, setEditingAppt] = useState<Appointment | null>(null)
   const [openRecord, setOpenRecord] = useState(false)
   const [editingRecord, setEditingRecord] = useState<MedicalRecord | null>(null)
+  const [viewRecord, setViewRecord] = useState<MedicalRecord | null>(null)
   const [openEdit, setOpenEdit] = useState(false)
   const [openUpload, setOpenUpload] = useState(false)
   const [completingAppt, setCompletingAppt] = useState<Appointment | null>(null)
+  const [loadingReports, setLoadingReports] = useState<Set<string>>(new Set())
 
   const translateStatus = (status: AppointmentStatus) => {
     switch (status) {
@@ -44,6 +47,19 @@ export default function PatientDetailsPage() {
       case 'cancelled': return 'Cancelada'
       default: return status
     }
+  }
+
+  const startReportGeneration = (appointmentId: string) => {
+    setLoadingReports(prev => new Set(prev).add(appointmentId))
+    
+    // After 20 seconds, remove from loading state
+    setTimeout(() => {
+      setLoadingReports(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(appointmentId)
+        return newSet
+      })
+    }, 20000) // 20 seconds
   }
 
   useEffect(() => {
@@ -94,6 +110,7 @@ export default function PatientDetailsPage() {
               title=""
               appointments={future}
               records={records}
+              loadingReports={loadingReports}
               onEdit={(a) => { setEditingAppt(a); setOpenAppt(true); }}
               onDelete={async (a) => {
                 if (confirm('Eliminar cita?')) {
@@ -102,7 +119,7 @@ export default function PatientDetailsPage() {
                 }
               }}
               onComplete={(a) => { setEditingRecord(null); setCompletingAppt(a); setOpenRecord(true); }}
-              onViewRecord={(r) => { setEditingRecord(r); setOpenRecord(true); }}
+              onViewRecord={(r) => { setViewRecord(r); }}
               translateStatus={translateStatus}
             />
           </Section>
@@ -112,6 +129,7 @@ export default function PatientDetailsPage() {
               title=""
               appointments={past}
               records={records}
+              loadingReports={loadingReports}
               onEdit={(a) => { setEditingAppt(a); setOpenAppt(true); }}
               onDelete={async (a) => {
                 if (confirm('Eliminar cita?')) {
@@ -120,7 +138,7 @@ export default function PatientDetailsPage() {
                 }
               }}
               onComplete={(a) => { setEditingRecord(null); setCompletingAppt(a); setOpenRecord(true); }}
-              onViewRecord={(r) => { setEditingRecord(r); setOpenRecord(true); }}
+              onViewRecord={(r) => { setViewRecord(r); }}
               translateStatus={translateStatus}
             />
           </Section>
@@ -199,11 +217,22 @@ export default function PatientDetailsPage() {
                   : p,
               ),
             )
+            // Start the report generation loading state
+            startReportGeneration(completingAppt.appointmentId)
           }
         }}
         onUpdated={(r) =>
           setRecords((prev) => prev.map((p) => (p.recordId === r.recordId ? r : p)))
         }
+      />
+      <MedicalRecordDetailsPopup
+        record={viewRecord}
+        onClose={() => setViewRecord(null)}
+        onEdit={(r) => {
+          setViewRecord(null)
+          setEditingRecord(r)
+          setOpenRecord(true)
+        }}
       />
       <EditPatientModal
         open={openEdit}

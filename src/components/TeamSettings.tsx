@@ -1,6 +1,6 @@
 'use client'
 import { useContext, useEffect, useState } from 'react'
-import { getUsersByTenant, getInvitesByTenant } from '@/db/users'
+import { getUsersByTenant, getInvitesByTenant, updateUser } from '@/db/users'
 import { UserContext } from '@/contexts/UserContext'
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
@@ -78,14 +78,15 @@ export default function TeamSettings() {
                 <TableRow>
                   <TableHead>Email</TableHead>
                   <TableHead>Rol</TableHead>
+                  <TableHead>Color</TableHead>
                   <TableHead>Creado</TableHead>
                   <TableHead>Último acceso</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {users.length === 0 ? (
+        {users.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="py-4 text-center">
+          <TableCell colSpan={5} className="py-4 text-center">
                       Sin usuarios
                     </TableCell>
                   </TableRow>
@@ -95,6 +96,36 @@ export default function TeamSettings() {
                       <TableCell>{u.email}</TableCell>
                       <TableCell>
                         <RoleTag $role={u.role}>{u.role}</RoleTag>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center">
+                          <input
+                            id={`color-${u.uid}`}
+                            type="color"
+                            defaultValue={u.color || '#3b82f6'}
+                            className="sr-only"
+                            onChange={async (e) => {
+                              const newColor = e.target.value
+                              try {
+                                await updateUser(u.uid, { color: newColor })
+                                setUsers((prev) =>
+                                  prev.map((us) =>
+                                    us.uid === u.uid ? { ...us, color: newColor } : us,
+                                  ),
+                                )
+                              } catch {
+                                toast.error('No se pudo actualizar color')
+                              }
+                            }}
+                          />
+                          <button
+                            type="button"
+                            aria-label="Cambiar color"
+                            className="h-8 w-8 rounded-lg border-0 outline-none ring-0 cursor-pointer hover:opacity-90"
+                            style={{ backgroundColor: u.color || '#3b82f6' }}
+                            onClick={() => document.getElementById(`color-${u.uid}`)?.click()}
+                          />
+                        </div>
                       </TableCell>
                       <TableCell>{format(new Date(u.createdAt), 'dd/MM/yyyy')}</TableCell>
                       <TableCell>

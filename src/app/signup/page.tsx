@@ -1,12 +1,13 @@
 "use client"
 
-import { useEffect } from 'react'
-import AuthForm from '@/components/AuthForm'
+import { useEffect, Suspense } from 'react'
+import MultiStepSignupForm from '@/components/MultiStepSignupForm'
 import AuthScreenLayout from '@/components/AuthScreenLayout'
 import { useUser } from '@/contexts/UserContext'
 import { trackEvent } from '@/utils/trackEvent'
+import LoadingSpinner from '@/components/LoadingSpinner'
 
-export default function SignupPage() {
+function SignupContent() {
   const { user, tenant } = useUser()
 
   useEffect(() => {
@@ -16,9 +17,19 @@ export default function SignupPage() {
     })
   }, [user?.uid, tenant?.tenantId])
 
+  return <MultiStepSignupForm />
+}
+
+export default function SignupPage() {
   return (
     <AuthScreenLayout>
-      <AuthForm mode="signup" />
+      <Suspense fallback={
+        <div className="flex items-center justify-center py-12">
+          <LoadingSpinner />
+        </div>
+      }>
+        <SignupContent />
+      </Suspense>
     </AuthScreenLayout>
   )
 }

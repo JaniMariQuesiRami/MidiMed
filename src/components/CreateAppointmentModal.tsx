@@ -29,6 +29,7 @@ import {
   SelectContent,
   SelectValue,
 } from '@/components/ui/select'
+import SingleSelectAutocomplete from '@/components/SingleSelectAutocomplete'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -85,7 +86,7 @@ export default function CreateAppointmentModal({
     resolver: zodResolver(schema),
     defaultValues: {
       patientId: appointment?.patientId ?? patientId ?? '',
-      providerId: appointment?.providerId ?? user?.uid ?? '',
+      providerId: appointment?.providerId ?? (user?.role === 'provider' ? user.uid : ''),
       year: currentYear,
       month: '',
       day: '',
@@ -114,7 +115,7 @@ export default function CreateAppointmentModal({
         : ''
     form.reset({
       patientId: appointment?.patientId ?? patientId ?? '',
-      providerId: appointment?.providerId ?? user?.uid ?? '',
+      providerId: appointment?.providerId ?? (user?.role === 'provider' ? user.uid : ''),
       year,
       month,
       day,
@@ -136,8 +137,10 @@ export default function CreateAppointmentModal({
   useEffect(() => {
     form.setValue('patientId', appointment?.patientId ?? patientId ?? '')
     // Si no hay appointment (nueva cita) y hay usuario, setear el providerId al usuario actual
-    if (!appointment && user?.uid) {
+    if (!appointment && user?.uid && user.role === 'provider') {
       form.setValue('providerId', user.uid)
+    } else if (!appointment && user?.role !== 'provider') {
+      form.setValue('providerId', '')
     }
   }, [patientId, appointment, form, user])
 
@@ -149,7 +152,8 @@ export default function CreateAppointmentModal({
     ])
       .then(([patientsData, usersData]) => {
         setPatients(patientsData)
-        setUsers(usersData)
+        const allowed = usersData.filter((u) => u.role === 'admin' || u.role === 'provider')
+        setUsers(allowed)
       })
       .catch(() => toast.error('Error cargando datos'))
   }, [open, tenant])
@@ -372,18 +376,12 @@ export default function CreateAppointmentModal({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Paciente</FormLabel>
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccione" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {patients.map((p) => (
-                        <SelectItem key={p.patientId} value={p.patientId}>
-                          {p.firstName} {p.lastName}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <SingleSelectAutocomplete
+                    items={patients.map((p) => ({ id: p.patientId, label: `${p.firstName} ${p.lastName}` }))}
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder="Seleccione paciente"
+                  />
                   <FormMessage />
                 </FormItem>
               )}
@@ -394,18 +392,12 @@ export default function CreateAppointmentModal({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Doctor</FormLabel>
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccione un doctor" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {users.map((u) => (
-                        <SelectItem key={u.uid} value={u.uid}>
-                          {u.displayName} ({u.role})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <SingleSelectAutocomplete
+                    items={users.map((u) => ({ id: u.uid, label: u.displayName }))}
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder="Seleccione un doctor"
+                  />
                   <FormMessage />
                 </FormItem>
               )}

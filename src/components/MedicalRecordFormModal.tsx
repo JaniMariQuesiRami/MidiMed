@@ -1,6 +1,6 @@
 'use client'
 import { useForm } from 'react-hook-form'
-import { useEffect, useContext } from 'react'
+import { useEffect, useContext, useMemo } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { createMedicalRecord, updateMedicalRecord } from '@/db/patients'
@@ -18,8 +18,9 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
+import { Switch } from '@/components/ui/switch'
 import { Plus } from 'lucide-react'
-import type { MedicalRecord } from '@/types/db'
+import type { MedicalRecord, ExtraFieldDef, ExtraFieldType } from '@/types/db'
 
 const schema = z.object({
   summary: z.string().nonempty('Resumen requerido'),
@@ -32,6 +33,7 @@ const schema = z.object({
   medications: z.string().optional(),
   followUp: z.string().optional(),
   notes: z.string().optional(),
+  extras: z.record(z.any()).optional(),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -55,6 +57,53 @@ export default function MedicalRecordFormModal({
   onUpdated?: (rec: MedicalRecord) => void
 }) {
   const { user, tenant } = useContext(UserContext)
+  
+  // Get extra field definitions - use current org settings for new records,
+  // but reconstruct from saved data for existing records to preserve historical fields
+  const extraDefs = useMemo<ExtraFieldDef[]>(() => {
+    const currentOrgExtraFields = tenant?.settings?.extraFields?.filter(f => f.collection === 'medicalRecords') || []
+    
+    // If editing an existing record, reconstruct extra field definitions from the saved data
+    if (record?.extras) {
+      const savedExtraFields: ExtraFieldDef[] = []
+      
+      // Add fields that exist in the saved record
+      Object.entries(record.extras).forEach(([key, value]) => {
+        // Try to determine the type from the saved value
+        let type: ExtraFieldType = 'text'
+        if (typeof value === 'boolean') {
+          type = 'bool'
+        } else if (typeof value === 'number') {
+          type = 'number'
+        } else if (typeof value === 'string' && value.match(/^\d{4}-\d{2}-\d{2}/)) {
+          type = 'date'
+        }
+        
+        // Check if this field exists in current org settings to get proper label
+        const currentField = currentOrgExtraFields.find(f => f.key === key)
+        
+        savedExtraFields.push({
+          key,
+          label: currentField?.label || key, // Use current label if available, fallback to key
+          type: currentField?.type || type, // Prefer current type if available
+          collection: 'medicalRecords'
+        })
+      })
+      
+      // Also add any new fields from current org settings that aren't in the saved record
+      currentOrgExtraFields.forEach(currentField => {
+        if (!savedExtraFields.some(f => f.key === currentField.key)) {
+          savedExtraFields.push(currentField)
+        }
+      })
+      
+      return savedExtraFields
+    }
+    
+    // For new records, use current organization settings
+    return currentOrgExtraFields
+  }, [tenant, record])
+
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -68,12 +117,19 @@ export default function MedicalRecordFormModal({
       medications: '',
       followUp: '',
       notes: '',
+      extras: {},
     },
   })
 
-
   useEffect(() => {
-    if (open)
+    if (open) {
+      const extrasVals = extraDefs.reduce<Record<string, unknown>>((acc, def) => {
+        const val = record?.extras?.[def.key]
+        if (def.type === 'bool') acc[def.key] = typeof val === 'boolean' ? val : false
+        else if (def.type === 'date' && typeof val === 'string') acc[def.key] = val.slice(0, 10)
+        else acc[def.key] = val !== undefined && val !== null ? String(val) : ''
+        return acc
+      }, {})
       form.reset({
         summary: record?.summary ?? '',
         heightCm: record?.details.heightCm?.toString() ?? '',
@@ -85,8 +141,10 @@ export default function MedicalRecordFormModal({
         medications: record?.details.prescribedMedications?.join(', ') ?? '',
         followUp: record?.details.followUpInstructions ?? '',
         notes: record?.details.notes ?? '',
+        extras: extrasVals,
       })
-  }, [open, record, form])
+    }
+  }, [open, record, form, extraDefs])
 
   const submit = async (values: FormValues) => {
     try {
@@ -105,15 +163,42 @@ export default function MedicalRecordFormModal({
         ...(values.notes ? { notes: values.notes } : {}),
         summary: values.summary,
       }
+      const extras: Record<string, string | number | boolean | null> = {}
+      extraDefs.forEach((def) => {
+        const raw = values.extras?.[def.key]
+        if (raw === undefined || raw === '') return
+        switch (def.type) {
+          case 'number': {
+            const num = Number(raw)
+            extras[def.key] = Number.isFinite(num) ? num : null
+            break
+          }
+          case 'bool':
+            extras[def.key] = !!raw
+            break
+          case 'date':
+            extras[def.key] = raw ? new Date(raw as string).toISOString() : null
+            break
+          default:
+            extras[def.key] = String(raw)
+        }
+      })
       if (record) {
         await updateMedicalRecord(record.recordId, {
           ...record,
           summary: values.summary,
           details,
+          extras,
           ...(appointmentId ? { appointmentId } : {}),
         })
         toast.success('Registro actualizado')
-        onUpdated?.({ ...record, summary: values.summary, details, ...(appointmentId ? { appointmentId } : {}) })
+        onUpdated?.({
+          ...record,
+          summary: values.summary,
+          details,
+          extras,
+          ...(appointmentId ? { appointmentId } : {}),
+        })
       } else {
         const recordId = await createMedicalRecord(patientId, {
           summary: values.summary,
@@ -121,6 +206,7 @@ export default function MedicalRecordFormModal({
           tenantId: tenant.tenantId,
           createdBy: user.uid,
           patientId,
+          extras,
           ...(appointmentId ? { appointmentId } : {}),
         })
         if (appointmentId) {
@@ -140,6 +226,7 @@ export default function MedicalRecordFormModal({
           details,
           createdAt: new Date().toISOString(),
           createdBy: user.uid,
+          extras,
           ...(appointmentId ? { appointmentId } : {}),
         }
         toast.success('Registro creado')
@@ -272,6 +359,25 @@ export default function MedicalRecordFormModal({
                 </FormItem>
               )}
             />
+            {extraDefs.map((def) => (
+              <FormField
+                key={def.key}
+                control={form.control}
+                name={`extras.${def.key}` as const}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{def.label}</FormLabel>
+                    {def.type === 'text' && <Input {...field} />}
+                    {def.type === 'number' && <Input type="number" {...field} />}
+                    {def.type === 'bool' && (
+                      <Switch checked={field.value as boolean} onCheckedChange={field.onChange} />
+                    )}
+                    {def.type === 'date' && <Input type="date" {...field} />}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            ))}
             <Button
               type="submit"
               className="w-full flex items-center gap-1"

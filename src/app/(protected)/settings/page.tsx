@@ -1,11 +1,23 @@
 "use client"
-import { useState } from 'react'
+import { useState, useEffect, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import OrganizationSettingsForm from '@/components/OrganizationSettingsForm'
 import TeamSettings from '@/components/TeamSettings'
+import ExtraFieldsSettings from '@/components/ExtraFieldsSettings'
+import PlanManagement from '@/components/PlanManagement'
+import LoadingSpinner from '@/components/LoadingSpinner'
 import tw from 'tailwind-styled-components'
 
-export default function SettingsPage() {
-  const [tab, setTab] = useState<'org' | 'team'>('org')
+function SettingsContent() {
+  const searchParams = useSearchParams()
+  const [tab, setTab] = useState<'org' | 'team' | 'forms' | 'plan'>('org')
+
+  useEffect(() => {
+    const tabParam = searchParams.get('tab') as 'org' | 'team' | 'forms' | 'plan'
+    if (tabParam && ['org', 'team', 'forms', 'plan'].includes(tabParam)) {
+      setTab(tabParam)
+    }
+  }, [searchParams])
 
   return (
     <Wrapper>
@@ -16,9 +28,30 @@ export default function SettingsPage() {
         <Tab $active={tab === 'team'} onClick={() => setTab('team')}>
           Usuarios
         </Tab>
+        <Tab $active={tab === 'forms'} onClick={() => setTab('forms')}>
+          Formularios
+        </Tab>
+        <Tab $active={tab === 'plan'} onClick={() => setTab('plan')}>
+          Planes
+        </Tab>
       </Tabs>
-      {tab === 'org' ? <OrganizationSettingsForm /> : <TeamSettings />}
+      {tab === 'org' && <OrganizationSettingsForm />}
+      {tab === 'team' && <TeamSettings />}
+      {tab === 'forms' && <ExtraFieldsSettings />}
+      {tab === 'plan' && <PlanManagement />}
     </Wrapper>
+  )
+}
+
+export default function SettingsPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center py-12">
+        <LoadingSpinner />
+      </div>
+    }>
+      <SettingsContent />
+    </Suspense>
   )
 }
 

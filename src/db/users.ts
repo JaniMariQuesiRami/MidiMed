@@ -118,6 +118,7 @@ export async function loginWithInvitation(email: string, tempPassword: string): 
       invitedBy: invitationData.invitedBy,
       createdAt: invitationData.createdAt,
       lastLoginAt: new Date().toISOString(),
+      color: '#3b82f6',
     })
 
     // Marcar invitación como aceptada
@@ -156,6 +157,7 @@ export async function createUserFromInvite(
       invitedBy: inviteData.invitedBy,
       createdAt: inviteData.createdAt,
       lastLoginAt: new Date().toISOString(),
+      color: '#3b82f6',
     })
 
     await updateDoc(inviteDoc.ref, { status: 'accepted' })
@@ -164,5 +166,45 @@ export async function createUserFromInvite(
   } catch (err) {
     console.error('Error in createUserFromInvite:', err)
     throw err
+  }
+}
+
+export async function updateUser(uid: string, data: Partial<User>): Promise<void> {
+  try {
+    await updateDoc(doc(db, 'users', uid), data)
+  } catch (err) {
+    console.error('Error in updateUser:', err)
+    throw err
+  }
+}
+
+export async function checkUserOrInviteExistsByEmail(email: string): Promise<{ exists: boolean; type: 'user' | 'invite' | null }> {
+  try {
+    const normalizedEmail = email.trim().toLowerCase()
+    
+    // Check if user exists in users collection
+    const userQuery = query(collection(db, 'users'), where('email', '==', normalizedEmail))
+    const userSnap = await getDocs(userQuery)
+    
+    if (!userSnap.empty) {
+      return { exists: true, type: 'user' }
+    }
+    
+    // Check if user has a pending invitation
+    const inviteQuery = query(
+      collection(db, 'invites'), 
+      where('email', '==', normalizedEmail),
+      where('status', '==', 'pending')
+    )
+    const inviteSnap = await getDocs(inviteQuery)
+    
+    if (!inviteSnap.empty) {
+      return { exists: true, type: 'invite' }
+    }
+    
+    return { exists: false, type: null }
+  } catch (err) {
+    console.error('Error in checkUserOrInviteExistsByEmail:', err)
+    return { exists: false, type: null }
   }
 }

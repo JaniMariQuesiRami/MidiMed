@@ -15,25 +15,47 @@ import { Appointment, AppointmentInput } from '@/types/db'
 export async function getAppointmentsInRange(
   start: Date,
   end: Date,
-  patientId?: string,
+  patientIds?: string | string[],
   tenantId?: string,
+  providerIds?: string | string[],
 ): Promise<Appointment[]> {
   try {
+    const pIds = Array.isArray(patientIds)
+      ? patientIds
+      : patientIds
+      ? [patientIds]
+      : []
+    const dIds = Array.isArray(providerIds)
+      ? providerIds
+      : providerIds
+      ? [providerIds]
+      : []
+
     const conditions = [
       where('scheduledStart', '>=', start.toISOString()),
       where('scheduledStart', '<=', end.toISOString()),
     ]
-    if (patientId) conditions.push(where('patientId', '==', patientId))
     if (tenantId) conditions.push(where('tenantId', '==', tenantId))
+    if (pIds.length > 0 && dIds.length === 0) {
+      // Firestore composite index required: tenantId + patientId + scheduledStart
+      conditions.push(where('patientId', 'in', pIds))
+    } else if (dIds.length > 0 && pIds.length === 0) {
+      // Firestore composite index required: tenantId + providerId + scheduledStart
+      conditions.push(where('providerId', 'in', dIds))
+    }
 
     const q = query(collection(db, 'appointments'), ...conditions)
-
     const snap = await getDocs(q)
 
-    return snap.docs.map((d) => ({
+    let list = snap.docs.map((d) => ({
       ...(d.data() as Omit<Appointment, 'appointmentId'>),
       appointmentId: d.id,
     }))
+
+    if (pIds.length > 0) list = list.filter((a) => pIds.includes(a.patientId))
+    if (dIds.length > 0) list = list.filter((a) => dIds.includes(a.providerId))
+
+    return list
   } catch (err) {
     console.error('Error in getAppointmentsInRange:', err)
     return []

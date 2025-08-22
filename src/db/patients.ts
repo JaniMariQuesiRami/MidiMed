@@ -9,6 +9,7 @@ import {
   getDoc,
   updateDoc,
   deleteDoc,
+  limit,
 } from 'firebase/firestore'
 import { uploadBytes, ref, getDownloadURL, deleteObject } from 'firebase/storage'
 import {
@@ -139,6 +140,7 @@ export async function getMedicalRecords(
     return snap.docs.map((d) => ({
       ...(d.data() as Omit<MedicalRecord, 'recordId'>),
       recordId: d.id,
+      extras: (d.data() as MedicalRecord).extras || {},
     }))
   } catch (err) {
     console.error('Error in getMedicalRecords:', err)
@@ -158,6 +160,7 @@ export async function createMedicalRecord(
       patientId,
       recordId: refDoc.id,
       createdAt: now,
+      extras: data.extras || {},
     })
     return refDoc.id
   } catch (err) {
@@ -170,10 +173,33 @@ export async function getMedicalRecordById(id: string): Promise<MedicalRecord> {
   try {
     const snap = await getDoc(doc(db, 'medicalRecords', id))
     if (!snap.exists()) throw new Error('Medical record not found')
-    return snap.data() as MedicalRecord
+    const data = snap.data() as MedicalRecord
+    return { ...data, extras: data.extras || {} }
   } catch (err) {
     console.error('Error in getMedicalRecordById:', err)
     throw err
+  }
+}
+
+export async function getMedicalRecordByAppointmentId(appointmentId: string): Promise<MedicalRecord | null> {
+  try {
+    const q = query(
+      collection(db, 'medicalRecords'), 
+      where('appointmentId', '==', appointmentId),
+      limit(1)
+    )
+    const snap = await getDocs(q)
+    if (snap.empty) return null
+    
+    const doc = snap.docs[0]
+    return {
+      ...(doc.data() as Omit<MedicalRecord, 'recordId'>),
+      recordId: doc.id,
+      extras: (doc.data() as MedicalRecord).extras || {},
+    }
+  } catch (err) {
+    console.error('Error in getMedicalRecordByAppointmentId:', err)
+    return null
   }
 }
 
@@ -210,10 +236,11 @@ export async function getAllMedicalRecords(tenantId: string): Promise<MedicalRec
   try {
     const q = query(collection(db, 'medicalRecords'), where('tenantId', '==', tenantId))
     const snap = await getDocs(q)
-    
+
     return snap.docs.map((d) => ({
       ...(d.data() as Omit<MedicalRecord, 'recordId'>),
       recordId: d.id,
+      extras: (d.data() as MedicalRecord).extras || {},
     }))
   } catch (err) {
     console.error('Error in getAllMedicalRecords:', err)
