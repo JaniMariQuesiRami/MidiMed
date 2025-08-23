@@ -394,7 +394,8 @@ export default function MultiStepSignupForm() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="max-h-[60vh] overflow-y-auto pr-1">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                 {medicalSpecialties.map((specialty) => {
                   const IconComponent = specialty.icon
                   const isSelected = formData.specialties.includes(specialty.id)
@@ -428,6 +429,7 @@ export default function MultiStepSignupForm() {
                     </SpecialtyCard>
                   )
                 })}
+                </div>
               </div>
 
               <div className="flex justify-between pt-4">
