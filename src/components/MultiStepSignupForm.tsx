@@ -54,6 +54,9 @@ interface FormData {
   
   // Paso 4: Credenciales
   password: string
+  
+  // Selected plan from URL
+  selectedPlan?: 'BASIC' | 'PRO'
 }
 
 export default function MultiStepSignupForm() {
@@ -68,13 +71,18 @@ export default function MultiStepSignupForm() {
     address: '',
     specialties: [],
     password: '',
+    selectedPlan: undefined,
   })
 
   // Prefill email from URL parameters if coming from login redirect
   useEffect(() => {
     const emailParam = searchParams.get('email')
+    const planParam = searchParams.get('plan')
     if (emailParam) {
       setFormData(prev => ({ ...prev, email: emailParam }))
+    }
+    if (planParam && (planParam === 'BASIC' || planParam === 'PRO')) {
+      setFormData(prev => ({ ...prev, selectedPlan: planParam }))
     }
   }, [searchParams])
 
@@ -142,6 +150,7 @@ export default function MultiStepSignupForm() {
         phone: formData.phone,
         address: formData.address,
         specialties: formData.specialties,
+        wantsToBuy: formData.selectedPlan,
       })
 
       // Store specialty in tenant settings (we'll need to modify the signUp function later)
@@ -482,29 +491,36 @@ export default function MultiStepSignupForm() {
               </FieldGroup>
 
               {/* Summary */}
-              <div className="bg-gray-50 p-4 rounded-lg space-y-2">
-                <h4 className="font-medium text-sm mb-3">Resumen de tu cuenta:</h4>
-                <div className="space-y-1 text-sm text-gray-600">
+              <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg space-y-2">
+                <h4 className="font-medium text-sm mb-3 text-gray-900 dark:text-gray-100">
+                  Resumen de tu cuenta:
+                </h4>
+                <div className="space-y-1 text-sm text-gray-600 dark:text-gray-300">
                   <div className="flex justify-between">
                     <span>Médico:</span>
-                    <span className="font-medium">{formData.displayName}</span>
+                    <span className="font-medium text-gray-900 dark:text-gray-100">{formData.displayName}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Clínica:</span>
-                    <span className="font-medium">{formData.tenantName}</span>
+                    <span className="font-medium text-gray-900 dark:text-gray-100">{formData.tenantName}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Especialidad{formData.specialties.length > 1 ? 'es' : ''}:</span>
                     <div className="text-right">
                       {formData.specialties.length > 0 ? (
                         formData.specialties.map((specialtyId, index) => (
-                          <div key={specialtyId} className="font-medium">
+                          <div
+                            key={specialtyId}
+                            className="font-medium text-gray-900 dark:text-gray-100"
+                          >
                             {medicalSpecialties.find(s => s.id === specialtyId)?.name}
                             {index < formData.specialties.length - 1 && ','}
                           </div>
                         ))
                       ) : (
-                        <span className="font-medium">Ninguna seleccionada</span>
+                        <span className="font-medium text-gray-900 dark:text-gray-100">
+                          Ninguna seleccionada
+                        </span>
                       )}
                     </div>
                   </div>

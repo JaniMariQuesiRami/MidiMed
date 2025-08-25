@@ -17,6 +17,7 @@ export async function signUp({
 	phone,
 	address,
 	specialties,
+	wantsToBuy,
 }: {
 	email: string
 	password: string
@@ -25,6 +26,7 @@ export async function signUp({
 	phone: string
 	address: string
 	specialties?: string[]
+	wantsToBuy?: 'BASIC' | 'PRO'
 }) {
 	const userCredential = await createUserWithEmailAndPassword(auth, email, password)
 	const user = userCredential.user
@@ -64,6 +66,7 @@ export async function signUp({
                         trialStartAt: now,
                         trialDays: 15,
                         status: 'TRIAL_ACTIVE',
+                        ...(wantsToBuy && { wantsToBuy }),
                 },
         }
 

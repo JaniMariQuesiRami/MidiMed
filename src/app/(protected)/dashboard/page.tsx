@@ -33,6 +33,7 @@ import type { Patient, Appointment, User } from '@/types/db'
 import { getUsersByTenant } from '@/db/users'
 import { toast } from 'sonner'
 import LoadingSpinner from '@/components/LoadingSpinner'
+import WantsToBuyModal from '@/components/WantsToBuyModal'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { DndProvider } from 'react-dnd'
@@ -84,6 +85,14 @@ export default function DashboardCalendar() {
     end: Date
   } | null>(null)
   const [savingChange, setSavingChange] = useState(false)
+  const [showWantsToBuyModal, setShowWantsToBuyModal] = useState(false)
+
+  // Show wantsToBuy modal if user has a plan they want to buy
+  useEffect(() => {
+    if (tenant?.billing?.wantsToBuy && !showWantsToBuyModal) {
+      setShowWantsToBuyModal(true)
+    }
+  }, [tenant?.billing?.wantsToBuy, showWantsToBuyModal])
 
   const navigate = (step: number) => {
     if (view === 'month') setDate((d) => addMonths(d, step))
@@ -389,6 +398,15 @@ export default function DashboardCalendar() {
         onClose={() => setSelected(null)}
         onUpdated={() => loadEvents()}
       />
+
+      {/* WantsToBuy Modal */}
+      {tenant?.billing?.wantsToBuy && (
+        <WantsToBuyModal
+          isOpen={showWantsToBuyModal}
+          onClose={() => setShowWantsToBuyModal(false)}
+          planName={tenant.billing.wantsToBuy}
+        />
+      )}
     </>
   )
 }
