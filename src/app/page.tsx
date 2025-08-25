@@ -156,7 +156,7 @@ export default function Home() {
       <DetailedFeatures />
       <ValueStripe />
       <WhyMidiMed />
-      <PricingSection />
+      <PricingSection defaultCurrency="GTQ" />
       <FinalCTA />
       <FAQ />
       <Testimonials />

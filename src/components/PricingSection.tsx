@@ -7,18 +7,23 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Check, Star, TestTube, Briefcase, Stethoscope } from 'lucide-react'
 
-export default function PricingSection({ id = "pricing" }: { id?: string }) {
-  const [currency, setCurrency] = useState<'USD' | 'GTQ'>('USD');
+interface PricingSectionProps {
+  id?: string
+  defaultCurrency?: 'USD' | 'GTQ'
+}
+
+export default function PricingSection({ id = 'pricing', defaultCurrency = 'USD' }: PricingSectionProps) {
+  const [currency, setCurrency] = useState<'USD' | 'GTQ'>(defaultCurrency);
   const router = useRouter()
 
   const exchangeRate = 8;
 
   const formatPrice = (usd: number) => {
-    if (currency === 'USD') return `$${usd}`;
-    if (usd === 99.99) return 'Q799.99';
-    if (usd === 129.99) return 'Q1039.99';
-    return `Q${usd * exchangeRate}`;
-  };
+    if (currency === 'USD') return `$${usd}`
+    if (usd === 99.99) return 'Q759.99'
+    if (usd === 129.99) return 'Q999.99'
+    return `Q${usd * exchangeRate}`
+  }
 
   const handleContactClick = () => {
     const contactSection = document.getElementById('contact');
