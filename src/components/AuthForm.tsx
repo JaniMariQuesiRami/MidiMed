@@ -346,7 +346,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
               disabled={loading} 
               className="w-full flex items-center justify-center gap-1"
             >
-              {loading ? <LoadingSpinner className="h-4 w-4" /> : 'Ingresar'}
+              {loading ? <LoadingSpinner className="h-4 w-4 border-white border-t-transparent" /> : 'Ingresar'}
             </Button>
             
             <div className="text-center pt-4 border-t">
@@ -463,7 +463,8 @@ export default function AuthForm({ mode }: AuthFormProps) {
             className="w-full flex items-center justify-center gap-1"
           >
             {loading ? (
-              <LoadingSpinner className="h-4 w-4" />
+              // On primary buttons, use a contrasting spinner color
+              <LoadingSpinner className="h-4 w-4 border-white border-t-transparent" />
             ) : mode === 'signup' ? (
               'Crear cuenta'
             ) : (

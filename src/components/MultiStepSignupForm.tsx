@@ -54,6 +54,9 @@ interface FormData {
   
   // Paso 4: Credenciales
   password: string
+  
+  // Selected plan from URL
+  selectedPlan?: 'BASIC' | 'PRO'
 }
 
 export default function MultiStepSignupForm() {
@@ -68,13 +71,18 @@ export default function MultiStepSignupForm() {
     address: '',
     specialties: [],
     password: '',
+    selectedPlan: undefined,
   })
 
   // Prefill email from URL parameters if coming from login redirect
   useEffect(() => {
     const emailParam = searchParams.get('email')
+    const planParam = searchParams.get('plan')
     if (emailParam) {
       setFormData(prev => ({ ...prev, email: emailParam }))
+    }
+    if (planParam && (planParam === 'BASIC' || planParam === 'PRO')) {
+      setFormData(prev => ({ ...prev, selectedPlan: planParam }))
     }
   }, [searchParams])
 
@@ -142,6 +150,7 @@ export default function MultiStepSignupForm() {
         phone: formData.phone,
         address: formData.address,
         specialties: formData.specialties,
+        wantsToBuy: formData.selectedPlan,
       })
 
       // Store specialty in tenant settings (we'll need to modify the signUp function later)

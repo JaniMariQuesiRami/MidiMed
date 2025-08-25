@@ -47,9 +47,9 @@ const FullCard = tw.div`mt-4 p-4 rounded-lg border bg-muted transition-all`
 const CollapsedCard = tw.div`mt-4 p-3 rounded-lg border bg-muted hover:bg-muted/80 hover:shadow-sm flex justify-center text-muted-foreground transition-all cursor-pointer hover:scale-[1.01] active:scale-[0.99]`
 
 const CardContent = tw.div`flex items-center justify-between gap-2`
-const UserSection = tw.div`flex items-center gap-2 flex-1 hover:bg-muted/50 rounded-md p-2 -m-2 transition-colors cursor-pointer hover:scale-[1.01] active:scale-[0.99]`
-const UserInfo = tw.div`space-y-0.5`
+const UserSection = tw.div`flex items-center gap-2 flex-1 min-w-0 hover:bg-muted/50 rounded-md p-2 -m-2 transition-colors cursor-pointer hover:scale-[1.01] active:scale-[0.99]`
+const UserInfo = tw.div`space-y-0.5 min-w-0 flex-1`
 const PlanSection = tw.div`flex-shrink-0`
 
-const TenantName = tw.p`text-sm font-semibold`
-const UserEmail = tw.p`text-xs text-muted-foreground`
+const TenantName = tw.p`text-sm font-semibold break-words`
+const UserEmail = tw.p`text-xs text-muted-foreground truncate`

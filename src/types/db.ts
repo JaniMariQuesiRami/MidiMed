@@ -51,6 +51,7 @@ export type TenantBilling = {
   paidThrough?: string; // ISO
   status: TenantBillingStatus;
   providerSubscriptionId?: string; // ID de la suscripción en Recurrente
+  wantsToBuy?: TenantPlanType; // Plan that the tenant wants to buy
 };
 
 /* ---------- Billing (legacy / externo) ---------- */
@@ -78,6 +79,7 @@ export type Tenant = {
   settings: TenantSettings;
   counters: TenantCounters;
   billing?: TenantBilling; // presente en el modelo nuevo
+  providerSubscriptionId?: string; // ID de la suscripción en Recurrente (fuera de billing para evitar race conditions)
 };
 
 export type UserRole = "admin" | "provider" | "staff";

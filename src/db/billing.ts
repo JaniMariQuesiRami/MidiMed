@@ -1,5 +1,5 @@
 import { db } from '@/lib/firebase'
-import { collection, doc, setDoc } from 'firebase/firestore'
+import { collection, doc, setDoc, updateDoc } from 'firebase/firestore'
 import type { TenantBillingStatus, TenantPlanType, PlanUpgradeRequest } from '@/types/db'
 
 export async function createPlanUpgradeRequest({
@@ -31,6 +31,18 @@ export async function createPlanUpgradeRequest({
     await setDoc(ref, data)
   } catch (err) {
     console.error('Error in createPlanUpgradeRequest:', err)
+    throw err
+  }
+}
+
+export async function clearWantsToBuyPlan(tenantId: string): Promise<void> {
+  try {
+    const tenantRef = doc(db, 'tenants', tenantId)
+    await updateDoc(tenantRef, {
+      'billing.wantsToBuy': null
+    })
+  } catch (err) {
+    console.error('Error in clearWantsToBuyPlan:', err)
     throw err
   }
 }

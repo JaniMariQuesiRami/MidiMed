@@ -1,37 +1,68 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import tw from 'tailwind-styled-components'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Check, Star, TestTube, Briefcase, Stethoscope } from 'lucide-react'
+import { db } from '@/lib/firebase'
+import { collection, getDocs, query, where } from 'firebase/firestore'
+import type { PlanCatalog } from '@/types/db'
 
-interface PricingSectionProps {
-  id?: string
-  defaultCurrency?: 'USD' | 'GTQ'
-}
-
-export default function PricingSection({ id = 'pricing', defaultCurrency = 'USD' }: PricingSectionProps) {
-  const [currency, setCurrency] = useState<'USD' | 'GTQ'>(defaultCurrency);
+export default function PricingSection({ id = "pricing" }: { id?: string }) {
+  const [currency, setCurrency] = useState<'USD' | 'GTQ'>('GTQ');
+  const [plans, setPlans] = useState<(PlanCatalog & { id: string })[]>([])
+  const [loading, setLoading] = useState(true)
   const router = useRouter()
 
-  const exchangeRate = 8;
+  useEffect(() => {
+    loadPlans()
+  }, []) // Only load once, no dependency on currency
 
-  const formatPrice = (usd: number) => {
-    if (currency === 'USD') return `$${usd}`
-    if (usd === 99.99) return 'Q759.99'
-    if (usd === 129.99) return 'Q999.99'
-    return `Q${usd * exchangeRate}`
+  const loadPlans = async () => {
+    try {
+      setLoading(true)
+      const planCatalogRef = collection(db, 'planCatalog')
+      const snapshot = await getDocs(
+        query(
+          planCatalogRef, 
+          where('active', '==', true),
+          where('currency', '==', 'GTQ') // Always load GTQ prices
+        )
+      )
+      
+      const availablePlans = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as (PlanCatalog & { id: string })[]
+      
+      setPlans(availablePlans)
+    } catch (error) {
+      console.error('Error loading plans:', error)
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const handleContactClick = () => {
-    const contactSection = document.getElementById('contact');
-    if (contactSection) {
-      contactSection.scrollIntoView({ behavior: 'smooth' });
-    } else {
-      router.push('/contact');
+  const getPlanByType = (planType: 'BASIC' | 'PRO') => {
+    return plans.find(plan => plan.plan === planType)
+  }
+
+  const exchangeRate = 7.8
+
+  const formatPrice = (priceInCentavos: number) => {
+    const gtqPrice = priceInCentavos / 100
+    if (currency === 'USD') {
+      const usdPrice = gtqPrice / exchangeRate
+      return `$${usdPrice.toFixed(2)}`
     }
+    return `Q${gtqPrice.toFixed(2)}`
+  }
+
+  const handleSignupClick = (plan: 'BASIC' | 'PRO') => {
+    const signupUrl = `/signup?plan=${plan}`
+    router.push(signupUrl)
   }
 
   const handleFreeTrialClick = () => {
@@ -119,7 +150,9 @@ export default function PricingSection({ id = 'pricing', defaultCurrency = 'USD'
               <PlanTitle className="text-gray-900 dark:text-gray-100">Básico</PlanTitle>
               <PlanSubtitle>Para consultorios pequeños</PlanSubtitle>
               <PlanPrice>
-                <PriceAmount className="text-gray-900 dark:text-gray-100">{formatPrice(99.99)}</PriceAmount>
+                <PriceAmount className="text-gray-900 dark:text-gray-100">
+                  {loading ? '...' : getPlanByType('BASIC')?.price ? formatPrice(getPlanByType('BASIC')!.price) : 'Q799.99'}
+                </PriceAmount>
                 <PricePeriod>/mes</PricePeriod>
               </PlanPrice>
             </CardHeader>
@@ -150,10 +183,11 @@ export default function PricingSection({ id = 'pricing', defaultCurrency = 'USD'
             <CardFooter>
               <PlanButton 
                 variant="outline"
-                onClick={handleContactClick}
+                onClick={() => handleSignupClick('BASIC')}
+                disabled={loading}
                 className="border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800"
               >
-                Contáctanos
+                Empezar
               </PlanButton>
             </CardFooter>
           </PricingCard>
@@ -167,7 +201,9 @@ export default function PricingSection({ id = 'pricing', defaultCurrency = 'USD'
               <PlanTitle>Pro</PlanTitle>
               <PlanSubtitle className="text-white/90">Para consultorios grandes y clínicas</PlanSubtitle>
               <PlanPrice>
-                <PriceAmount>{formatPrice(129.99)}</PriceAmount>
+                <PriceAmount>
+                  {loading ? '...' : getPlanByType('PRO')?.price ? formatPrice(getPlanByType('PRO')!.price) : 'Q1,039.99'}
+                </PriceAmount>
                 <PricePeriod className="text-white/80">/mes</PricePeriod>
               </PlanPrice>
             </CardHeader>
@@ -194,10 +230,11 @@ export default function PricingSection({ id = 'pricing', defaultCurrency = 'USD'
             <CardFooter>
               <PlanButton 
                 variant="outline"
-                onClick={handleContactClick}
+                onClick={() => handleSignupClick('PRO')}
+                disabled={loading}
                 className="border-white/30 bg-white/10 text-white hover:bg-white/20 hover:border-white/50"
               >
-                Contáctanos
+                Empezar
               </PlanButton>
             </CardFooter>
           </PricingCard>
