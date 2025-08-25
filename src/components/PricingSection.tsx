@@ -28,7 +28,7 @@ export default function PricingSection({ id = "pricing" }: { id?: string }) {
         query(
           planCatalogRef, 
           where('active', '==', true),
-          where('currency', '==', 'GTQ') // Always load GTQ prices
+          where('currency', '==', 'GTQ')
         )
       )
       
