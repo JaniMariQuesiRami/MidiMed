@@ -3,9 +3,12 @@
 import { Appointment } from '@/types/db'
 import { format } from 'date-fns'
 import tw from 'tailwind-styled-components'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useContext, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { updateAppointment } from '@/db/appointments'
+import { completeOnboardingStep } from '@/db/onboarding'
+import { UserContext } from '@/contexts/UserContext'
+import { useHighlight } from '@/hooks/useHighlight'
 import { toast } from 'sonner'
 import { CalendarDays, Clock, FileText, User, X, AlertCircle, CheckCircle, Calendar, Sparkles, Download } from 'lucide-react'
 import CreateAppointmentModal from '@/components/CreateAppointmentModal'
@@ -20,6 +23,8 @@ export default function AppointmentDetailsPopup({
   onViewRecord,
   onViewPatientSummary,
   onComplete,
+  fromOnboarding = false,
+  highlightComplete = false,
 }: {
   appointment: Appointment | null
   patientName?: string
@@ -28,13 +33,55 @@ export default function AppointmentDetailsPopup({
   onViewRecord?: (recordId: string) => void
   onViewPatientSummary?: (patientId: string) => void
   onComplete?: (appt: Appointment) => void
+  fromOnboarding?: boolean
+  highlightComplete?: boolean
 }) {
+  const { tenant } = useContext(UserContext)
+  const { highlight, removeHighlight } = useHighlight()
+  const completeButtonRef = useRef<HTMLButtonElement>(null)
   const [editOpen, setEditOpen] = useState(false)
   const [cancelLoading, setCancelLoading] = useState(false)
   const [uncancelLoading, setUncancelLoading] = useState(false)
   const { getReportForAppointment } = useAppointmentReport()
   const [reportUrl, setReportUrl] = useState<string | null>(null)
   const [reportLoading, setReportLoading] = useState(false)
+
+  // Marcar paso del onboarding como completado cuando se abra desde el onboarding
+  useEffect(() => {
+    if (fromOnboarding && appointment && tenant?.tenantId) {
+      if (highlightComplete) {
+        // Si viene para completar appointment, marcar ese paso
+        completeOnboardingStep(tenant.tenantId, 'completeAppointment')
+          .then(() => {
+            console.log('Paso completeAppointment marcado como completado')
+          })
+          .catch((error) => {
+            console.error('Error al marcar paso como completado:', error)
+          })
+      } else {
+        // Si viene para ver appointment, marcar ese paso
+        completeOnboardingStep(tenant.tenantId, 'viewAppointmentInfo')
+          .then(() => {
+            console.log('Paso viewAppointmentInfo marcado como completado')
+          })
+          .catch((error) => {
+            console.error('Error al marcar paso como completado:', error)
+          })
+      }
+    }
+  }, [fromOnboarding, appointment, tenant?.tenantId, highlightComplete])
+
+  // Resaltar el botón de completar cuando se necesite
+  useEffect(() => {
+    if (highlightComplete) {
+      highlight({ elementId: 'complete-appointment-btn' })
+    }
+    
+    // Cleanup cuando el componente se desmonte o highlightComplete cambie
+    return () => {
+      removeHighlight()
+    }
+  }, [highlightComplete, highlight, removeHighlight])
 
   useEffect(() => {
     if (appointment?.status === 'completed') {
@@ -248,6 +295,8 @@ export default function AppointmentDetailsPopup({
         <div className="flex flex-col sm:flex-row gap-2 mt-2">
           {appointment.status === 'scheduled' && !appointment.medicalRecordId && onComplete && (
             <Button 
+              id="complete-appointment-btn"
+              ref={completeButtonRef}
               size="sm" 
               className="w-full sm:w-auto"
               onClick={() => onComplete(appointment)}

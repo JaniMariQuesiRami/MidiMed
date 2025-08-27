@@ -22,6 +22,8 @@ import PatientRecordsTable from '@/components/PatientRecordsTable'
 import PatientFilesTable from '@/components/PatientFilesTable'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
+import { driver } from 'driver.js'
+import 'driver.js/dist/driver.css'
 
 export default function PatientDetailsPage() {
   const params = useParams<{ id: string }>()
@@ -63,6 +65,18 @@ export default function PatientDetailsPage() {
   }
 
   useEffect(() => {
+    if (!tenant || tenant.onboarding?.createAppointment) return
+    const d = driver()
+    d.highlight({
+      element: '#create-appointment-btn',
+      popover: {
+        title: 'Crea una cita',
+        description: 'Programa una cita para este paciente',
+      },
+    })
+  }, [tenant])
+
+  useEffect(() => {
     getPatientById(params.id)
       .then((p) => {
         setPatient(p)
@@ -102,7 +116,12 @@ export default function PatientDetailsPage() {
           <Section>
             <div className="flex justify-between items-center mb-2">
               <h2 className="font-medium text-lg">Citas futuras</h2>
-              <Button size="sm" onClick={() => setOpenAppt(true)} className="flex items-center gap-1">
+              <Button
+                id="create-appointment-btn"
+                size="sm"
+                onClick={() => setOpenAppt(true)}
+                className="flex items-center gap-1"
+              >
                 Nueva cita <Plus size={14} />
               </Button>
             </div>

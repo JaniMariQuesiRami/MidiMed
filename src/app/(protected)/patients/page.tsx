@@ -15,7 +15,7 @@ import {
 import { Input } from '@/components/ui/input'
 import tw from 'tailwind-styled-components'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Plus } from 'lucide-react'
 import CreatePatientModal from '@/components/CreatePatientModal'
 import LoadingSpinner from '@/components/LoadingSpinner'
@@ -30,6 +30,19 @@ export default function PatientsPage() {
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(0)
   const router = useRouter()
+  const searchParams = useSearchParams()
+
+  // Abrir modal automáticamente si viene del onboarding
+  useEffect(() => {
+    const modalParam = searchParams.get('modal')
+    if (modalParam === 'createPatient') {
+      setOpen(true)
+      // Limpiar el parámetro de la URL sin recargar
+      const url = new URL(window.location.href)
+      url.searchParams.delete('modal')
+      window.history.replaceState({}, '', url)
+    }
+  }, [searchParams])
 
   useEffect(() => {
     if (!tenant) return
@@ -66,6 +79,7 @@ export default function PatientsPage() {
           className="max-w-sm"
         />
         <button
+          id="create-patient-btn"
           className="bg-primary text-white px-3 py-1 rounded flex items-center gap-1 cursor-pointer"
           onClick={() => setOpen(true)}
         >

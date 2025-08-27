@@ -34,6 +34,14 @@ export type TenantCounters = {
   medicalRecords: number;
 };
 
+export type OnboardingProgress = {
+  createPatient: boolean;
+  createAppointment: boolean;
+  viewAppointmentInfo: boolean;
+  completeAppointment: boolean;
+  visitSettings: boolean;
+};
+
 /* ---------- Billing (nuevo modelo) ---------- */
 export type TenantPlanType = "TRIAL" | "BASIC" | "PRO" | "ENTERPRISE";
 
@@ -80,6 +88,7 @@ export type Tenant = {
   counters: TenantCounters;
   billing?: TenantBilling; // presente en el modelo nuevo
   providerSubscriptionId?: string; // ID de la suscripción en Recurrente (fuera de billing para evitar race conditions)
+  onboarding?: OnboardingProgress;
 };
 
 export type UserRole = "admin" | "provider" | "staff";
