@@ -125,18 +125,16 @@ export default function OnboardingCard() {
     return null
   }
 
-  // Si el progress aún no ha cargado, no renderizar nada (evita el flash)
-  if (!progress) {
-    return null
-  }
-
   // Si todos los pasos están completados Y el onboarding está marcado como completado, no renderizar
-  const allStepsCompleted = onboardingSteps.every(step => 
-    progress[step.key as keyof typeof progress] === true
-  )
-  
-  if (onboardingCompleted && allStepsCompleted) {
-    return null
+  // Solo verificar esto si progress existe (para tenants que ya tienen datos de onboarding)
+  if (progress) {
+    const allStepsCompleted = onboardingSteps.every(step => 
+      progress[step.key as keyof typeof progress] === true
+    )
+    
+    if (onboardingCompleted && allStepsCompleted) {
+      return null
+    }
   }
 
   const completedSteps = getCompletedSteps()
@@ -321,7 +319,7 @@ const ProgressText = tw.p`
 `
 
 const ProgressBar = tw.div`
-  w-full h-2 bg-muted rounded-full overflow-hidden
+  w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden border border-gray-300 dark:border-gray-600
 `
 
 const Progress = tw.div`

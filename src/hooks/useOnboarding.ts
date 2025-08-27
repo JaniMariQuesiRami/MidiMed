@@ -167,7 +167,9 @@ export function useOnboarding() {
   const getProgress = () => {
     const completed = getCompletedSteps()
     const total = getTotalSteps()
-    return Math.round((completed / total) * 100)
+    const progressPercentage = Math.round((completed / total) * 100)
+    // Mostrar al menos 2% para que la barra siempre sea visible
+    return Math.max(progressPercentage, 2)
   }
 
   const isStepCompleted = (stepKey: keyof OnboardingProgress) => {
