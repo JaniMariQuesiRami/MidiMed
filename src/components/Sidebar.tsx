@@ -14,6 +14,7 @@ import {
 import { useState } from 'react'
 import Image from 'next/image'
 import UserSettings from '@/components/UserSettings'
+import OnboardingCard from '@/components/OnboardingCard'
 import tw from 'tailwind-styled-components'
 import { useContext, useEffect } from 'react'
 import { UserContext } from '@/contexts/UserContext'
@@ -89,6 +90,7 @@ export default function Sidebar({ collapsed = false, onCollapsedChange }: Sideba
             <NavItem key={href} $active={pathname === href} $collapsed={collapsed}>
               <Link
                 href={href}
+                id={href === '/settings' ? 'settings-nav' : undefined}
                 className={`flex items-center gap-2 w-full relative ${collapsed ? 'justify-center px-2 py-3' : 'px-4 py-3 '}`}
               >
                 <div className="flex items-center gap-2 w-full justify-center">
@@ -104,6 +106,7 @@ export default function Sidebar({ collapsed = false, onCollapsedChange }: Sideba
             </NavItem>
           ))}
         </NavList>
+        {!collapsed && <OnboardingCard />}
       </TopSection>
 
       <UserSettings collapsed={collapsed} />

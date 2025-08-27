@@ -10,6 +10,7 @@ import {
   updateAppointment,
   getAppointmentsInRange,
 } from '@/db/appointments'
+import { completeOnboardingStep } from '@/db/onboarding'
 import { UserContext } from '@/contexts/UserContext'
 import type { Patient, Appointment, User } from '@/types/db'
 import { toast } from 'sonner'
@@ -330,6 +331,11 @@ export default function CreateAppointmentModal({
           tenantId: tenant.tenantId,
           appointmentId,
         })
+        try {
+          await completeOnboardingStep(tenant.tenantId, 'createAppointment')
+        } catch (err) {
+          console.error('Error completing onboarding step createAppointment:', err)
+        }
         const newAppt: Appointment = {
           appointmentId,
           tenantId: tenant.tenantId,

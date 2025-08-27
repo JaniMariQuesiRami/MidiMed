@@ -1,5 +1,6 @@
 'use client'
-import { useEffect, useState, useCallback, useContext } from 'react'
+import { useEffect, useState, useCallback, useContext, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Calendar, View, dateFnsLocalizer } from 'react-big-calendar'
 import type { SlotInfo, EventProps as RBCEventProps, CalendarProps } from 'react-big-calendar'
 import type { EventInteractionArgs } from 'react-big-calendar/lib/addons/dragAndDrop'
@@ -23,6 +24,7 @@ import '@/app/(protected)/dashboard/rbc-modern.css'
 import tw from 'tailwind-styled-components'
 import { getPatients } from '@/db/patients'
 import { getAppointmentsInRange, updateAppointment } from '@/db/appointments'
+import { completeOnboardingStep } from '@/db/onboarding'
 import { UserContext } from '@/contexts/UserContext'
 import CreateAppointmentModal from '@/components/CreateAppointmentModal'
 import AppointmentDetailsPopup from '@/components/AppointmentDetailsPopup'
@@ -34,6 +36,7 @@ import { getUsersByTenant } from '@/db/users'
 import { toast } from 'sonner'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import WantsToBuyModal from '@/components/WantsToBuyModal'
+import MedicalRecordFormModal from '@/components/MedicalRecordFormModal'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { DndProvider } from 'react-dnd'
@@ -64,7 +67,13 @@ const views = [
   { key: 'day' as View, label: 'Día' },
 ]
 
-export default function DashboardCalendar() {
+// Component that handles search params (needs to be wrapped in Suspense)
+function DashboardWithSearchParams() {
+  const searchParams = useSearchParams()
+  return <DashboardCalendar searchParams={searchParams} />
+}
+
+function DashboardCalendar({ searchParams }: { searchParams: ReturnType<typeof useSearchParams> }) {
   const { tenant } = useContext(UserContext)
   const [view, setView] = useState<View | null>(null)
   const [date, setDate] = useState(new Date())
@@ -78,6 +87,8 @@ export default function DashboardCalendar() {
   const [slotStart, setSlotStart] = useState<Date | null>(null)
   const [slotEnd, setSlotEnd] = useState<Date | null>(null)
   const [selected, setSelected] = useState<{ appt: Appointment; name: string } | null>(null)
+  const [fromOnboarding, setFromOnboarding] = useState(false)
+  const [highlightComplete, setHighlightComplete] = useState(false)
   const [pendingChange, setPendingChange] = useState<{
     type: 'move' | 'resize'
     event: CalendarEvent
@@ -86,6 +97,8 @@ export default function DashboardCalendar() {
   } | null>(null)
   const [savingChange, setSavingChange] = useState(false)
   const [showWantsToBuyModal, setShowWantsToBuyModal] = useState(false)
+  const [completingAppt, setCompletingAppt] = useState<Appointment | null>(null)
+  const [openRecord, setOpenRecord] = useState(false)
 
   // Show wantsToBuy modal if user has a plan they want to buy
   useEffect(() => {
@@ -93,6 +106,59 @@ export default function DashboardCalendar() {
       setShowWantsToBuyModal(true)
     }
   }, [tenant?.billing?.wantsToBuy, showWantsToBuyModal])
+
+  // Abrir modal automáticamente si viene del onboarding
+  useEffect(() => {
+    const modalParam = searchParams.get('modal')
+    const actionParam = searchParams.get('action')
+    
+    if (modalParam === 'createAppointment') {
+      setOpen(true)
+      // Limpiar el parámetro de la URL sin recargar
+      const url = new URL(window.location.href)
+      url.searchParams.delete('modal')
+      window.history.replaceState({}, '', url)
+    }
+
+    // Manejar acción especial para ver el primer appointment
+    if (actionParam === 'viewFirstAppointment' && events.length > 0) {
+      const firstEvent = events[0]
+      if (firstEvent.resource && patients.length > 0) {
+        const patientName = patients.find(p => p.patientId === firstEvent.resource.patientId)
+        if (patientName) {
+          setSelected({
+            appt: firstEvent.resource,
+            name: `${patientName.firstName} ${patientName.lastName}`
+          })
+          setFromOnboarding(true) // Marcar que viene del onboarding
+          // Limpiar el parámetro de la URL sin recargar
+          const url = new URL(window.location.href)
+          url.searchParams.delete('action')
+          window.history.replaceState({}, '', url)
+        }
+      }
+    }
+
+    // Manejar acción especial para completar el primer appointment
+    if (actionParam === 'completeFirstAppointment' && events.length > 0) {
+      const firstEvent = events[0]
+      if (firstEvent.resource && patients.length > 0) {
+        const patientName = patients.find(p => p.patientId === firstEvent.resource.patientId)
+        if (patientName) {
+          setSelected({
+            appt: firstEvent.resource,
+            name: `${patientName.firstName} ${patientName.lastName}`
+          })
+          setFromOnboarding(true) // Marcar que viene del onboarding
+          setHighlightComplete(true) // Marcar que se debe resaltar el botón de completar
+          // Limpiar el parámetro de la URL sin recargar
+          const url = new URL(window.location.href)
+          url.searchParams.delete('action')
+          window.history.replaceState({}, '', url)
+        }
+      }
+    }
+  }, [searchParams, events, patients])
 
   const navigate = (step: number) => {
     if (view === 'month') setDate((d) => addMonths(d, step))
@@ -210,6 +276,7 @@ export default function DashboardCalendar() {
               placeholder="Filtrar doctores..."
             />
             <button
+              id="create-appointment-btn"
               className="bg-primary text-white px-3 py-1 rounded flex items-center gap-1 cursor-pointer"
               onClick={() => {
                 setSlotDate(new Date())
@@ -236,6 +303,7 @@ export default function DashboardCalendar() {
         <div className="overflow-x-auto w-full">
           <div className="md:min-w-[700px] md:max-w-auto max-w-[100vw]">
             <DndProvider backend={HTML5Backend}>
+            <div id="calendar-container">
             <DnDCalendar
               culture="es"
               localizer={localizer}
@@ -259,6 +327,11 @@ export default function DashboardCalendar() {
               }}
               onSelectEvent={(event: CalendarEvent) => {
                 setSelected({ appt: event.resource, name: event.title })
+                if (tenant && !tenant.onboarding?.viewAppointmentInfo) {
+                  completeOnboardingStep(tenant.tenantId, 'viewAppointmentInfo').catch((err) =>
+                    console.error('Error completing onboarding step viewAppointmentInfo:', err),
+                  )
+                }
               }}
               onSelectSlot={(slot: SlotInfo) => {
                 const startDate = slot.start instanceof Date ? slot.start : new Date(slot.start)
@@ -322,6 +395,7 @@ export default function DashboardCalendar() {
                 }
               }}
             />
+            </div>
             </DndProvider>
           </div>
         </div>
@@ -395,8 +469,26 @@ export default function DashboardCalendar() {
       <AppointmentDetailsPopup
         appointment={selected?.appt || null}
         patientName={selected?.name}
-        onClose={() => setSelected(null)}
+        onClose={() => {
+          setSelected(null)
+          setFromOnboarding(false) // Resetear flag cuando se cierre
+          setHighlightComplete(false) // Resetear highlight cuando se cierre
+        }}
         onUpdated={() => loadEvents()}
+        fromOnboarding={fromOnboarding}
+        highlightComplete={highlightComplete}
+        onComplete={(appointment) => {
+          setSelected(null)
+          setFromOnboarding(false) // Resetear flag también cuando se complete
+          setHighlightComplete(false) // Resetear highlight cuando se complete
+          setCompletingAppt(appointment)
+          setOpenRecord(true)
+          if (tenant && !tenant.onboarding?.completeAppointment) {
+            completeOnboardingStep(tenant.tenantId, 'completeAppointment').catch((err) =>
+              console.error('Error completing onboarding step completeAppointment:', err),
+            )
+          }
+        }}
       />
 
       {/* WantsToBuy Modal */}
@@ -407,6 +499,26 @@ export default function DashboardCalendar() {
           planName={tenant.billing.wantsToBuy}
         />
       )}
+
+      {/* Medical Record Modal for completing appointments */}
+      <MedicalRecordFormModal
+        open={openRecord}
+        onClose={() => {
+          setOpenRecord(false)
+          setCompletingAppt(null)
+        }}
+        patientId={completingAppt?.patientId || ''}
+        appointmentId={completingAppt?.appointmentId}
+        patientBirthDate={patients.find(p => p.patientId === completingAppt?.patientId)?.birthDate || ''}
+        onCreated={() => {
+          if (completingAppt) {
+            // Update the appointment as completed and refresh events
+            loadEvents()
+          }
+          setOpenRecord(false)
+          setCompletingAppt(null)
+        }}
+      />
     </>
   )
 }
@@ -431,3 +543,12 @@ const SwitchButton = tw.button<{ $active: boolean }>`
 `
 
 const IconButton = tw.button`p-1 rounded hover:bg-muted text-muted-foreground cursor-pointer`
+
+// Default export with Suspense boundary
+export default function Dashboard() {
+  return (
+    <Suspense fallback={<LoadingSpinner />}>
+      <DashboardWithSearchParams />
+    </Suspense>
+  )
+}

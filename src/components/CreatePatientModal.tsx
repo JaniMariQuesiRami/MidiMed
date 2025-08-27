@@ -2,6 +2,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import PatientForm, { PatientFormValues } from "./PatientForm"
 import { createPatient } from "@/db/patients"
+import { completeOnboardingStep } from "@/db/onboarding"
 import { useContext } from "react"
 import { UserContext } from "@/contexts/UserContext"
 import { toast } from "sonner"
@@ -37,12 +38,17 @@ export default function CreatePatientModal({
           tenantId: tenant.tenantId,
           createdBy: user.uid,
         })
-        trackEvent('Created Patient', {
-          userId: user.uid,
-          tenantId: tenant.tenantId,
-          patientId,
-        })
-        onCreated?.({
+      trackEvent('Created Patient', {
+        userId: user.uid,
+        tenantId: tenant.tenantId,
+        patientId,
+      })
+      try {
+        await completeOnboardingStep(tenant.tenantId, 'createPatient')
+      } catch (err) {
+        console.error('Error completing onboarding step createPatient:', err)
+      }
+      onCreated?.({
           tenantId: tenant.tenantId,
           patientId,
           firstName,
