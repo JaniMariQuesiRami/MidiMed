@@ -218,7 +218,7 @@ export default function OnboardingCard() {
         <CardContent>
           <ProgressSection>
             <ProgressText>
-              {completedSteps} de {totalSteps} pasos completados ({progressPercentage}%)
+              {completedSteps} de {totalSteps} pasos completados
             </ProgressText>
             <ProgressBar>
               <Progress style={{ width: `${progressPercentage}%` }} />
