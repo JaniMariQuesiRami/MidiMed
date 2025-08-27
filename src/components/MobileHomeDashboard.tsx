@@ -288,6 +288,11 @@ export default function MobileHomeDashboard() {
               toast.error('Error al cargar el registro médico')
             }
           }}
+          onComplete={(appointment) => {
+            setSelectedAppointment(null)
+            setCompletingAppt(appointment)
+            setOpenRecord(true)
+          }}
           onViewPatientSummary={(patientId) => {
             const summary = getPatientSummary(patientId)
             const patientName = getPatientName(patientId)

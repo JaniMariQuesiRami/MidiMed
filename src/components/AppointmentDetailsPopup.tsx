@@ -19,6 +19,7 @@ export default function AppointmentDetailsPopup({
   onUpdated,
   onViewRecord,
   onViewPatientSummary,
+  onComplete,
 }: {
   appointment: Appointment | null
   patientName?: string
@@ -26,6 +27,7 @@ export default function AppointmentDetailsPopup({
   onUpdated?: (appt: Appointment) => void
   onViewRecord?: (recordId: string) => void
   onViewPatientSummary?: (patientId: string) => void
+  onComplete?: (appt: Appointment) => void
 }) {
   const [editOpen, setEditOpen] = useState(false)
   const [cancelLoading, setCancelLoading] = useState(false)
@@ -192,6 +194,7 @@ export default function AppointmentDetailsPopup({
             </div>
           )}
         </div>
+        {/* Primera fila - Botones de visualización */}
         <div className="flex flex-col sm:flex-row gap-2 mt-4">
           {patientName && (
             <Button 
@@ -239,35 +242,47 @@ export default function AppointmentDetailsPopup({
               {reportLoading ? 'Cargando...' : 'Descargar receta'}
             </Button>
           )}
-          <div className="flex gap-2">
+        </div>
+        
+        {/* Segunda fila - Botones de acción */}
+        <div className="flex flex-col sm:flex-row gap-2 mt-2">
+          {appointment.status === 'scheduled' && !appointment.medicalRecordId && onComplete && (
             <Button 
               size="sm" 
-              className="flex-1 sm:flex-none"
-              onClick={() => setEditOpen(true)} 
-              disabled={appointment.status === 'cancelled'}
+              className="w-full sm:w-auto"
+              onClick={() => onComplete(appointment)}
             >
-              Editar
+              Completar cita
             </Button>
-            <Button 
-              size="sm" 
-              variant="destructive" 
-              className="flex-1 sm:flex-none"
-              onClick={cancelAppt} 
-              disabled={appointment.status === 'cancelled' || cancelLoading}
+          )}
+          <Button 
+            size="sm" 
+            variant="outline"
+            className="w-full sm:w-auto"
+            onClick={() => setEditOpen(true)} 
+            disabled={appointment.status === 'cancelled'}
+          >
+            Editar
+          </Button>
+          <Button 
+            size="sm" 
+            variant="destructive" 
+            className="w-full sm:w-auto"
+            onClick={cancelAppt} 
+            disabled={appointment.status === 'cancelled' || cancelLoading}
+          >
+            {cancelLoading ? 'Cancelando...' : 'Cancelar'}
+          </Button>
+          {appointment.status === 'cancelled' && (
+            <Button
+              size="sm"
+              className="w-full sm:w-auto"
+              onClick={uncancelAppt}
+              disabled={uncancelLoading}
             >
-              {cancelLoading ? 'Cancelando...' : 'Cancelar'}
+              {uncancelLoading ? 'Reactivando...' : 'Reactivar'}
             </Button>
-            {appointment.status === 'cancelled' && (
-              <Button
-                size="sm"
-                className="flex-1 sm:flex-none"
-                onClick={uncancelAppt}
-                disabled={uncancelLoading}
-              >
-                {uncancelLoading ? 'Reactivando...' : 'Reactivar'}
-              </Button>
-            )}
-          </div>
+          )}
         </div>
         <CreateAppointmentModal
           open={editOpen}

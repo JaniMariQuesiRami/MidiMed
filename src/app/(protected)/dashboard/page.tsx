@@ -34,6 +34,7 @@ import { getUsersByTenant } from '@/db/users'
 import { toast } from 'sonner'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import WantsToBuyModal from '@/components/WantsToBuyModal'
+import MedicalRecordFormModal from '@/components/MedicalRecordFormModal'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { DndProvider } from 'react-dnd'
@@ -86,6 +87,8 @@ export default function DashboardCalendar() {
   } | null>(null)
   const [savingChange, setSavingChange] = useState(false)
   const [showWantsToBuyModal, setShowWantsToBuyModal] = useState(false)
+  const [completingAppt, setCompletingAppt] = useState<Appointment | null>(null)
+  const [openRecord, setOpenRecord] = useState(false)
 
   // Show wantsToBuy modal if user has a plan they want to buy
   useEffect(() => {
@@ -397,6 +400,11 @@ export default function DashboardCalendar() {
         patientName={selected?.name}
         onClose={() => setSelected(null)}
         onUpdated={() => loadEvents()}
+        onComplete={(appointment) => {
+          setSelected(null)
+          setCompletingAppt(appointment)
+          setOpenRecord(true)
+        }}
       />
 
       {/* WantsToBuy Modal */}
@@ -407,6 +415,26 @@ export default function DashboardCalendar() {
           planName={tenant.billing.wantsToBuy}
         />
       )}
+
+      {/* Medical Record Modal for completing appointments */}
+      <MedicalRecordFormModal
+        open={openRecord}
+        onClose={() => {
+          setOpenRecord(false)
+          setCompletingAppt(null)
+        }}
+        patientId={completingAppt?.patientId || ''}
+        appointmentId={completingAppt?.appointmentId}
+        patientBirthDate={patients.find(p => p.patientId === completingAppt?.patientId)?.birthDate || ''}
+        onCreated={() => {
+          if (completingAppt) {
+            // Update the appointment as completed and refresh events
+            loadEvents()
+          }
+          setOpenRecord(false)
+          setCompletingAppt(null)
+        }}
+      />
     </>
   )
 }
