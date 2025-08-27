@@ -14,3 +14,18 @@ export async function completeOnboardingStep(tenantId: string, step: OnboardingS
     throw err
   }
 }
+
+export async function resetOnboardingProgress(tenantId: string): Promise<void> {
+  try {
+    await updateDoc(doc(db, 'tenants', tenantId), {
+      'onboarding.createPatient': false,
+      'onboarding.createAppointment': false,
+      'onboarding.viewAppointmentInfo': false,
+      'onboarding.completeAppointment': false,
+      'onboarding.visitSettings': false,
+    })
+  } catch (err) {
+    console.error('Error in resetOnboardingProgress:', err)
+    throw err
+  }
+}

@@ -14,6 +14,8 @@ import { updateProfile } from 'firebase/auth'
 import { doc, updateDoc } from 'firebase/firestore'
 import tw from 'tailwind-styled-components'
 import UserPlanCard from '@/components/UserPlanCard'
+import { resetOnboardingProgress } from '@/db/onboarding'
+import { toast } from 'sonner'
 
 export default function UserSettings({ collapsed }: { collapsed: boolean }) {
   const { user, tenant } = useContext(UserContext)
@@ -35,6 +37,19 @@ export default function UserSettings({ collapsed }: { collapsed: boolean }) {
 
   const logout = () => {
     auth.signOut()
+  }
+
+  const resetOnboarding = async () => {
+    if (!tenant) return
+    
+    try {
+      await resetOnboardingProgress(tenant.tenantId)
+      toast.success('Tutorial reiniciado. La guía de inicio aparecerá nuevamente.')
+      setOpen(false) // Close the modal
+    } catch (error) {
+      toast.error('Error al reiniciar el tutorial')
+      console.error('Error resetting onboarding:', error)
+    }
   }
 
   useEffect(() => {
@@ -113,6 +128,23 @@ export default function UserSettings({ collapsed }: { collapsed: boolean }) {
                   </div>
                   <Switch checked={theme === 'dark'} onCheckedChange={toggleTheme} />
                 </ToggleRow>
+              </div>
+
+              {/* Tutorials Section */}
+              <div className="space-y-3">
+                <SectionTitle>Tutoriales</SectionTitle>
+                <div className="space-y-2">
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-start"
+                    onClick={resetOnboarding}
+                  >
+                    Repetir tutorial &ldquo;Guía de Inicio&rdquo;
+                  </Button>
+                  <p className="text-xs text-muted-foreground">
+                    Reinicia el tutorial de introducción para volver a ver todos los pasos.
+                  </p>
+                </div>
               </div>
 
               {/* Actions */}
