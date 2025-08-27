@@ -14,6 +14,7 @@ import {
 import { useState } from 'react'
 import Image from 'next/image'
 import UserSettings from '@/components/UserSettings'
+import OnboardingCard from '@/components/OnboardingCard'
 import tw from 'tailwind-styled-components'
 import { useContext, useEffect } from 'react'
 import { UserContext } from '@/contexts/UserContext'
@@ -104,6 +105,7 @@ export default function Sidebar({ collapsed = false, onCollapsedChange }: Sideba
             </NavItem>
           ))}
         </NavList>
+        {!collapsed && <OnboardingCard />}
       </TopSection>
 
       <UserSettings collapsed={collapsed} />

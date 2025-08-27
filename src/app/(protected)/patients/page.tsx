@@ -19,6 +19,8 @@ import { useRouter } from 'next/navigation'
 import { Plus } from 'lucide-react'
 import CreatePatientModal from '@/components/CreatePatientModal'
 import LoadingSpinner from '@/components/LoadingSpinner'
+import { driver } from 'driver.js'
+import 'driver.js/dist/driver.css'
 
 const PAGE_SIZE = 10
 
@@ -30,6 +32,18 @@ export default function PatientsPage() {
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(0)
   const router = useRouter()
+
+  useEffect(() => {
+    if (!tenant || tenant.onboarding?.createPatient) return
+    const d = driver()
+    d.highlight({
+      element: '#create-patient-btn',
+      popover: {
+        title: 'Crea un paciente',
+        description: 'Haz clic aquí para agregar tu primer paciente',
+      },
+    })
+  }, [tenant])
 
   useEffect(() => {
     if (!tenant) return
@@ -66,6 +80,7 @@ export default function PatientsPage() {
           className="max-w-sm"
         />
         <button
+          id="create-patient-btn"
           className="bg-primary text-white px-3 py-1 rounded flex items-center gap-1 cursor-pointer"
           onClick={() => setOpen(true)}
         >

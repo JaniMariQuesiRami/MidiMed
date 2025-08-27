@@ -23,10 +23,13 @@ import '@/app/(protected)/dashboard/rbc-modern.css'
 import tw from 'tailwind-styled-components'
 import { getPatients } from '@/db/patients'
 import { getAppointmentsInRange, updateAppointment } from '@/db/appointments'
+import { completeOnboardingStep } from '@/db/onboarding'
 import { UserContext } from '@/contexts/UserContext'
 import CreateAppointmentModal from '@/components/CreateAppointmentModal'
 import AppointmentDetailsPopup from '@/components/AppointmentDetailsPopup'
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
+import { driver } from 'driver.js'
+import 'driver.js/dist/driver.css'
 import MultiSelectAutocomplete from '@/components/MultiSelectAutocomplete'
 import MobileHomeDashboard from '@/components/MobileHomeDashboard'
 import type { Patient, Appointment, User } from '@/types/db'
@@ -96,6 +99,25 @@ export default function DashboardCalendar() {
       setShowWantsToBuyModal(true)
     }
   }, [tenant?.billing?.wantsToBuy, showWantsToBuyModal])
+
+  useEffect(() => {
+    if (!tenant) return
+    if (!tenant.onboarding?.viewCalendar) {
+      completeOnboardingStep(tenant.tenantId, 'viewCalendar').catch((err) =>
+        console.error('Error completing onboarding step viewCalendar:', err),
+      )
+    }
+    if (!tenant.onboarding?.viewAppointmentInfo) {
+      const d = driver()
+      d.highlight({
+        element: '#calendar-container',
+        popover: {
+          title: 'Calendario',
+          description: 'Selecciona una cita para ver su información',
+        },
+      })
+    }
+  }, [tenant])
 
   const navigate = (step: number) => {
     if (view === 'month') setDate((d) => addMonths(d, step))
@@ -239,6 +261,7 @@ export default function DashboardCalendar() {
         <div className="overflow-x-auto w-full">
           <div className="md:min-w-[700px] md:max-w-auto max-w-[100vw]">
             <DndProvider backend={HTML5Backend}>
+            <div id="calendar-container">
             <DnDCalendar
               culture="es"
               localizer={localizer}
@@ -262,6 +285,11 @@ export default function DashboardCalendar() {
               }}
               onSelectEvent={(event: CalendarEvent) => {
                 setSelected({ appt: event.resource, name: event.title })
+                if (tenant && !tenant.onboarding?.viewAppointmentInfo) {
+                  completeOnboardingStep(tenant.tenantId, 'viewAppointmentInfo').catch((err) =>
+                    console.error('Error completing onboarding step viewAppointmentInfo:', err),
+                  )
+                }
               }}
               onSelectSlot={(slot: SlotInfo) => {
                 const startDate = slot.start instanceof Date ? slot.start : new Date(slot.start)
@@ -325,6 +353,7 @@ export default function DashboardCalendar() {
                 }
               }}
             />
+            </div>
             </DndProvider>
           </div>
         </div>
@@ -404,6 +433,11 @@ export default function DashboardCalendar() {
           setSelected(null)
           setCompletingAppt(appointment)
           setOpenRecord(true)
+          if (tenant && !tenant.onboarding?.completeAppointment) {
+            completeOnboardingStep(tenant.tenantId, 'completeAppointment').catch((err) =>
+              console.error('Error completing onboarding step completeAppointment:', err),
+            )
+          }
         }}
       />
 
