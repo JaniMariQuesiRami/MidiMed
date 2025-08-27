@@ -90,6 +90,7 @@ export default function Sidebar({ collapsed = false, onCollapsedChange }: Sideba
             <NavItem key={href} $active={pathname === href} $collapsed={collapsed}>
               <Link
                 href={href}
+                id={href === '/settings' ? 'settings-nav' : undefined}
                 className={`flex items-center gap-2 w-full relative ${collapsed ? 'justify-center px-2 py-3' : 'px-4 py-3 '}`}
               >
                 <div className="flex items-center gap-2 w-full justify-center">

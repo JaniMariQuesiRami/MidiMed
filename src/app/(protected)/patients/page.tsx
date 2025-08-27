@@ -15,12 +15,10 @@ import {
 import { Input } from '@/components/ui/input'
 import tw from 'tailwind-styled-components'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Plus } from 'lucide-react'
 import CreatePatientModal from '@/components/CreatePatientModal'
 import LoadingSpinner from '@/components/LoadingSpinner'
-import { driver } from 'driver.js'
-import 'driver.js/dist/driver.css'
 
 const PAGE_SIZE = 10
 
@@ -32,18 +30,19 @@ export default function PatientsPage() {
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(0)
   const router = useRouter()
+  const searchParams = useSearchParams()
 
+  // Abrir modal automáticamente si viene del onboarding
   useEffect(() => {
-    if (!tenant || tenant.onboarding?.createPatient) return
-    const d = driver()
-    d.highlight({
-      element: '#create-patient-btn',
-      popover: {
-        title: 'Crea un paciente',
-        description: 'Haz clic aquí para agregar tu primer paciente',
-      },
-    })
-  }, [tenant])
+    const modalParam = searchParams.get('modal')
+    if (modalParam === 'createPatient') {
+      setOpen(true)
+      // Limpiar el parámetro de la URL sin recargar
+      const url = new URL(window.location.href)
+      url.searchParams.delete('modal')
+      window.history.replaceState({}, '', url)
+    }
+  }, [searchParams])
 
   useEffect(() => {
     if (!tenant) return

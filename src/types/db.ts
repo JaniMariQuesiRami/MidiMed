@@ -37,9 +37,9 @@ export type TenantCounters = {
 export type OnboardingProgress = {
   createPatient: boolean;
   createAppointment: boolean;
-  viewCalendar: boolean;
   viewAppointmentInfo: boolean;
   completeAppointment: boolean;
+  visitSettings: boolean;
 };
 
 /* ---------- Billing (nuevo modelo) ---------- */

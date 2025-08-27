@@ -1,15 +1,18 @@
 "use client"
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useEffect, Suspense, useContext } from 'react'
 import { useSearchParams } from 'next/navigation'
 import OrganizationSettingsForm from '@/components/OrganizationSettingsForm'
 import TeamSettings from '@/components/TeamSettings'
 import ExtraFieldsSettings from '@/components/ExtraFieldsSettings'
 import PlanManagement from '@/components/PlanManagement'
 import LoadingSpinner from '@/components/LoadingSpinner'
+import { UserContext } from '@/contexts/UserContext'
+import { completeOnboardingStep } from '@/db/onboarding'
 import tw from 'tailwind-styled-components'
 
 function SettingsContent() {
   const searchParams = useSearchParams()
+  const { tenant } = useContext(UserContext)
   const [tab, setTab] = useState<'org' | 'team' | 'forms' | 'plan'>('org')
 
   useEffect(() => {
@@ -18,6 +21,16 @@ function SettingsContent() {
       setTab(tabParam)
     }
   }, [searchParams])
+
+  // Completar el paso de visitar settings
+  useEffect(() => {
+    if (!tenant) return
+    if (!tenant.onboarding?.visitSettings) {
+      completeOnboardingStep(tenant.tenantId, 'visitSettings').catch((err) =>
+        console.error('Error completing onboarding step visitSettings:', err),
+      )
+    }
+  }, [tenant])
 
   return (
     <Wrapper>
