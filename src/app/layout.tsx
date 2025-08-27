@@ -26,9 +26,9 @@ const sourceSansPro = localFont({
 
 
 export const metadata: Metadata = {
-  title: "MidiMed - Software Médico y Sistema de Gestión Clínica | Agenda, Expedientes y IA",
+  title: "MidiMed Tech - Software Médico y Sistema de Gestión Clínica | Agenda, Expedientes y IA",
   description:
-    "Software médico integral para consultorios y clínicas. Gestiona pacientes, agenda médica digital, expedientes electrónicos e historias clínicas con automatización IA. Recupera tiempo y enfócate en tus pacientes.",
+    "MidiMed tech: Software médico integral para consultorios y clínicas en México y Guatemala. Gestiona pacientes, agenda médica digital, expedientes electrónicos e historias clínicas con automatización IA. Recupera tiempo y enfócate en tus pacientes.",
   keywords: [
     // Core medical software terms
     "software médico",
@@ -65,11 +65,19 @@ export const metadata: Metadata = {
     
     // Regional terms
     "software médico México",
+    "software médico Guatemala", 
     "sistema clínico Latinoamérica",
+    "sistema clínico Guatemala",
+    "software clínico Guatemala",
     "telemedicina",
+    "telemedicina Guatemala",
     
     // Brand
     "MidiMed",
+    "MidiMed tech", 
+    "MidiMed guatemala",
+    "MidiMed software",
+    "MidiMed Mexico",
   ],
   authors: [{ name: "MidiMed", url: "https://midimed.tech" }],
   creator: "MidiMed",
@@ -77,9 +85,9 @@ export const metadata: Metadata = {
   category: "Healthcare Software",
   classification: "Medical Practice Management Software",
   openGraph: {
-    title: "MidiMed - Software Médico Integral | Gestión Clínica con IA para Consultorios",
+    title: "MidiMed Tech - Software Médico Integral | Gestión Clínica con IA para Consultorios",
     description:
-      "Plataforma médica completa: agenda digital, expedientes electrónicos, automatización IA y gestión de pacientes. Diseñado para consultorios y clínicas que buscan eficiencia y mejor atención.",
+      "MidiMed tech: Plataforma médica completa para México y Guatemala. Agenda digital, expedientes electrónicos, automatización IA y gestión de pacientes. Diseñado para consultorios y clínicas que buscan eficiencia y mejor atención.",
     url: "https://midimed.tech",
     siteName: "MidiMed",
     images: [
@@ -96,9 +104,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "MidiMed - Software Médico con IA para Consultorios y Clínicas",
+    title: "MidiMed Tech - Software Médico con IA para Consultorios y Clínicas",
     description:
-      "Gestiona tu práctica médica con eficiencia: agenda digital, expedientes electrónicos y automatización IA. Recupera tiempo, reduce trabajo administrativo.",
+      "MidiMed tech para México y Guatemala: Gestiona tu práctica médica con eficiencia: agenda digital, expedientes electrónicos y automatización IA. Recupera tiempo, reduce trabajo administrativo.",
     images: ["/screenshot.png"],
     creator: "@midimed",
     site: "@midimed",
@@ -123,6 +131,7 @@ export const metadata: Metadata = {
     canonical: "https://midimed.tech",
     languages: {
       "es-MX": "https://midimed.tech",
+      "es-GT": "https://midimed.tech", 
       "es-ES": "https://midimed.tech",
       "es": "https://midimed.tech",
     },
@@ -152,6 +161,9 @@ export default function RootLayout({
         <meta name="geo.region" content="MX" />
         <meta name="geo.country" content="Mexico" />
         <meta name="geo.placename" content="México" />
+        <meta name="geo.region" content="GT" />
+        <meta name="geo.country" content="Guatemala" /> 
+        <meta name="geo.placename" content="Guatemala" />
         <meta name="category" content="Healthcare Software" />
         <meta name="coverage" content="Worldwide" />
         <meta name="distribution" content="Global" />
@@ -159,6 +171,7 @@ export default function RootLayout({
         <meta name="target" content="medical professionals, doctors, clinics, healthcare providers" />
         <link rel="canonical" href="https://midimed.tech" />
         <link rel="alternate" hrefLang="es-mx" href="https://midimed.tech" />
+        <link rel="alternate" hrefLang="es-gt" href="https://midimed.tech" />
         <link rel="alternate" hrefLang="es-es" href="https://midimed.tech" />
         <link rel="alternate" hrefLang="es" href="https://midimed.tech" />
         <link rel="alternate" hrefLang="x-default" href="https://midimed.tech" />
