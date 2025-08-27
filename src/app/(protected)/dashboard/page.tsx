@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState, useCallback, useContext } from 'react'
+import { useEffect, useState, useCallback, useContext, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Calendar, View, dateFnsLocalizer } from 'react-big-calendar'
 import type { SlotInfo, EventProps as RBCEventProps, CalendarProps } from 'react-big-calendar'
@@ -67,9 +67,14 @@ const views = [
   { key: 'day' as View, label: 'Día' },
 ]
 
-export default function DashboardCalendar() {
-  const { tenant } = useContext(UserContext)
+// Component that handles search params (needs to be wrapped in Suspense)
+function DashboardWithSearchParams() {
   const searchParams = useSearchParams()
+  return <DashboardCalendar searchParams={searchParams} />
+}
+
+function DashboardCalendar({ searchParams }: { searchParams: ReturnType<typeof useSearchParams> }) {
+  const { tenant } = useContext(UserContext)
   const [view, setView] = useState<View | null>(null)
   const [date, setDate] = useState(new Date())
   const [patients, setPatients] = useState<Patient[]>([])
@@ -538,3 +543,12 @@ const SwitchButton = tw.button<{ $active: boolean }>`
 `
 
 const IconButton = tw.button`p-1 rounded hover:bg-muted text-muted-foreground cursor-pointer`
+
+// Default export with Suspense boundary
+export default function Dashboard() {
+  return (
+    <Suspense fallback={<LoadingSpinner />}>
+      <DashboardWithSearchParams />
+    </Suspense>
+  )
+}

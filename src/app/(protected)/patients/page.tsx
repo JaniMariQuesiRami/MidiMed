@@ -1,6 +1,6 @@
 'use client'
 
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useState, Suspense } from 'react'
 import { getPatients } from '@/db/patients'
 import { UserContext } from '@/contexts/UserContext'
 import type { Patient } from '@/types/db'
@@ -22,7 +22,13 @@ import LoadingSpinner from '@/components/LoadingSpinner'
 
 const PAGE_SIZE = 10
 
-export default function PatientsPage() {
+// Component that handles search params (needs to be wrapped in Suspense)
+function PatientsWithSearchParams() {
+  const searchParams = useSearchParams()
+  return <PatientsPage searchParams={searchParams} />
+}
+
+function PatientsPage({ searchParams }: { searchParams: ReturnType<typeof useSearchParams> }) {
   const { tenant } = useContext(UserContext)
   const [allPatients, setAllPatients] = useState<Patient[]>([])
   const [search, setSearch] = useState('')
@@ -30,7 +36,6 @@ export default function PatientsPage() {
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(0)
   const router = useRouter()
-  const searchParams = useSearchParams()
 
   // Abrir modal automáticamente si viene del onboarding
   useEffect(() => {
@@ -169,3 +174,12 @@ const Wrapper = tw.div`flex flex-col gap-4 px-2 sm:px-4 pt-8`
 const Header = tw.div`
   flex flex-row gap-2 justify-between items-center
 `
+
+// Default export with Suspense boundary
+export default function Patients() {
+  return (
+    <Suspense fallback={<LoadingSpinner />}>
+      <PatientsWithSearchParams />
+    </Suspense>
+  )
+}
