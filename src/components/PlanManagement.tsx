@@ -206,7 +206,7 @@ export default function PlanManagement() {
   const { billing } = tenant
   const trialStart = billing.trialStartAt ? parseISO(billing.trialStartAt) : null
   const trialEnd = billing.trialStartAt
-    ? addDays(parseISO(billing.trialStartAt), billing.trialDays ?? 15)
+    ? addDays(parseISO(billing.trialStartAt), billing.trialDays ?? 30)
     : null
   const purchasedAt = billing.purchasedAt ? parseISO(billing.purchasedAt) : null
   const paidThrough = billing.paidThrough ? parseISO(billing.paidThrough) : null

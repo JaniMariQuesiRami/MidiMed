@@ -26,7 +26,7 @@ export default function PlanPill({ billing, onClick }: { billing?: TenantBilling
   const body = (() => {
     const now = new Date()
     if (billing.status === 'TRIAL_ACTIVE' && billing.trialStartAt) {
-      const trialEnd = addDays(parseISO(billing.trialStartAt), billing.trialDays ?? 15)
+      const trialEnd = addDays(parseISO(billing.trialStartAt), billing.trialDays ?? 30)
       const diffMs = trialEnd.getTime() - now.getTime()
       if (diffMs > 0) {
         const diffDays = Math.ceil(diffMs / (24 * 60 * 60 * 1000))
