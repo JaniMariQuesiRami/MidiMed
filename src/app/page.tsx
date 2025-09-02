@@ -4,13 +4,11 @@ import SharedHeader from "@/components/SharedHeader";
 import { useUser } from "@/contexts/UserContext";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import Image from "next/image";
 import { useEffect } from "react";
 import { trackEvent } from "@/utils/trackEvent";
 import { saveUtmCampaignFromUrl } from "@/db/utmCampaigns";
 import "./shine.css";
 import TrustStats from "@/components/TrustStats";
-import { useTheme } from "@/contexts/ThemeContext";
 import FeatureHighlights from "@/components/FeatureHighlights";
 import DetailedFeatures from "@/components/DetailedFeatures";
 import ValueStripe from "@/components/ValueStripe";
@@ -25,7 +23,6 @@ import FooterColumns from "@/components/FooterColumns";
 import BottomLegalBar from "@/components/BottomLegalBar";
 
 export default function Home() {
-  const { theme } = useTheme();
   const { user, tenant } = useUser();
 
   const handlePricingClick = () => {
@@ -99,40 +96,19 @@ export default function Home() {
               </HeroCol>
 
               <HeroScreenshotCol>
-                <ScreenshotInner>
-                  <DeviceGroup>
-                    <div className="relative">
-                      {(() => {
-                        const laptopSrc =
-                          theme === "dark"
-                            ? "/laptopDarkMockup.svg"
-                            : "/laptopLightMockup.svg";
-                        const phoneSrc =
-                          theme === "dark" ? "/mobileDark.svg" : "/mobileLight.svg";
-                        return (
-                          <>
-                            <Image
-                              src={laptopSrc}
-                              alt="Software médico MidiMed - Dashboard principal mostrando agenda de citas, gestión de pacientes y expedientes médicos digitales para consultorios"
-                              width={1100}
-                              height={620}
-                              className="w-[760px] md:w-[820px] lg:w-[1000px] xl:w-[1100px] max-w-full h-auto lg:hidden xl:block"
-                              priority
-                            />
-                            <Image
-                              src={phoneSrc}
-                              alt="Aplicación móvil MidiMed - Acceso a historias clínicas y agenda médica desde dispositivos móviles para médicos"
-                              width={170}
-                              height={360}
-                              className="absolute right-12 bottom-8 w-[140px] md:w-[140px] lg:w-[200px] h-auto lg:relative lg:right-auto lg:bottom-auto xl:absolute xl:right-12 xl:bottom-8 xl:w-[155px] 2xl:block"
-                              priority
-                            />
-                          </>
-                        );
-                      })()}
-                    </div>
-                  </DeviceGroup>
-                </ScreenshotInner>
+                  <VideoContainer>
+                    <iframe
+                      width="800"
+                      height="450"
+                      src="https://www.youtube.com/embed/yycOoffqSDw"
+                      title="MidiMed Demo - Software médico para consultorios"
+                      frameBorder="0"
+                      style={{ border: 'none' }}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowFullScreen
+                      className="w-full h-full rounded-lg shadow-lg border-0"
+                    ></iframe>
+                  </VideoContainer>
               </HeroScreenshotCol>
             </HeroGrid>
           </HeroInner>
@@ -190,8 +166,7 @@ const HeroGrid = tw.div`
 `;
 
 const HeroCol = tw.div`flex flex-col gap-6 justify-center pr-0 lg:pr-8`;
-const HeroScreenshotCol = tw.div`hidden md:flex items-center justify-center`;
-const ScreenshotInner = tw.div`relative flex items-center justify-center`;
+const HeroScreenshotCol = tw.div`flex items-center justify-center`;
 
 const CTAGroup = tw.div`flex flex-wrap items-center gap-4`;
 const Headline = tw.h1`text-5xl sm:text-6xl font-bold leading-tight text-slate-900 dark:text-white max-w-[720px]`;
@@ -212,10 +187,11 @@ const StatsRight = tw.div`
   hidden lg:block
 `;
 
-const DeviceGroup = tw.div`
-  relative flex items-end justify-center translate-y-8 sm:translate-y-12 md:translate-y-0 lg:translate-y-16 xl:translate-y-20 z-10
-  lg:-translate-x-6 xl:-translate-x-6 2xl:translate-x-0
-  scale-115 sm:scale-130 md:scale-100 lg:scale-145 xl:scale-150
+const VideoContainer = tw.div`
+  relative w-full max-w-[90vw] sm:max-w-[600px] md:max-w-[700px] lg:max-w-[800px] xl:max-w-[900px] aspect-video
+  translate-y-4 sm:translate-y-6 md:translate-y-0 lg:translate-y-8 xl:translate-y-12 z-10
+  scale-100 sm:scale-105 lg:scale-110 xl:scale-115
+  mx-auto mb-8 sm:mb-12 md:mb-24 md:mr-8
 `;
 
 const HeaderSpacer = tw.div`

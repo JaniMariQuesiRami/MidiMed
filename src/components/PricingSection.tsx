@@ -101,10 +101,10 @@ export default function PricingSection({ id = "pricing" }: { id?: string }) {
                 <TestTube className="w-12 h-12 text-primary dark:text-blue-400" />
               </PlanIcon>
               <PlanTitle className="text-gray-900 dark:text-gray-100">Prueba gratuita</PlanTitle>
-              <PlanSubtitle>Prueba todas las funciones por 15 días</PlanSubtitle>
+              <PlanSubtitle>Prueba todas las funciones por 30 días</PlanSubtitle>
               <PlanPrice>
                 <PriceAmount className="text-gray-900 dark:text-gray-100">Gratis</PriceAmount>
-                <PricePeriod>por 15 días</PricePeriod>
+                <PricePeriod>por 30 días</PricePeriod>
               </PlanPrice>
             </CardHeader>
 
@@ -127,7 +127,7 @@ export default function PricingSection({ id = "pricing" }: { id?: string }) {
               </Feature>
               <Feature>
                 <Check className="w-4 h-4 text-green-600" />
-                Acceso completo por 15 días
+                Acceso completo por 30 días
               </Feature>
             </FeaturesList>
 
