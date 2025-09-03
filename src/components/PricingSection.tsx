@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import tw from 'tailwind-styled-components'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Check, Star, TestTube, Briefcase, Stethoscope } from 'lucide-react'
+import { Check, Star, TestTube, Briefcase, Stethoscope, Lightbulb } from 'lucide-react'
 import { db } from '@/lib/firebase'
 import { collection, getDocs, query, where } from 'firebase/firestore'
 import type { PlanCatalog } from '@/types/db'
@@ -75,8 +75,16 @@ export default function PricingSection({ id = "pricing" }: { id?: string }) {
         <Header>
           <Title>Precios</Title>
           <Subtitle>
-            Elige el plan perfecto para tí
+            Elige el plan perfecto para ti
           </Subtitle>
+          <ROINote>
+            <div className="flex items-start gap-1">
+              <Lightbulb className="w-4 h-4 text-yellow-500 flex-shrink-0 mt-1" />
+              <div>
+                <strong>Dato importante:</strong> El 90% de nuestros clientes recupera su inversión en tan solo 2-3 citas. El resto lo hace en menos de una semana gracias al tiempo ahorrado.
+              </div>
+            </div>
+          </ROINote>
           <div className="flex justify-center mt-6 mb-2">
             <button
               className={`relative flex items-center px-2 py-1 rounded-full border border-gray-300 dark:border-gray-700 bg-white/80 dark:bg-gray-800/80 shadow transition-colors duration-200 focus:outline-none w-28 h-10`}
@@ -106,6 +114,10 @@ export default function PricingSection({ id = "pricing" }: { id?: string }) {
                 <PriceAmount className="text-gray-900 dark:text-gray-100">Gratis</PriceAmount>
                 <PricePeriod>por 30 días</PricePeriod>
               </PlanPrice>
+              <TrialNote>
+                <Star className="w-3 h-3 text-amber-500 flex-shrink-0" />
+                <span className="text-xs">Al completar los 30 días, obtén 50% de descuento en tus primeros 3 meses</span>
+              </TrialNote>
             </CardHeader>
 
             <FeaturesList>
@@ -119,7 +131,7 @@ export default function PricingSection({ id = "pricing" }: { id?: string }) {
               </Feature>
               <Feature>
                 <Check className="w-4 h-4 text-green-600" />
-                Hasta 20 pacientes
+                Hasta 100 pacientes
               </Feature>
               <Feature>
                 <Check className="w-4 h-4 text-green-600" />
@@ -168,7 +180,7 @@ export default function PricingSection({ id = "pricing" }: { id?: string }) {
               </Feature>
               <Feature>
                 <Check className="w-4 h-4 text-green-600" />
-                Hasta 100 pacientes
+                Hasta 1000 pacientes
               </Feature>
               <Feature>
                 <Check className="w-4 h-4 text-green-600" />
@@ -267,6 +279,11 @@ const Subtitle = tw.p`
   text-white/90 text-lg max-w-2xl mx-auto
 `
 
+const ROINote = tw.div`
+  bg-white/90 backdrop-blur-md border border-white/50 rounded-xl p-4 mt-6 max-w-3xl mx-auto
+  text-slate-700 text-sm leading-relaxed shadow-xl
+`
+
 const PricingGrid = tw.div`
   grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto md:pb-0 pb-12
 `
@@ -311,6 +328,12 @@ const PlanSubtitle = tw.p`
 
 const PlanPrice = tw.div`
   mb-6
+`
+
+const TrialNote = tw.div`
+  flex items-center gap-2 justify-center
+  bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-600/30 
+  rounded-lg p-2 mt-3 text-amber-700 dark:text-amber-300
 `
 
 const PriceAmount = tw.span`

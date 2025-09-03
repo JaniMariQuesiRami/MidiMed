@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useEffect } from "react";
 import { trackEvent } from "@/utils/trackEvent";
 import { saveUtmCampaignFromUrl } from "@/db/utmCampaigns";
+import { Zap } from "lucide-react";
 import "./shine.css";
 import TrustStats from "@/components/TrustStats";
 import FeatureHighlights from "@/components/FeatureHighlights";
@@ -77,13 +78,19 @@ export default function Home() {
                   Automatizamos agenda, expedientes y aumentamos tu productividad con IA para devolverte horas y permitirte equilibrar mejor tu práctica y tu vida personal.
                 </Subheadline>
                 <CTAGroup>
-                  <Button
-                    asChild
-                    size="lg"
-                    className="bg-primary text-white hover:bg-primary/90 font-semibold px-8 py-3 text-lg shadow-lg relative overflow-hidden shine-btn"
-                  >
-                    <Link href="/signup">Empieza gratis</Link>
-                  </Button>
+                  <div className="relative">
+                    <Button
+                      asChild
+                      size="lg"
+                      className="bg-primary text-white hover:bg-primary/90 font-semibold px-8 py-3 text-lg shadow-lg relative overflow-hidden shine-btn"
+                    >
+                      <Link href="/signup">Empieza gratis!</Link>
+                    </Button>
+                    <SpeechBubble>
+                      <Zap className="w-3 h-3 text-yellow-500" />
+                      <span>¡Tarda menos de 1 minuto!</span>
+                    </SpeechBubble>
+                  </div>
                   <Button
                     asChild
                     variant="outline"
@@ -96,19 +103,19 @@ export default function Home() {
               </HeroCol>
 
               <HeroScreenshotCol>
-                  <VideoContainer>
-                    <iframe
-                      width="800"
-                      height="450"
-                      src="https://www.youtube.com/embed/yycOoffqSDw"
-                      title="MidiMed Demo - Software médico para consultorios"
-                      frameBorder="0"
-                      style={{ border: 'none' }}
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      allowFullScreen
-                      className="w-full h-full rounded-lg shadow-lg border-0"
-                    ></iframe>
-                  </VideoContainer>
+                <VideoContainer>
+                  <iframe
+                    width="800"
+                    height="450"
+                    src="https://www.youtube.com/embed/yycOoffqSDw"
+                    title="MidiMed Demo - Software médico para consultorios"
+                    frameBorder="0"
+                    style={{ border: 'none' }}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                    className="w-full h-full rounded-lg shadow-lg border-0"
+                  ></iframe>
+                </VideoContainer>
               </HeroScreenshotCol>
             </HeroGrid>
           </HeroInner>
@@ -168,7 +175,18 @@ const HeroGrid = tw.div`
 const HeroCol = tw.div`flex flex-col gap-6 justify-center pr-0 lg:pr-8`;
 const HeroScreenshotCol = tw.div`flex items-center justify-center`;
 
-const CTAGroup = tw.div`flex flex-wrap items-center gap-4`;
+const CTAGroup = tw.div`flex flex-wrap items-center gap-4 mt-6`;
+
+const SpeechBubble = tw.div`
+  absolute -top-12 left-1/2 transform -translate-x-1/2
+  bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600
+  rounded-lg px-3 py-2 text-xs text-gray-700 dark:text-gray-300
+  shadow-lg flex items-center gap-1 whitespace-nowrap
+  before:content-[''] before:absolute before:top-full before:left-1/2 before:transform before:-translate-x-1/2
+  before:border-4 before:border-transparent before:border-t-white dark:before:border-t-gray-800
+  animate-bounce
+`;
+
 const Headline = tw.h1`text-5xl sm:text-6xl font-bold leading-tight text-slate-900 dark:text-white max-w-[720px]`;
 const Subheadline = tw.p`text-lg sm:text-xl text-slate-700 dark:text-slate-300 leading-relaxed max-w-[660px]`;
 
