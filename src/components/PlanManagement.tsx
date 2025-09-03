@@ -145,7 +145,7 @@ export default function PlanManagement() {
   const getPlanFeatures = (planType: string) => {
     const features = {
       TRIAL: [
-        { text: 'Acceso completo por 15 días', icon: CheckCircle2 },
+        { text: 'Acceso completo por 30 días', icon: CheckCircle2 },
         { text: 'Hasta 20 pacientes', icon: Users },
         { text: 'Agenda digital con recordatorios', icon: Calendar },
         { text: 'Expedientes médicos digitales', icon: FileText },
@@ -206,7 +206,7 @@ export default function PlanManagement() {
   const { billing } = tenant
   const trialStart = billing.trialStartAt ? parseISO(billing.trialStartAt) : null
   const trialEnd = billing.trialStartAt
-    ? addDays(parseISO(billing.trialStartAt), billing.trialDays ?? 15)
+    ? addDays(parseISO(billing.trialStartAt), billing.trialDays ?? 30)
     : null
   const purchasedAt = billing.purchasedAt ? parseISO(billing.purchasedAt) : null
   const paidThrough = billing.paidThrough ? parseISO(billing.paidThrough) : null
@@ -397,7 +397,7 @@ export default function PlanManagement() {
                         {plan.plan === 'TRIAL' ? 'Gratis' : formatPrice(plan.price, plan.currency)}
                       </PriceAmount>
                       <PricePeriod $pro={isPro} $enterprise={isEnterprise}>
-                        {plan.plan === 'TRIAL' ? 'por 15 días' : '/mes'}
+                        {plan.plan === 'TRIAL' ? 'por 30 días' : '/mes'}
                       </PricePeriod>
                     </PlanPricing>
                   </PlanCardHeader>

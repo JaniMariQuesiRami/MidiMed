@@ -64,7 +64,7 @@ export async function signUp({
                 billing: {
                         plan: 'TRIAL',
                         trialStartAt: now,
-                        trialDays: 15,
+                        trialDays: 30,
                         status: 'TRIAL_ACTIVE',
                         ...(wantsToBuy && { wantsToBuy }),
                 },

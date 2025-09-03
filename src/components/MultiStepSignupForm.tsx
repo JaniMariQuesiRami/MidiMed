@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner'
 import LoadingSpinner from './LoadingSpinner'
-import { Mail, ArrowLeft, ArrowRight, User, Building, Key, Stethoscope, Hospital, Baby, Heart, Bone, Brain, Users2, Smile, Eye, Activity } from 'lucide-react'
+import { Mail, ArrowLeft, ArrowRight, User, Building, Key, Stethoscope, Hospital, Baby, Heart, Bone, Brain, Users2, Smile, Eye, Activity, Zap } from 'lucide-react'
 import { getBaseUrl } from '@/lib/magic-link'
 import { signOutUser } from '@/db/session'
 import tw from 'tailwind-styled-components'
@@ -256,7 +256,13 @@ export default function MultiStepSignupForm() {
       <StyledCard>
         <CardHeader>
           <div className="space-y-4">
-            <CardTitle className="text-xl">Crear tu cuenta</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-xl">Crear tu cuenta</CardTitle>
+              <QuickNote>
+                <Zap className="w-4 h-4 text-primary" />
+                <span className="text-sm text-gray-600 dark:text-gray-400">¡Toma menos de 1 minuto!</span>
+              </QuickNote>
+            </div>
             
             {/* Progress indicator */}
             <div className="flex items-center justify-between">
@@ -581,6 +587,12 @@ const FieldGroup = tw.div`
 const Title = tw.h1`
   text-6xl font-bold mb-6 text-center
   text-white
+`
+
+const QuickNote = tw.div`
+  flex items-center gap-2
+  bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-600/30
+  rounded-full px-3 py-1
 `
 
 interface SpecialtyCardProps {
