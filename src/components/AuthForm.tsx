@@ -413,7 +413,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
                   id="phone"
                   type="tel"
                   pattern="^\+\d{1,3}\s?\d{8}$"
-                  placeholder="+502 55551234"
+                    placeholder="+502 5537 3805"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   disabled={loading}

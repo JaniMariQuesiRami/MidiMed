@@ -85,10 +85,10 @@ export default function FooterColumns() {
               </div>
               <div className="flex items-center space-x-2 text-slate-600 dark:text-slate-300 text-sm">
                 <Phone size={16} />
-                <a href="tel:+50231021287" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
-                  +502 3102-1287
-                </a>
-              </div>
+                  <a href="tel:+50255373805" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
+                    +502 5537 3805
+                  </a>
+                </div>
             </div>
             <div className="pt-2">
               <p className="text-slate-600 dark:text-slate-300 text-sm mb-3">Síguenos</p>
