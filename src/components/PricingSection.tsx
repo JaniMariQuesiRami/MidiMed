@@ -160,7 +160,7 @@ export default function PricingSection({ id = "pricing" }: { id?: string }) {
                 <Briefcase className="w-12 h-12 text-gray-600 dark:text-gray-400" />
               </PlanIcon>
               <PlanTitle className="text-gray-900 dark:text-gray-100">Básico</PlanTitle>
-              <PlanSubtitle>Para consultorios pequeños</PlanSubtitle>
+              <PlanSubtitle>Ideal para empezar</PlanSubtitle>
               <PlanPrice>
                 <PriceAmount className="text-gray-900 dark:text-gray-100">
                   {loading ? '...' : getPlanByType('BASIC')?.price ? formatPrice(getPlanByType('BASIC')!.price) : 'Q799.99'}
@@ -211,7 +211,7 @@ export default function PricingSection({ id = "pricing" }: { id?: string }) {
                 <Stethoscope className="w-12 h-12 text-white" />
               </PlanIcon>
               <PlanTitle>Pro</PlanTitle>
-              <PlanSubtitle className="text-white/90">Para consultorios grandes y clínicas</PlanSubtitle>
+              <PlanSubtitle className="text-white/90">Máxima productividad</PlanSubtitle>
               <PlanPrice>
                 <PriceAmount>
                   {loading ? '...' : getPlanByType('PRO')?.price ? formatPrice(getPlanByType('PRO')!.price) : 'Q1,039.99'}
