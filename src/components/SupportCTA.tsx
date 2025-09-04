@@ -15,14 +15,14 @@ export default function SupportCTA() {
           Contáctanos por teléfono o WhatsApp
         </p>
         <div className="flex items-center justify-center gap-3 mb-8 text-2xl md:text-3xl font-semibold">
-          <span>+502 3102-1287</span>
+          <span>+502 5537 3805</span>
         </div>
         <div className="flex flex-col md:flex-row gap-4 justify-center items-center flex-wrap">
           <Button
             asChild
             className="bg-[#25D366] hover:bg-[#1FAD52] text-white font-semibold px-6 py-3 text-base border-0"
           >
-            <Link href="https://wa.me/50231021287">
+            <Link href="https://wa.me/50255373805">
               <MessageCircle size={20} className="mr-2" />
               WhatsApp
             </Link>

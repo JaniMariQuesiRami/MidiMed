@@ -359,7 +359,7 @@ export default function MultiStepSignupForm() {
                 <Input
                   id="phone"
                   type="tel"
-                  placeholder="+502 2345-6789"
+                  placeholder="+502 5537 3805"
                   value={formData.phone}
                   onChange={(e) => updateFormData({ phone: e.target.value })}
                   disabled={loading}
