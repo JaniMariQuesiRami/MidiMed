@@ -29,7 +29,7 @@
     "framer-motion": "^12.23.1",
     "html2pdf.js": "^0.10.3",
     "lucide-react": "^0.517.0",
-    "next": "15.3.4",
+    "next": "15.3.8",
     "ogl": "^1.0.11",
     "posthog-js": "^1.258.5",
     "react": "^19.0.0",
