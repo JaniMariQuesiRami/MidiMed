@@ -8,7 +8,7 @@ export default function StructuredData() {
     "legalName": "MidiMed Software Médico",
     "url": "https://midimed.tech",
     "logo": "https://midimed.tech/logo.svg",
-    "description": "Software médico integral para consultorios y clínicas. Gestiona pacientes, agenda médica digital, expedientes electrónicos e historias clínicas con automatización IA.",
+    "description": "MidiMed es un software médico integral para consultorios y clínicas en México y Guatemala. Gestiona pacientes, agenda médica digital, expedientes electrónicos e historias clínicas con automatización IA.",
     "foundingDate": "2024",
     "industry": "Healthcare Software",
     "address": {
@@ -16,6 +16,16 @@ export default function StructuredData() {
       "addressCountry": "MX",
       "addressLocality": "México"
     },
+    "areaServed": [
+      {
+        "@type": "Country",
+        "name": "Mexico"
+      },
+      {
+        "@type": "Country", 
+        "name": "Guatemala"
+      }
+    ],
     "contactPoint": {
       "@type": "ContactPoint",
       "contactType": "Customer Service",
@@ -49,7 +59,7 @@ export default function StructuredData() {
     "name": "MidiMed",
     "applicationCategory": "HealthApplication",
     "operatingSystem": "Web-based",
-    "description": "Software médico integral para gestión clínica: agenda digital, expedientes electrónicos, automatización IA y gestión de pacientes para consultorios y clínicas.",
+    "description": "MidiMed tech: Software médico integral para gestión clínica en México y Guatemala. Agenda digital, expedientes electrónicos, automatización IA y gestión de pacientes para consultorios y clínicas.",
     "url": "https://midimed.tech",
     "downloadUrl": "https://midimed.tech/signup",
     "screenshot": "https://midimed.tech/screenshot.png",
