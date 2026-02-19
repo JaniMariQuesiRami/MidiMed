@@ -15,7 +15,15 @@ export type AnalyticsEvent =
   | 'Payment Failed - Go to Settings'
   | 'Payment Cancelled Page Visited'
   | 'Payment Cancelled - Retry Payment'
-  | 'Payment Cancelled - Go to Settings';
+  | 'Payment Cancelled - Go to Settings'
+  | 'scribe_recording_started'
+  | 'scribe_recording_stopped'
+  | 'scribe_processing_completed'
+  | 'scribe_processing_failed'
+  | 'scribe_transcript_viewed'
+  | 'scribe_field_edited'
+  | 'scribe_fields_cleared'
+  | 'scribe_record_saved';
 
 export type AnalyticsEventProps = {
   userId?: string;
