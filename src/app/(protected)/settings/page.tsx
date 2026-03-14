@@ -2,6 +2,7 @@
 import { useState, useEffect, Suspense, useContext } from 'react'
 import { useSearchParams } from 'next/navigation'
 import OrganizationSettingsForm from '@/components/OrganizationSettingsForm'
+import PublicPortalSettings from '@/components/PublicPortalSettings'
 import TeamSettings from '@/components/TeamSettings'
 import ExtraFieldsSettings from '@/components/ExtraFieldsSettings'
 import PlanManagement from '@/components/PlanManagement'
@@ -48,7 +49,12 @@ function SettingsContent() {
           Planes
         </Tab>
       </Tabs>
-      {tab === 'org' && <OrganizationSettingsForm />}
+      {tab === 'org' && (
+          <>
+            <OrganizationSettingsForm />
+            <PublicPortalSettings />
+          </>
+        )}
       {tab === 'team' && <TeamSettings />}
       {tab === 'forms' && <ExtraFieldsSettings />}
       {tab === 'plan' && <PlanManagement />}
