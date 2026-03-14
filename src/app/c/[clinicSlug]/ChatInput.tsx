@@ -45,7 +45,7 @@ export default function ChatInput({ value, onChange, onSend, disabled }: ChatInp
         enterKeyHint="send"
         aria-label="Escribe tu mensaje"
         rows={1}
-        className="min-w-0 flex-1 resize-none rounded-2xl bg-muted px-4 py-2 text-sm leading-relaxed outline-none focus:ring-2 focus:ring-primary/50"
+        className="min-w-0 flex-1 resize-none rounded-2xl bg-muted px-4 py-2 text-base leading-relaxed outline-none focus:ring-2 focus:ring-primary/50"
       />
       <motion.button
         type="button"
