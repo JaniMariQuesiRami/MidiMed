@@ -7,7 +7,7 @@
 import { tool } from "ai"
 import { z } from "zod"
 import { FieldValue } from "firebase-admin/firestore"
-import { adminDb } from "@/lib/firebase-admin"
+import { getAdminDb } from "@/lib/firebase-admin"
 import { phonesMatch } from "@/app/api/chat/phone-utils"
 import type { Tenant, Patient, Appointment, User } from "@/types/db"
 
@@ -41,7 +41,7 @@ export function buildChatTools(tenantId: string, tenant: Tenant) {
   }> {
     if (cachedProvider) return cachedProvider
 
-    const snap = await adminDb
+    const snap = await getAdminDb()
       .collection("users")
       .where("tenantId", "==", tenantId)
       .where("role", "in", ["provider", "admin"])
@@ -82,7 +82,7 @@ export function buildChatTools(tenantId: string, tenant: Tenant) {
     }),
     execute: async ({ name, phone }) => {
       try {
-        const snap = await adminDb
+        const snap = await getAdminDb()
           .collection("patients")
           .where("tenantId", "==", tenantId)
           .get()
@@ -175,7 +175,7 @@ export function buildChatTools(tenantId: string, tenant: Tenant) {
     }),
     execute: async ({ patientId }) => {
       try {
-        const snap = await adminDb
+        const snap = await getAdminDb()
           .collection("appointments")
           .where("tenantId", "==", tenantId)
           .where("patientId", "==", patientId)
@@ -197,7 +197,7 @@ export function buildChatTools(tenantId: string, tenant: Tenant) {
         const providerNames: Record<string, string> = {}
 
         for (const pid of providerIds) {
-          const userDoc = await adminDb.collection("users").doc(pid).get()
+          const userDoc = await getAdminDb().collection("users").doc(pid).get()
           if (userDoc.exists) {
             const user = userDoc.data() as User
             providerNames[pid] = user.displayName
@@ -306,7 +306,7 @@ export function buildChatTools(tenantId: string, tenant: Tenant) {
         }
 
         // Fetch existing appointments in the range
-        const apptSnap = await adminDb
+        const apptSnap = await getAdminDb()
           .collection("appointments")
           .where("tenantId", "==", tenantId)
           .where("status", "==", "scheduled")
@@ -352,7 +352,7 @@ export function buildChatTools(tenantId: string, tenant: Tenant) {
     execute: async ({ patientId, date, startTime, endTime, reason }) => {
       try {
         const provider = await resolveProvider()
-        const docRef = adminDb.collection("appointments").doc()
+        const docRef = getAdminDb().collection("appointments").doc()
         const appointmentId = docRef.id
 
         const appointmentData: Appointment = {
@@ -371,7 +371,7 @@ export function buildChatTools(tenantId: string, tenant: Tenant) {
         await docRef.set(appointmentData)
 
         // Increment tenant appointment counter
-        await adminDb
+        await getAdminDb()
           .collection("tenants")
           .doc(tenantId)
           .update({
@@ -379,7 +379,7 @@ export function buildChatTools(tenantId: string, tenant: Tenant) {
           })
 
         // Update patient's latestAppointmentId
-        await adminDb
+        await getAdminDb()
           .collection("patients")
           .doc(patientId)
           .update({ latestAppointmentId: appointmentId })
@@ -406,7 +406,7 @@ export function buildChatTools(tenantId: string, tenant: Tenant) {
     }),
     execute: async ({ appointmentId, newDate, newStartTime, newEndTime }) => {
       try {
-        const docRef = adminDb.collection("appointments").doc(appointmentId)
+        const docRef = getAdminDb().collection("appointments").doc(appointmentId)
         const docSnap = await docRef.get()
 
         if (!docSnap.exists) {
@@ -443,7 +443,7 @@ export function buildChatTools(tenantId: string, tenant: Tenant) {
     }),
     execute: async ({ appointmentId }) => {
       try {
-        const docRef = adminDb.collection("appointments").doc(appointmentId)
+        const docRef = getAdminDb().collection("appointments").doc(appointmentId)
         const docSnap = await docRef.get()
 
         if (!docSnap.exists) {
@@ -491,7 +491,7 @@ export function buildChatTools(tenantId: string, tenant: Tenant) {
     }),
     execute: async ({ firstName, lastName, phone, birthDate, sex, email }) => {
       try {
-        const docRef = adminDb.collection("patients").doc()
+        const docRef = getAdminDb().collection("patients").doc()
         const patientId = docRef.id
         const now = new Date().toISOString()
 
@@ -512,7 +512,7 @@ export function buildChatTools(tenantId: string, tenant: Tenant) {
         await docRef.set(patientData)
 
         // Increment tenant patient counter
-        await adminDb
+        await getAdminDb()
           .collection("tenants")
           .doc(tenantId)
           .update({

@@ -7,7 +7,7 @@
 
 import { streamText, convertToModelMessages, stepCountIs } from "ai"
 import { openai } from "@ai-sdk/openai"
-import { adminDb } from "@/lib/firebase-admin"
+import { getAdminDb } from "@/lib/firebase-admin"
 import { buildSystemPrompt } from "@/app/api/chat/system-prompt"
 import { buildChatTools } from "@/app/api/chat/tools"
 import type { Tenant, TenantBillingStatus } from "@/types/db"
@@ -41,7 +41,7 @@ export async function POST(req: Request) {
     }
 
     // Look up tenant by slug (doc ID)
-    const tenantDoc = await adminDb
+    const tenantDoc = await getAdminDb()
       .collection("tenants")
       .doc(clinicSlug)
       .get()

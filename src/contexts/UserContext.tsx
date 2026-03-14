@@ -56,8 +56,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
           // Excluir ciertas rutas públicas para evitar loops infinitos
           const publicRoutes = ['/', '/login', '/signup', '/finishSignIn', '/contact', '/pricing']
           const currentPath = window.location.pathname
-          
-          if (!publicRoutes.includes(currentPath)) {
+
+          if (!publicRoutes.includes(currentPath) && !currentPath.startsWith('/c/')) {
             router.push('/login')
           }
         }
@@ -78,7 +78,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
           const publicRoutes = ['/', '/login', '/signup', '/finishSignIn', '/contact', '/pricing']
           const currentPath = window.location.pathname
 
-          if (!publicRoutes.includes(currentPath)) {
+          if (!publicRoutes.includes(currentPath) && !currentPath.startsWith('/c/')) {
             router.push('/login')
           }
         }
@@ -102,8 +102,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
           // Si hay error cargando datos del usuario, también redirigir
           const publicRoutes = ['/', '/login', '/signup', '/finishSignIn', '/contact', '/pricing']
           const currentPath = window.location.pathname
-          
-          if (!publicRoutes.includes(currentPath)) {
+
+          if (!publicRoutes.includes(currentPath) && !currentPath.startsWith('/c/')) {
             router.push('/login')
           }
         }
