@@ -22,6 +22,21 @@ export async function updateOrganization(tenantId: string, data: OrganizationSet
   }
 }
 
+export async function updatePublicChatEnabled(
+  tenantId: string,
+  enabled: boolean,
+): Promise<void> {
+  try {
+    await updateDoc(doc(db, 'tenants', tenantId), {
+      'settings.publicChatEnabled': enabled,
+      updatedAt: new Date().toISOString(),
+    })
+  } catch (err) {
+    console.error('Error in updatePublicChatEnabled:', err)
+    throw err
+  }
+}
+
 export async function updateExtraFields(
   tenantId: string,
   extraFields: ExtraFieldDef[],

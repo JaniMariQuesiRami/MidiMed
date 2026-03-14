@@ -26,6 +26,7 @@ export type TenantSettings = {
     sun?: [string, string];
   };
   extraFields?: ExtraFieldDef[];
+  publicChatEnabled?: boolean;
 };
 
 export type TenantCounters = {

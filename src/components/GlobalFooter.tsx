@@ -16,14 +16,17 @@ export default function GlobalFooter() {
   const forceWhiteText = forceWhitePages.some((p) => pathname?.startsWith(p)) || pathname === '/'
   
   // Detectar si estamos en rutas protegidas (dashboard, patients, etc.)
-  const isProtectedRoute = pathname?.startsWith('/dashboard') || 
-                          pathname?.startsWith('/patients') || 
-                          pathname?.startsWith('/reports') || 
-                          pathname?.startsWith('/notifications') || 
+  const isProtectedRoute = pathname?.startsWith('/dashboard') ||
+                          pathname?.startsWith('/patients') ||
+                          pathname?.startsWith('/reports') ||
+                          pathname?.startsWith('/notifications') ||
                           pathname?.startsWith('/settings')
 
+  // Ocultar siempre en el portal público de citas
+  const isPublicPortal = pathname?.startsWith('/c/')
+
   // No mostrar en mobile si estamos en rutas protegidas (para no chocar con BottomTabs)
-  const shouldHide = isMobile && isProtectedRoute
+  const shouldHide = isPublicPortal || (isMobile && isProtectedRoute)
 
   useEffect(() => {
     const checkIfMobile = () => {
