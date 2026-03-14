@@ -72,8 +72,8 @@ export default function ChatWindow({ tenantId, clinicName, logoUrl }: ChatWindow
   const quickChips = status === "ready" ? extractQuickReplies(lastAssistant) : []
 
   return (
-    <div className="flex h-dvh flex-col bg-background sm:bg-muted">
-      <div className="mx-auto flex h-full w-full max-w-lg flex-col sm:my-4 sm:h-auto sm:max-h-[700px] sm:rounded-2xl sm:border sm:bg-background sm:shadow-xl">
+    <div className="flex h-dvh flex-col overflow-x-hidden bg-background sm:bg-muted">
+      <div className="mx-auto flex h-full w-full max-w-lg flex-col overflow-hidden sm:my-4 sm:h-auto sm:max-h-[700px] sm:rounded-2xl sm:border sm:bg-background sm:shadow-xl">
         {/* Header */}
         <div className="flex h-14 shrink-0 items-center gap-3 border-b px-4">
           {logoUrl ? (
